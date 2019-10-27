@@ -5,7 +5,7 @@ import Box from '@material-ui/core/Box';
 import MuiLink from '@material-ui/core/Link';
 import Link from '../views/Link';
 import styled from 'styled-components'
-import { withRedux } from '../lib/redux';
+import { withRedux } from '../qwiket-lib/redux';
 
 const Title = styled.h1`
   color: red;

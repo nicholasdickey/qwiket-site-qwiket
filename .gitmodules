@@ -1,0 +1,3 @@
+[submodule "qwiket-lib"]
+	path = qwiket-lib
+	url = https://github.com/nicholasdickey/qwiket-lib.git
