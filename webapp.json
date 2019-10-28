@@ -1,0 +1,57 @@
+{
+    "apps": [
+        {
+            "name": "qwiket-2020",
+            "script": "npm",
+            "args": "start",
+            "instances": "3",
+            "exec_mode": "cluster_mode",
+            "error_file": "err.log",
+            "out_file": "out.log",
+            "pid_file": "./webapp/child.pid",
+            "max_memory_restart": "750M",
+            "listen_timeout": 21000,
+            "node_args": "--experimental-modules",
+            //"node_args":"--trace_gc --track_gc_object_stats  --trace_gc_verbose",
+            "env_dev": {
+                "NODE_ENV": "development",
+                "QWIKET_DATA_ENV": "dev",
+                "QWIKET_CNTRL_ENV": "dev",
+                "HOSTNAME": "dev.qwiket.com",
+                "WEBPACK_HOSTNAME": "dev.qwiket.com",
+                "PORT": "3000",
+                "QWIKETAPI": "dev.qwiket.com",
+                "QWIKETAPIPORT": "8088"
+            },
+            "env_prod": {
+                "NODE_ENV": "production",
+                "HOSTNAME": "xprod1.qwiket.com",
+                "PORT": "3000",
+                "QWIKET_DATA_ENV": "prod",
+                "QWIKET_CNTRL_ENV": "prod",
+                "QWIKETAPI": "prod.qwiket.com",
+                "QWIKETAPIPORT": "8088"
+            },
+            "env_dr": {
+                "NODE_ENV": "production",
+                "HOSTNAME": "xprod2.qwiket.com",
+                "WEBPACK_HOSTNAME": "localhost",
+                "PORT": "3000",
+                "QWIKET_DATA_ENV": "dr",
+                "QWIKET_CNTRL_ENV": "dr",
+                "QWIKETAPI": "dr.qwiket.com",
+                "QWIKETAPIPORT": "8088"
+            },
+            "env_stage": {
+                "NODE_ENV": "production",
+                "QWIKET_DATA_ENV": "dr",
+                "QWIKET_CNTRL_ENV": "dr",
+                "HOSTNAME": "stage.qwiket.com",
+                "WEBPACK_HOSTNAME": "localhost",
+                "PORT": "3000",
+                "QWIKETAPI": "dr.qwiket.com",
+                "QWIKETAPIPORT": "8088"
+            }
+        }
+    ]
+}
