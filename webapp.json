@@ -4,7 +4,7 @@
             "name": "qwiket-2020",
             "script": "npm",
             "args": "start",
-            "instances": "3",
+            "instances": "1",
             "exec_mode": "cluster_mode",
             "error_file": "err.log",
             "out_file": "out.log",
