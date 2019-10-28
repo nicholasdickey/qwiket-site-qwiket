@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { ThemeProvider } from '@material-ui/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import withRedux from "next-redux-wrapper";
+
 import theme from '../views/theme';
 
 class MyApp extends App {
