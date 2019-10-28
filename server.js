@@ -17,6 +17,7 @@ const server = express();
 server.use(compression());
 
 const url = 'http://' + process.env.QAPI + ':' + process.env.QAPIPORT;
+const port = process.env.PORT || 3000;
 console.log("API BASE URL:", url)
 const updateQueryStringParameter = (path, key, value) => {
     const re = new RegExp('([?&])' + key + '=.*?(&|$)', 'i');
