@@ -15,6 +15,7 @@
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.3",
     "@types/styled-components": "^4.1.19",
+    "immutable": "^4.0.0-rc.12",
     "next": "9.1.1",
     "next-redux-wrapper": "^4.0.1",
     "prop-types": "latest",
