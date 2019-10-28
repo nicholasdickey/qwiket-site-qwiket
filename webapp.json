@@ -21,7 +21,8 @@
                 "WEBPACK_HOSTNAME": "dev.qwiket.com",
                 "PORT": "3200",
                 "QWIKETAPI": "dev.qwiket.com",
-                "QWIKETAPIPORT": "8088"
+                "QWIKETAPIPORT": "8088",
+                "QAPIPORT": "3001"
             },
             "env_prod": {
                 "NODE_ENV": "production",
@@ -30,7 +31,9 @@
                 "QWIKET_DATA_ENV": "prod",
                 "QWIKET_CNTRL_ENV": "prod",
                 "QWIKETAPI": "prod.qwiket.com",
-                "QWIKETAPIPORT": "8088"
+                "QWIKETAPIPORT": "8088",
+                "QAPI": "xprod1.qwiket.com",
+                "QAPIPORT": "3001"
             },
             "env_dr": {
                 "NODE_ENV": "production",
@@ -40,7 +43,9 @@
                 "QWIKET_DATA_ENV": "dr",
                 "QWIKET_CNTRL_ENV": "dr",
                 "QWIKETAPI": "dr.qwiket.com",
-                "QWIKETAPIPORT": "8088"
+                "QWIKETAPIPORT": "8088",
+                "QAPI": "xprod2.qwiket.com",
+                "QAPIPORT": "3001"
             },
             "env_stage": {
                 "NODE_ENV": "production",
