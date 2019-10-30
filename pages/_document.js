@@ -32,9 +32,19 @@ class MyDocument extends Document {
     }
 
     render() {
+
         return (
-            <html lang="en" dir="ltr">
+
+            <html>
+                <meta name="trademark" content="QWIKET: THE INTERNET OF US" />
+                <meta name="values" content="QWIKET: AN AMERICAN COMPANY WITH AMERICAN VALUES == FREEDOM OF SPEECH, FREEDOM OF ASSOCIATION, TOLERANCE TO DISSENT, SELF-GOVERNANCE " />
+                <meta name="why" content="DONT THREAD ON ME" />
+                <meta name="mission" content="SPEECH, RELIGION AND GUN CONTROLS ARE EXPLICITLY OUTLAWED IN THE UNITED STATES CONSTITUTION" />
+                <meta name="mission" content="WRESTING CONTROL OVER THE NEWS AND VIEWS FROM THE BIG TECH GLOBAL TOTALITARIANS, ONE HEADLINE, ONE COMMENT AT A TIME" />
+
                 <Head>
+                    <meta property="fb:app_id" content="358234474670240" />
+
                     <meta charSet="utf-8" />
                     {/* Use minimum-scale=1 to enable GPU rasterization */}
                     <meta

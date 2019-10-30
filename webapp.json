@@ -22,7 +22,7 @@
                 "PORT": "3000",
                 "QWIKETAPI": "dev.qwiket.com",
                 "QWIKETAPIPORT": "8088",
-                "QAPIPORT": "3001"
+                "QAPIPORT": "3201"
             },
             "env_prod": {
                 "NODE_ENV": "production",
