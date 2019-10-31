@@ -5,8 +5,8 @@ const next = require('next')
 var proxy = require('http-proxy-middleware');
 const compression = require('compression')
 //const routes = require("./routes")
-//const cookieParser = require("cookie-parser");
-//const cookieSession = require('cookie-session')
+const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session')
 const chalk = require("chalk");
 const app = next({ dev: process.env.NODE_ENV !== 'production' })
 //const handler = routes.getRequestHandler(app)
@@ -29,9 +29,24 @@ const updateQueryStringParameter = (path, key, value) => {
     }
 };
 // proxy middleware options
+function relayRequestHeaders(proxyReq, req) {
+    Object.keys(req.headers).forEach(function (key) {
+        proxyReq.setHeader(key, req.headers[key]);
+    });
+}
+
+function relayResponseHeaders(proxyRes, req, res) {
+    Object.keys(proxyRes.headers).forEach(function (key) {
+        console.log("relayResponseHeaders", proxyRes.headers[key])
+        res.append(key, proxyRes.headers[key]);
+    });
+}
+
 var optionsApi = {
     target: url, // target host
     //  logLevel: 'debug',
+    onProxyReq: relayRequestHeaders,
+    onProxyRes: relayResponseHeaders,
     onError(err, req, res) {
         console.log("ERROR", { url, err })
         res.writeHead(500, {
@@ -41,50 +56,51 @@ var optionsApi = {
             'Something went wrong. And we are reporting a custom error message.' + err
         );
     },
-    /*  pathRewrite: function (path, req) {
-          let newPath = path;
-          var parts = req.url.split('?');
-          var query = parts[1] || '';
-          const cookies = req.cookies;
-          let identity = cookies['identity'];
-          if (!identity) {
-              identity = cookies['qid'] || '';
-          }
-          var hc = false;
-          if (query && (query.indexOf("health_check") >= 0 || query.indexOf("drsyncdb") >= 0))
-              hc = true;
-          //  console.log("query",query,"hc=",hc); 
-          var xFF = req.headers['x-forwarded-for'];
-          var xRef = req.headers['x-forwarded-for'] || '';
-          var ip = xFF ? xFF.split(',')[0] : req.connection.remoteAddress || '';
-          var w = ip.split(':');
-          //console.log("w=", w);
-          ip = w ? w[w.length - 1] : ip;
-          newPath = newPath.replace(/robots.txt/g, 'api?task=robots');
-          newPath = newPath.replace(/sitemap.txt/, 'api?task=sitemap2');
-  
-          newPath = newPath.replace(/\bipn\b/, 'server/ipn.php?prod=1');
-          newPath = newPath.replace(/\bipndev\b/, 'server/ipn.php?prod=0');
-  
-          if (newPath.indexOf("/sitemaps/") === 0)
-              newPath = '/api?task=sitemap&name=req.params.name';
-          else
-              if (newPath.indexOf("/dl/") === 0)
-                  newPath = '/server/dl.php?image=req.params.filename';
-  
-          newPath = updateQueryStringParameter(newPath, 'host', req.headers.host);
-          newPath = updateQueryStringParameter(newPath, 'xip', ip);
-          newPath = updateQueryStringParameter(newPath, 'xref', xRef);
-          newPath = updateQueryStringParameter(newPath, 'pxid', identity);
-          l(chalk.green("PROXY API:"), { url: newPath, remoteAddress: req.connection.remoteAddress });
-          return newPath;
-      }, */
+    pathRewrite: function (path, req) {
+        let newPath = path;
+        var parts = req.url.split('?');
+        var query = parts[1] || '';
+        const cookies = req.cookies;
+        let identity = cookies['identity'];
+        if (!identity) {
+            identity = cookies['qid'] || '';
+        }
+        var hc = false;
+        if (query && (query.indexOf("health_check") >= 0 || query.indexOf("drsyncdb") >= 0))
+            hc = true;
+        //  console.log("query",query,"hc=",hc); 
+        var xFF = req.headers['x-forwarded-for'];
+        var xRef = req.headers['x-forwarded-for'] || '';
+        var ip = xFF ? xFF.split(',')[0] : req.connection.remoteAddress || '';
+        console.log("IP: ", { ip, xFF, rip: req.connection.remoteAddress })
+        var w = ip.split(':');
+        //console.log("w=", w);
+        ip = w ? w[w.length - 1] : ip;
+        newPath = newPath.replace(/robots.txt/g, 'api?task=robots');
+        newPath = newPath.replace(/sitemap.txt/, 'api?task=sitemap2');
+
+        newPath = newPath.replace(/\bipn\b/, 'server/ipn.php?prod=1');
+        newPath = newPath.replace(/\bipndev\b/, 'server/ipn.php?prod=0');
+
+        if (newPath.indexOf("/sitemaps/") === 0)
+            newPath = '/api?task=sitemap&name=req.params.name';
+        else
+            if (newPath.indexOf("/dl/") === 0)
+                newPath = '/server/dl.php?image=req.params.filename';
+
+        newPath = updateQueryStringParameter(newPath, 'host', req.headers.host);
+        newPath = updateQueryStringParameter(newPath, 'xip', ip);
+        newPath = updateQueryStringParameter(newPath, 'xref', xRef);
+        newPath = updateQueryStringParameter(newPath, 'pxid', identity);
+        console.log(chalk.green("PROXY API:"), { url: newPath, remoteAddress: req.connection.remoteAddress });
+        return newPath;
+    },
 };
 
 console.log("call prepare")
 app.prepare().then(() => {
     console.log("prepare")
-    //  server.use(cookieParser());
+    server.use(cookieParser());
     server.use(express.json());       // to support JSON-encoded bodies
     server.use(express.urlencoded()); // to support URL-encoded bodies
 
@@ -105,7 +121,7 @@ app.prepare().then(() => {
     server.use("/ipn/?*", apiProxy);
     server.use("/ipndev/?*", apiProxy);
     server.use("/sitemap.txt", apiProxy);
-    server.use("/sitemaps/:name/?*", apiProxy);
+    // server.use("/sitemaps/:name/?*", apiProxy);
     server.use("/dl/:filename?*", apiProxy);
     server.use('/cdn', apiProxy);
     server.use('/login', apiProxy);
