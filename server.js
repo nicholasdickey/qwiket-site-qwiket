@@ -155,6 +155,7 @@ app.prepare().then(() => {
         })
     })
     server.get('*', (req, res) => {
+        console.log("APP request headers:", req.headers)
         return handle(req, res)
     })
     // console.log("calling server listen")
