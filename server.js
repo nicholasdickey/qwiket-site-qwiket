@@ -61,6 +61,8 @@ var optionsApi = {
         var query = parts[1] || '';
         const cookies = req.cookies;
         console.log("cookies:", cookies)
+        console.log("headers:", req.headers)
+
         let identity = cookies['identity'];
         if (!identity) {
             identity = cookies['qid'] || '';
