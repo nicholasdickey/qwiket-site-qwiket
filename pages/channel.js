@@ -8,6 +8,8 @@ class Channel extends React.Component {
     static async getInitialProps({ store, isServer, req, query }) {
         if (isServer && req) {
             Root.host = req.headers.host;
+            Root.xff = req.headers['x-forwarded-for'];
+            Root.ua = req.headers['user-agent'];
         }
         let { channel, q, solo, code } = query;
         //  console.log({ store, isServer, query })
