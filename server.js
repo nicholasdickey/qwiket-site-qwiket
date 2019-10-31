@@ -45,8 +45,7 @@ function relayResponseHeaders(proxyRes, req, res) {
 var optionsApi = {
     target: url, // target host
     //  logLevel: 'debug',
-    onProxyReq: relayRequestHeaders,
-    onProxyRes: relayResponseHeaders,
+
     onError(err, req, res) {
         console.log("ERROR", { url, err })
         res.writeHead(500, {
@@ -61,6 +60,7 @@ var optionsApi = {
         var parts = req.url.split('?');
         var query = parts[1] || '';
         const cookies = req.cookies;
+        console.log("cookies:", cookies)
         let identity = cookies['identity'];
         if (!identity) {
             identity = cookies['qid'] || '';
@@ -72,7 +72,7 @@ var optionsApi = {
         var xFF = req.headers['x-forwarded-for'];
         var xRef = req.headers['x-forwarded-for'] || '';
         var ip = xFF ? xFF.split(',')[0] : req.connection.remoteAddress || '';
-        console.log("IP: ", { ip, xFF, rip: req.connection.remoteAddress })
+        console.log("IP: ", { ip, xFF, rip: req.connection.remoteAddress, identity })
         var w = ip.split(':');
         //console.log("w=", w);
         ip = w ? w[w.length - 1] : ip;
@@ -100,17 +100,22 @@ var optionsApi = {
 console.log("call prepare")
 app.prepare().then(() => {
     console.log("prepare")
-    server.use(cookieParser());
+
     server.use(express.json());       // to support JSON-encoded bodies
     server.use(express.urlencoded()); // to support URL-encoded bodies
 
 
-    server.set('trust proxy', 'linklocal', '159.203.156.141');
+    // server.set('trust proxy', 'linklocal', '159.203.156.141');
 
 
     server.use(favicon(__dirname + '/public/img/blue-bell.png'));
 
+    server.use(cookieParser());
+    server.use(cookieSession({
+        name: 'session', secret: '23987f',
+        maxAge: 365 * 24 * 60 * 60 * 1000,
 
+    }));
 
     var apiProxy = proxy(optionsApi);
     server.use("/robots.txt", apiProxy);
@@ -152,7 +157,7 @@ app.prepare().then(() => {
     // console.log("calling server listen")
     server.listen(port, err => {
         if (err) throw err
-        console.log('> Ready on http://localhost:3000')
+        console.log(`> Ready on http://localhost:${port}`)
     })
 
 }).catch(ex => {
