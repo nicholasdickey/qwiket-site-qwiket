@@ -72,7 +72,7 @@ var optionsApi = {
         var xFF = req.headers['x-forwarded-for'];
         var xRef = req.headers['x-forwarded-for'] || '';
         var ip = xFF ? xFF.split(',')[0] : req.connection.remoteAddress || '';
-        console.log("IP: ", { ip, xFF, rip: req.connection.remoteAddress, identity })
+        console.log("IP: ", { ip, xFF, rip: req.connection.remoteAddress, identity, hostname: req.hostname, reqip: req.ip })
         var w = ip.split(':');
         //console.log("w=", w);
         ip = w ? w[w.length - 1] : ip;
@@ -105,7 +105,7 @@ app.prepare().then(() => {
     server.use(express.urlencoded()); // to support URL-encoded bodies
 
 
-    server.set('trust proxy', 'linklocal', '159.203.156.141', '104.248.124.155');
+    server.set('trust proxy', 'linklocal', '159.203.156.141');
 
 
     server.use(favicon(__dirname + '/public/img/blue-bell.png'));
