@@ -70,12 +70,13 @@ var optionsApi = {
             hc = true;
         //  console.log("query",query,"hc=",hc); 
         var xFF = req.headers['x-forwarded-for'];
-        var xRef = req.headers['x-forwarded-for'] || '';
+        var xRef = req.headers['x-Forwarded-for'] || '';
         var ip = xFF ? xFF.split(',')[0] : req.connection.remoteAddress || '';
         console.log("IP: ", { ip, xFF, rip: req.connection.remoteAddress, identity, hostname: req.hostname, reqip: req.ip })
         var w = ip.split(':');
         //console.log("w=", w);
         ip = w ? w[w.length - 1] : ip;
+        ip = req.ip;
         newPath = newPath.replace(/robots.txt/g, 'api?task=robots');
         newPath = newPath.replace(/sitemap.txt/, 'api?task=sitemap2');
 
@@ -105,7 +106,7 @@ app.prepare().then(() => {
     server.use(express.urlencoded()); // to support URL-encoded bodies
 
 
-    server.set('trust proxy', 'linklocal', '159.203.156.141');
+    //server.set('trust proxy', 'linklocal', '159.203.156.141');
 
 
     server.use(favicon(__dirname + '/public/img/blue-bell.png'));
