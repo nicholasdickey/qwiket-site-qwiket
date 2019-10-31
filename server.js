@@ -106,7 +106,7 @@ app.prepare().then(() => {
     server.use(express.urlencoded()); // to support URL-encoded bodies
 
 
-    server.set('trust proxy', 'loopback', 'linklocal', '159.203.156.141');
+    server.set('trust proxy', 'loopback', 'linklocal');
 
 
     server.use(favicon(__dirname + '/public/img/blue-bell.png'));
