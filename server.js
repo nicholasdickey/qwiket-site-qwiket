@@ -1,4 +1,5 @@
 // server.js
+require = require("esm")(module/*, options*/)
 var favicon = require('serve-favicon');
 
 const next = require('next')
@@ -7,6 +8,8 @@ const compression = require('compression')
 //const routes = require("./routes")
 const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session')
+const { ssrParams, initSession } = require('./qwiket-lib/lib/ssrParams')
+
 const chalk = require("chalk");
 const app = next({ dev: process.env.NODE_ENV !== 'production' })
 //const handler = routes.getRequestHandler(app)
@@ -41,28 +44,7 @@ function relayResponseHeaders(proxyRes, req, res) {
         res.append(key, proxyRes.headers[key]);
     });
 }
-function initSession(session) {
-    if (!session || !session.options) {
-        // l(chalk.red("updSessionParam: no session"));
-        session = {
-            options: {
-                init: 1,
-                theme: 1,
-                twitter: 1,
-                activeTopics: 1,
-                cover: 0,
-                zoom: 'out',
-                thick: 0,
-                dense: 0,
-                loud: 0,
-                width: 0,
-                channelConfig: 0,
-                userConfig: 0
-            }
-        }
-    }
-    return session;
-}
+
 var optionsApi = {
     target: url, // target host
     //  logLevel: 'debug',
@@ -91,37 +73,15 @@ var optionsApi = {
                 newPath = '/server/dl.php?image=req.params.filename';
 
         if (newPath.indexOf("ssr") < 0) {
-            var parts = req.url.split('?');
-            var query = parts[1] || '';
-            const cookies = req.cookies;
-            console.log("cookies:", cookies)
-            console.log("headers:", req.headers)
-
-            let identity = cookies['identity'];
-            if (!identity) {
-                identity = cookies['qid'] || '';
-            }
-            let anon_identity = cookies['anon_identity'];
-            var hc = false;
-            if (query && (query.indexOf("health_check") >= 0 || query.indexOf("drsyncdb") >= 0))
-                hc = true;
-            //  console.log("query",query,"hc=",hc); 
-            var xFF = req.headers['x-forwarded-for'];
-            var ua = encodeURIComponent(req.headers['user-agent'] || '');
-            var ip = xFF ? xFF.split(',')[0] : req.connection.remoteAddress || '';
-            console.log("IP: ", { ip, xFF, rip: req.connection.remoteAddress, identity, hostname: req.hostname, reqip: req.ip })
-            var w = ip.split(':');
-            //console.log("w=", w);
-            ip = w ? w[w.length - 1] : ip;
-            ip = req.ip;
+            let { host, ip, ua, pxid, anon } = ssrParams(req);
 
 
-            newPath = updateQueryStringParameter(newPath, 'host', req.headers.host);
+            newPath = updateQueryStringParameter(newPath, 'host', host);
             newPath = updateQueryStringParameter(newPath, 'xip', ip);
             newPath = updateQueryStringParameter(newPath, 'ua', ua);
-            newPath = updateQueryStringParameter(newPath, 'pxid', identity);
-            newPath = updateQueryStringParameter(newPath, 'anon', anon_identity);
-            console.log(chalk.green("PROXY API:"), { url: newPath, remoteAddress: req.connection.remoteAddress });
+            newPath = updateQueryStringParameter(newPath, 'pxid', pxid);
+            newPath = updateQueryStringParameter(newPath, 'anon', anon);
+            console.log(chalk.green("PROXY API:"), { url: newPath });
         }
         else {
             console.log(chalk.blue("SSR PROXY API:"), { url: newPath });
@@ -168,56 +128,33 @@ app.prepare().then(() => {
     server.use('/upload', apiProxy)
 
     server.use("/get-session", async (req, res) => {
-        var session = initSession(req.session);
-        let ss = JSON.stringify(session);
+        var session = initSession(req);
         let r = {};
-        r.session = session.options;
+        r.session = session;
         r.success = true;
+        console.log("GET_SESSION:", session)
         res.end(JSON.stringify(r, null, 4));
         logTime(t);
     });
     server.use("/update-session-param", async (req, res) => {
-        const t = logEnter('update-session', '');
-        var session = req.session;
+        console.log("update-session-param")
         let { name, value } = req.query;
-        if (!session || !session.options) {
-            // l(chalk.red("updSessionParam: no session"));
-            session = {
-                options: {
-                    init: 1,
-                    theme: 1,
-                    twitter: 1,
-                    activeTopics: 1,
-                    cover: 0,
-                    zoom: 'out',
-                    thick: 0,
-                    dense: 0,
-                    loud: 0,
-                    width: 0,
-                    channelConfig: 0,
-                    userConfig: 0
-                }
-            }
-        }
         try {
-            //console.log(chalk.green.bold("updSessionParam 1 session: "), { session });
-            session.options[name] = value;
-            // console.log(chalk.green.bold("updSessionParam 2 session: "), { session });
+            if (!req.session || !req.session.options) {
+                req.session.options = initSession(req);
+            }
+            req.session.options[name] = value;
         }
         catch (x) {
             console.log({ x });
         }
         let r = {};
-        r.options = session.options;
+        r.session = req.session.options;
         r.success = true;
         res.end(JSON.stringify(r, null, 4));
-        logTime(t);
+
     });
 
-    //server.use(handler).listen(3000)
-    /* server.get('*', (req, res) => {
-         return handle(req, res)
-       }) */
     ['/static*', '/_next*', '/_webpack*', '/__webpack_hmr*'].forEach(function (path) {
         console.log("adding next path:", path)
         server.get(path, function (req, res) {

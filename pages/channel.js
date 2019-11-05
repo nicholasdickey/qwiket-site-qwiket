@@ -2,8 +2,9 @@ import React from 'react';
 import { bindActionCreators } from 'redux'
 import Root from 'window-or-global'
 import { connect } from 'react-redux'
-import { fetchPageData } from '../qwiket-lib/actions/app'
-import ssrParams from '../qwiket-lib/lib/ssrParams'
+import { fetchApp, dispatchSession } from '../qwiket-lib/lib/ssrParams'
+import { Layout, InnerGrid } from '../qwiket-lib/components/layout';
+import Topline from '../components/topline';
 
 class Channel extends React.Component {
     static async getInitialProps({ store, isServer, req, query }) {
@@ -14,8 +15,9 @@ class Channel extends React.Component {
         let { channel, q, solo, code } = query;
         //  console.log({ store, isServer, query })
 
-        await store.dispatch(fetchPageData({ ssrType: 'channel', channel, ssrQid: q, code, ssrParams: ssrParams(req) }));
-        console.log("AFTER DISPATCH>>>>>>>>>>>>>>", store);
+        await fetchApp({ req, store, channel, q, solo, code });
+        await dispatchSession({ req, store });
+        console.log("after fetchApp")
         /*
         const cookie = Immutable.fromJS(json.cookie ? json.cookie : {});
         console.log({ cookie });
@@ -24,13 +26,15 @@ class Channel extends React.Component {
         req.res.cookie('identity', identity, { maxAge, sameSite: 'Lax' })
         req.res.cookie('anon', anon, { maxAge, sameSite: 'Lax' })
         console.log("SET COOKIE ", { identity, anon }) */
-        return { query }
+        return {
+            qparams: query
+        }
     }
     /*
         componentDidMount() {
             this.timer = this.props.startClock()
         }
-    
+     
         componentWillUnmount() {
             clearInterval(this.timer)
         }*/
@@ -38,7 +42,8 @@ class Channel extends React.Component {
     render() {
         const { app } = this.props;
         console.log("RENDER CHANNEL:")
-        return <div>CHANNEL:<div>{JSON.stringify(app, null, 4)}</div></div>
+        const InnerWrapper = ({ layout }) => <div><Topline layout={layout} /><InnerGrid layout={layout}><div>BLAH</div></InnerGrid></div>;
+        return <div>CHANNEL:<Layout pageType="context"><InnerWrapper /></Layout></div>
     }
 }
 function mapStateToProps(state) {
@@ -46,14 +51,8 @@ function mapStateToProps(state) {
         app: state.app,
     };
 }
-const mapDispatchToProps = dispatch => {
-    return {
-        fetchPageData: bindActionCreators(fetchPageData, dispatch),
-
-    }
-}
 
 export default connect(
     mapStateToProps,
-    mapDispatchToProps
+    null
 )(Channel)
