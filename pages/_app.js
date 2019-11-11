@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import React from 'react';
 import { Provider } from 'react-redux'
 import App from 'next/app';
@@ -34,7 +35,7 @@ class MyApp extends App {
             meta = meta.toJS();
         else
             meta = {};
-        console.log("RENDER APP:", { meta })
+        //  console.log("RENDER APP:", { meta })
         return (
             <div>
                 <Head>

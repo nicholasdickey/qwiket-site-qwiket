@@ -4,8 +4,9 @@ import { bindActionCreators } from 'redux';
 import styled from 'styled-components';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Tooltip from '@material-ui/core/Tooltip';
 import { updateSession } from '../qwiket-lib/actions/app'
-
+import AlertWidget from './widgets/alert'
 const StyledCheckbox = styled(({ ...other }) => <Checkbox classes={{ checked: 'checked', disabled: 'disabled' }}{...other} />)`
   color: #eee !important;
   width:200px%;
@@ -33,8 +34,21 @@ const StyledFormControlLabel = styled(({ ...other }) => <FormControlLabel classe
 
 let Topline = ({ session, layout, actions }) => {
     let upd = actions.updateSession;
-    console.log("RENDER TOPLINE");
+    //console.log("RENDER TOPLINE");
     let hpads = layout.hpads;
+
+
+
+    const alert = <div style={{ flexShrink: 4 }}> <Tooltip title="Alerts"><AlertWidget onClick={(v) => {
+        console.log("alert click ", v);
+        /* if (v.threadid) {
+           // console.log("Alert clicked thread=", v.threadid);
+           const url = contextUrl + v.threadid;
+           props.history.push(url);
+         }*/
+
+
+    }} /></Tooltip></div>
     const Check = ({ label, checked, onChange, disabled }) => {
         return <StyledFormControlLabel
             control={
@@ -109,7 +123,7 @@ let Topline = ({ session, layout, actions }) => {
         height:30%;
         display:block;
         background-color:#000;
-        @media(max-width:750){
+        @media(max-width:749px){
             display:none;
         }
     `
@@ -159,7 +173,7 @@ let Topline = ({ session, layout, actions }) => {
         margin-bottom:0px;
     
     `
-    return <ToplineBand><InnerBand><Loud /><Thick /><Dense /><Dark /><Band /></InnerBand></ToplineBand>
+    return <ToplineBand data-id="topline"><InnerBand><Loud /><Thick /><Dense /><Dark /><Band />{alert}</InnerBand></ToplineBand>
 };
 function mapStateToProps(state) {
     return {

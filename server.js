@@ -1,4 +1,5 @@
 // server.js
+
 require = require("esm")(module/*, options*/)
 var favicon = require('serve-favicon');
 
@@ -81,10 +82,10 @@ var optionsApi = {
             newPath = updateQueryStringParameter(newPath, 'ua', ua);
             newPath = updateQueryStringParameter(newPath, 'pxid', pxid);
             newPath = updateQueryStringParameter(newPath, 'anon', anon);
-            console.log(chalk.green("PROXY API:"), { url: newPath });
+            // console.log(chalk.green("PROXY API:"), { url: newPath });
         }
         else {
-            console.log(chalk.blue("SSR PROXY API:"), { url: newPath });
+            //  console.log(chalk.blue("SSR PROXY API:"), { url: newPath });
 
         }
         return newPath;

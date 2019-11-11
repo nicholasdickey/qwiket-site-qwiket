@@ -16,6 +16,10 @@ const theme = createMuiTheme({
         background: {
             default: '#fff',
         },
+        linkColor: {
+            light: red[900],
+            dark: red[200]
+        }
     },
 });
 
