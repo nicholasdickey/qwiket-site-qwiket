@@ -75,21 +75,25 @@ export class QwiketItem extends Component {
 
     render() {
         let {
-		/*passed:*/		columnType, topic, history, channel, qparams, forceShow, qType, firstRow, approver, test,
-		/*bound: */		showQwiket, context, globals, session, online,
+		/*passed:*/		columnType, topic, channel, qparams, forceShow, firstRow, approver, test,
+		/*bound: */		showQwiket, context, session, online,
             actions, /*bound actions*/
             ...rest /* styles */
         } = this.props;
-        if (!qparams)
+        if (!qparams || !topic)
             return <div >QPARAMS:{qparams}</div>
-
+        let globals = session;
         const { fetchStoryQwikets, fetchShowQwiket, invalidateContext, requestIcon } = actions;
 		/**
 			Qwikets are classified into three types: a normal Qwiket, a Qwiket from a Comment Stream (displayed opened from the beginning), a full qwiket - in the context page.
-		**/
+        **/
+        if (columnType == 'newsviews') {
+            columnType = 'mix';
+            // console.log("qwiketItem", { channel })
+        }
         const typeOfQwiket = columnType == 'context' ? 'full' : (columnType == 'reacts' || columnType == 'mix' || columnType == 'story-qwikets') ? 'commentStream' : 'qwiketColumn'; //full,commentStream,qwiketColumn, TBA - meta qwikets, hotlist?
         const zoom = qparams.z;
-        console.log({ topic })
+        // console.log({ topic })
         //console.log("BoundQwiket render...")
 
 		/**
@@ -330,6 +334,10 @@ export class QwiketItem extends Component {
 
         const createDatum = (topic, opened, topLevel, muzzled, starColor, relation, levelLink) => {
             reshare = topic.get('reshare');
+            const isDisqus = (topic.get("qtype") == 'disqus' || topic.get("type") == 'disqus') && topic.get("body") ? true : false;
+            const id = isDisqus ? topic.get("id") : topic.get("threadid");
+            const key = isDisqus ? ('postid:' + id) : id;
+
             const xQwiketType = (topic.get('qtype') == 'disqus' || topic.get('reshare') == 7) ? 'react' : 'story';
             const xQwiketSubtype = (topic.get('qtype') == 'disqus' || topic.get("type") == 'disqus') ? 'disqus' : (reshare == 0 || reshare == 100) ? 'tview' : 'qwiket';
             //	console.log("datumus", { topic: topic.toJS() })
@@ -347,16 +355,14 @@ export class QwiketItem extends Component {
             let xTargetLink = (xQwiketSubtype == 'disqus') ? `${rootTargetLink}/cc/comment-${xId}#comment-${xId}` : xQwiketType == "react" && !topLevel ? `${rootTargetLink}/q/${xId}` : topLevel ? `/context${ch}/topic/${topic.get("threadid")}` : rootTargetLink;
             xTargetLink = xTargetLink.replace(/\/\//g, `/`);
             let xLink = (loud || opened || !topLevel) ? xTargetLink : xOpenLink;
-            //if (relation == 'parent')
-            //	console.log("XLINK", { opened, loud, xQwiketType, xQwiketSubtype, topLevel, xLink, xTargetLink, xOpenLink })
-            const isDisqus = (topic.get("qtype") == 'disqus' || topic.get("type") == 'disqus') && topic.get("body") ? true : false;
-            const id = isDisqus ? topic.get("id") : topic.get("threadid");
-            const key = isDisqus ? ('postid:' + id) : id;
+            // if (relation == 'parent')
+            //   console.log("XLINK", { opened, loud, xQwiketType, xQwiketSubtype, topLevel, xLink, xTargetLink, xOpenLink })
+
             const datumQwiketLink = `${routePageLink}/${muzzled ? view : show}/${routeRootKey ? routeRootKey : key}/${key}`;
             let targetLink = isDisqus ? rootTargetLink : `/context${ch}/topic/${topic.get("threadid")}`;
             if (!xLink) {
                 xLink = `${routePageLink}/${muzzled ? view : show}/${key}/${key}`;
-                //console.log("xTargetLink datum", { topic, topLevel, xTargetLink, qType, typeOfQwiket, xQwiketSubtype, xId, xKey, xOpenLink, xQwiketType, routePageLink, routeRootKey, key, datumQwiketLink, levelLink, targetLink, xLink });
+                // console.log("xTargetLink datum", { topic, topLevel, xTargetLink, typeOfQwiket, xQwiketSubtype, xId, xKey, xOpenLink, xQwiketType, routePageLink, routeRootKey, key, datumQwiketLink, levelLink, targetLink, xLink });
 
             }
             //if (inShow && relation == 'level' && typeOfQwiket == 'commentStream' && Root.__CLIENT__)
@@ -395,11 +401,11 @@ export class QwiketItem extends Component {
             //if (relation == 'parent')
             //	console.log("LINK:", { rootId, link, targetLink, xTargetLink, xLink, reshare, })
             if (stickie && typeOfQwiket == 'commentStream') {
-                //console.log({"stickie links link":link,'topLevel':topLevel,'relation':relation})
+                // console.log({ "stickie links link": link, 'topLevel': topLevel, 'relation': relation })
 
             }
-            //if(relation=='parent')
-            //console.log("QGBG: parent_summary QGBG link:",link,datumQwiketLink,routePageLink,'muzzled:',muzzled)	  
+            // if (relation == 'parent')
+            //   console.log("QGBG: parent_summary QGBG link:", link, datumQwiketLink, routePageLink, 'muzzled:', muzzled)
             const onClick = () => {
                 //console.log(" setTop onClick invalidateContext:", { topic: topic.toJS(), isDisqus, topLevel })
                 if (isDisqus) {
@@ -623,13 +629,13 @@ export class QwiketItem extends Component {
 		Parents:
 		**/
         let parentQwikets = null;
-        let parent_summary = topic.get("parent_summary");
+        let parent_summary = topic.get("parent_summary") ? topic.get("parent_summary") : Immutable.fromJS([]);
         const showParents = typeOfQwiket == 'commentStream' || rootOpened && typeOfQwiket != 'full';
         //if (inShow)
-        //	console.log("DMP", { typeOfQwiket, parent_summary: parent_summary ? parent_summary.toJS() : '', rootIsDisqus, showParents, rootOpened })
-        if (typeOfQwiket == 'commentStream' && parent_summary && rootIsDisqus) {
+        //  console.log("DMP", { typeOfQwiket, parent_summary: parent_summary ? parent_summary.toJS() : '', rootIsDisqus, showParents, rootOpened })
+        if (rootIsDisqus) {
             //if(columnType=='story-qwikets')
-            //console.log("QGBG adding topLevel parent to disq comment, columnType:", columnType, "headless:", headless)
+            // console.log("QGBG adding topLevel parent to disq comment, columnType:", columnType, "headless:", headless)
             //Add Top Level pseudo-Qwiket
             parent_summary = parent_summary.push(Immutable.fromJS({
                 type: 'tview',
@@ -682,8 +688,9 @@ export class QwiketItem extends Component {
         //if(levelId=='north-korea-to-us-change-your-political-calculation-or-we-re-back-to-testing-nukes-and-missiles-1')
         //	console.log("qq replyLink2:",{replyLink,description:topic.get("description")});
         return (
-            <ErrorBoundary>
+            <ErrorBoundary data-id="error-boundary">
                 <QwiketFamily
+                    data-id="qwiket-family"
                     inShow={inShow}
                     level={levelQwiket}
                     children={childrenQwikets}
@@ -702,12 +709,12 @@ export class QwiketItem extends Component {
                     meta={meta}
                     zoom={zoom}
                     approver={approver}
-                    history={history}
+
                     itemAction={actions.itemAction}
                     unpublishQwiket={actions.unpublishQwiket}
                     updateOnlineState={actions.updateOnlineState}
                     lazy={qparams.lazy}
-                    online={online}
+
                     context={context}
                     test={test}
                     actions={actions}

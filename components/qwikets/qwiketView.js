@@ -28,8 +28,8 @@ let QwiketView = ({ qwiket, app, session, qparams, user }) => {
     const OuterShell = styled.div`
         display:flex;
         flex-direction:column;
-        border:thick solid green;
-        width:600px;
+       // border:thick solid green;
+        //width:600px;
         & .q-qwiket-title-full{
             font-weight:500;
               
@@ -42,7 +42,7 @@ let QwiketView = ({ qwiket, app, session, qparams, user }) => {
         }
     `;
     const Credits = styled.div`
-        display:flex,
+        display:flex;
         justify-content:space-between;
     `;
     let q = {

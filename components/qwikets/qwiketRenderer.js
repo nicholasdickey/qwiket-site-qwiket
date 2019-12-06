@@ -1,5 +1,7 @@
 import React, { Component } from "react";
+
 import $ from 'jquery';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import Immutable from "immutable"
 import Root from 'window-or-global';
@@ -15,10 +17,11 @@ import linkifyHtml from 'linkifyjs/html';
 
 //Qwiket
 import u from '../../qwiket-lib/lib/utils'
-import Link, { MaskedLink, linkPush } from '../../qwiket-lib/components/link'
-import { ArticleView, renderToHtml } from '../../qwiket-lib/components/articleView'
+import { ssRoutes } from '../../qwiket-lib/routes'
+let { Link, Router } = ssRoutes;
+//import { ArticleView, renderToHtml } from '../../qwiket-lib/components/articleView'
 //material-ui
-import { withTheme } from '@material-ui/core/styles'; 
+import { withTheme } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import yellow from "@material-ui/core/colors/yellow";
 import green from "@material-ui/core/colors/green";
@@ -145,7 +148,7 @@ const renderArticle = ({ topic, index, theme, globals, os, cs, zoom, channel, ap
     let editor = false;
     zoom = 'out';
     console.log("Render Article", { topic: topic ? topic.toJS() : 'no topic' })
-    return <ArticleView globals={globals} approver={approver} os={os} cs={cs} zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />
+    return <div globals={globals} approver={approver} os={os} cs={cs} zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />
 
 
 }
@@ -155,7 +158,7 @@ const renderArticleHtml = ({ topic, index, theme, globals, os, cs, zoom, channel
     let editor = false;
     zoom = 'out';
     console.log("Render Article", { topic: topic ? topic.toJS() : 'no topic' })
-    return "<ArticleView globals={globals} approver={approver} os={os} cs={cs} zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />"
+    return "<div globals={globals} approver={approver} os={os} cs={cs} zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />"
 
 
 }
@@ -277,10 +280,12 @@ class LinkRenderer extends Component {
                 </blockquote>
             </div>
             );
-            if (Root.__CLIENT__)
+            if (Root.__CLIENT__ && (typeof window.twttr !== 'undefined'))
                 setTimeout(() => {
-                    window.twttr.widgets.load()
-                    window.twttr.widgets.load();
+                    if (Root.__CLIENT__ && (typeof window.twttr !== 'undefined')) {
+                        window.twttr.widgets.load()
+                        window.twttr.widgets.load();
+                    }
                 }, 500);
 
             return tc;
@@ -446,17 +451,20 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
                 image: imageRenderer
             }} /> : null}
             <style global jsx>{`
+                a{
+                     text-decoration:none;
+                }
                     .q-full.q-qwiket-main-image{
                     object-fit: cover;
                     margin-top: 20px;
                     position: relative;
-                    max-width: 100 % !important;
+                    max-width: 100% !important;
                     margin-left: auto;
                     margin-right: auto;
                 }
-                .q-column.q-qwiket-main-image{
+                .q-column .q-qwiket-main-image{
                     position: relative;
-                    max-width: 100 % !important;
+                    max-width: 100% !important;
                     margin-left: auto;
                     margin-right: auto;
                 }
@@ -467,9 +475,38 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
                     margin-left: auto;
                     margin-right: auto;
                 }
+                .q-qwiket-title{
+                    font-weight:500;
+                    line-height: 1.2;
+                    font-size: 1.2rem; 
+                    font-family:roboto;
+                    text-align: left; 
+                    margin-top:10px;
+                    cursor:pointer;
+                }
+                .q-qwiket-title-full{
+                    font-weight:500;
+                
+                    line-height: 1.3; 
+                    font-size: 2.0rem; 
+                    font-family:roboto;
+                    text-align: left; 
+                    cursor:pointer;
+                    user-select:text;
+                }
+                .q-qwiket-title-full-zoom{
+                    font-weight:500;
+                    
+                    line-height: 3.2rem;
+                    font-size: 2.6rem; 
+                    font-family:roboto;
+                    text-align: left; 
+                    cursor:pointer;
+                    user-select:text;
+                }
                 .q-qwiket-markdown{
                     max-width: 100%;
-                   // font - size: 1.3rem;
+                    font-size: 1.0rem;
                     line-height: 1.4;
                     overflow: hidden;
                     font-weight: 400;
@@ -852,6 +889,7 @@ export default class QwiketRenderer extends Component {
         const linkColor = theme == 1 ? red[900] : red[200];
 
         let d = topic.toJS();
+        // console.log("TOPIC>>>:", d)
         if (d.deleted || d.reshare > 1000)
             return <div>comment deleted by the user</div>
         //  if (type == 'reacts')
@@ -870,6 +908,11 @@ export default class QwiketRenderer extends Component {
         let { reshare, description, body, image, image_src, author, site_name, title, showedHistory, opened, article } = d;
         if (body == "none")
             body = null;
+        if (!author)
+            author = "AUTHOR"
+        if (!site_name)
+            site_name = "SITENAME"
+        //  console.log({ author, site_name })
         // console.log("showedHistory:", { showedHistory, title, d })
         opened = qwiketOpened || opened;
         //if (+article)
@@ -892,8 +935,8 @@ export default class QwiketRenderer extends Component {
         let rs = !reshare || reshare == 100 || reshare == 50 ? 0 : reshare == 6 || reshare == 106 || reshare == 56 ? 6 : reshare == 7 || reshare == 107 || reshare == 57 ? 7 : reshare == 9 || reshare == 59 || reshare == 109 ? 9 : -1;
         let isVideo = false;
         let readMore = body && long ? true : false;
-        if (Root.__SERVER__)
-            readMore = true; // or Google indexing, should only be limited to bots and subscribers
+        //   if (Root.__SERVER__)
+        //       readMore = true; // or Google indexing, should only be limited to bots and subscribers
         // if (full)
         //    console.log({ readMore, rs, reshare })
         //if (type == 'full')
@@ -1123,7 +1166,7 @@ export default class QwiketRenderer extends Component {
                     </div>
                         {(!full && top) ?
 
-                            <MaskedLink data-id="masked-link" to={link} refUrl={link} >
+                            <Link data-id="masked-link" route={link} refUrl={link} >
                                 <div data-id="inner-block" onClick={() => { console.log("ONECLICK2"); onClick() }}>
                                     <div style={{ marginBottom: 10 }} >
                                         <div data-id="title31" className={full ? "q-qwiket-title-full" : "q-qwiket-title"} >{d.title}</div>
@@ -1131,7 +1174,7 @@ export default class QwiketRenderer extends Component {
 
                                     </div>
                                 </div>
-                            </MaskedLink>
+                            </Link>
                             : null}
                     </div>
                     break;
@@ -1170,9 +1213,9 @@ export default class QwiketRenderer extends Component {
 
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 <div className="q-qwiket-author" style={{ marginTop: 0 }}>Shared by {d.sharedBy}</div>
-                                                {(d.starColor && (!d.topLevel || d)) ? <Link to={"/context/topic/become-qwiket-member"}>
+                                                {(d.starColor && (!d.topLevel || d)) ? <a><Link route={'context'} params={{ channel, threadid: "become-qwiket-member" }}>
                                                     <div data-id="g2"><Star style={{ marginLeft: 10, color: d.starColor }} /></div>
-                                                </Link> : null}
+                                                </Link></a> : null}
                                             </div>
 
                                         </div> : null}
@@ -1188,41 +1231,48 @@ export default class QwiketRenderer extends Component {
 
                             </div>
 
-                            {(!full && top) ? <MaskedLink data-id="masked-link" to={link} refUrl={link} >
+                            {(!full && top) ? <Link data-id="masked-link" route={link} refUrl={link} >
                                 <div data-id="title-block" onClick={() => { console.log("ONECLICK3", { link, d }); onClick() }}>
                                     <div  >
                                         <div data-id="title3" className={full ? "q-qwiket-title-full" : "q-qwiket-title"} >{d.title}</div>
 
 
                                     </div></div>
-                            </MaskedLink> : null}
-                            {full ? <MaskedLink data-id="masked-link" to={d.url} refUrl={link} target="article" >
+                            </Link> : null}
+                            {full ? <a data-id="masked-link" href={d.url} target="article" >
                                 <div data-id="title-block" onClick={() => { console.log("ONECLICK3", { link, d }); onClick() }}>
                                     <div  >
                                         <div data-id="title32" className={full ? "q-qwiket-title-full" : "q-qwiket-title"} >{d.title}</div>
 
 
                                     </div></div>
-                            </MaskedLink> : null}
+                            </a> : null}
                         </div></div >
 
             }
         }
         /*
-        {approver || (loud && !d.topLevel) ? approver ? <QwiketMenu qwiketid={d.threadid} updateOnlineState={updateOnlineState} reshare={d.reshare} history={history} icon={<img data-id="009" style={{ marginRight: 8, marginTop: 0, opacity: inShow ? 1.0 : 0.7 }} height={24} src={u.cdn(d.indicatorIcon)} />} stickie={d.stickie} editLink={editLink} un={un} /> : <img data-id="004" style={{ marginRight: 2, opacity: inShow ? 0.5 : 0.4 }} height={24} src={u.cdn(d.indicatorIcon)} /> : null}
-         
+{approver || (loud && !d.topLevel) ? approver ? <QwiketMenu qwiketid={d.threadid} updateOnlineState={updateOnlineState} reshare={d.reshare} history={history} icon={<img data-id="009" style={{ marginRight: 8, marginTop: 0, opacity: inShow ? 1.0 : 0.7 }} height={24} src={u.cdn(d.indicatorIcon)} />} stickie={d.stickie} editLink={editLink} un={un} /> : <img data-id="004" style={{ marginRight: 2, opacity: inShow ? 0.5 : 0.4 }} height={24} src={u.cdn(d.indicatorIcon)} /> : null}
+
             */
         //if (subtype == 'parent')
-        //    console.log("qwiket-renderer:", { link })
-        return (<div data-id="QWIKET_RENDERER" key={key} className={full ? 'q-full' : subtype == 'parent' && !top ? 'q-column q-weak' : shaded ? 'q-column-shaded' : 'q-column'}>
+        //    console.log("qwiket-renderer:", {link})
+        const StyledDiv = styled.div`
+           & a{
+                            cursor:pointer;
+                        text-decoration:none;
+            color:${textColor};
+                        }
+                    `;
+        return (<StyledDiv data-id="QWIKET_RENDERER2" key={key} className={full ? 'q-full' : subtype == 'parent' && !top ? 'q-column q-weak' : shaded ? 'q-column-shaded' : 'q-column'}>
             {header}
             <div>{type == "full" ? <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="inner-blocks">
                 {blocks}
-            </div> : <MaskedLink data-id="masked-link" to={link} refUrl={link} >
+            </div> : <Link data-id="masked-link" route={link} refUrl={link} >
                     <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="inner-blocks">
                         {blocks}
                     </div>
-                </MaskedLink>}</div>
+                </Link>}</div>
 
 
 
@@ -1245,7 +1295,7 @@ export default class QwiketRenderer extends Component {
                 {(!full && opened && top && (subtype == 'parent')) ? <div data-id="blank-1" style={{ height: 20, marginTop: 10, borderTop: 'dotted thin green', opacity: 0.4 }} /> : null}
             </div>
 
-        </div >)
+        </StyledDiv >)
     }
 }
 QwiketRenderer = withTheme(QwiketRenderer)

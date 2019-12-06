@@ -1,4 +1,5 @@
-import 'babel-polyfill';
+//import 'babel-polyfill';
+import "regenerator-runtime/runtime"
 import React from 'react';
 import { Provider } from 'react-redux'
 import App from 'next/app';

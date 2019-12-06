@@ -1,10 +1,9 @@
 import React, { Component } from "react";
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux';
 import PropTypes from 'prop-types';
 import Immutable from "immutable"
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import Router from 'next/router';
-import { withRouter } from 'next/router'
+import { withTheme } from '@material-ui/core/styles';
 import Root from 'window-or-global';
 import ReactHoverObserver from 'react-hover-observer';
 import { Image } from 'react-bootstrap';
@@ -18,20 +17,24 @@ var debounce = require('lodash.debounce');
 var he = require('he');
 import copy from 'copy-to-clipboard';
 import $ from 'jquery';
-import { updateOpenEditor, fetchDraftQwiket, unshareNewslineQwiket, fetchComments, fetchShowQwiket, invalidateContext, unpublishQwiket, createQwiket, saveQwiket, publishQwiket, localUpdateQwiket } from '../../qwiket-lib/actions/contextActions';
-import { updateQwiketState, itemAction } from '../../qwiket-lib/actions/newslineActions';
-import { requestIcon, updateOnlineState } from '../../qwiket-lib/actions/appActions';
-import Link from '../../qwiket-lib/components/link'
+import { updateOpenEditor, fetchDraftQwiket, fetchShowQwiket, saveQwiket, publishQwiket, localUpdateQwiket } from '../../qwiket-lib/actions/context'
+import { unshareNewslineQwiket, fetchComments, unpublishQwiket } from '../../qwiket-lib/actions/contextActions';
+
+import { updateOnlineState } from '../../qwiket-lib/actions/user';
+import { ssRoutes } from '../../qwiket-lib/routes'
+
+let { Link, Router } = ssRoutes;
 import u from '../../qwiket-lib/lib/utils';
 import { renderMarkdown } from './qwiketRenderer';
 import QwiketRenderer from './qwiketRenderer';
 import { ClickWalledGarden } from '../../qwiket-lib/components/walledGarden';
-import { ArticleView, renderToHtml } from '../../qwiket-lib/components/articleView'
+//import { ArticleView, renderToHtml } from '../../qwiket-lib/components/articleView'
 //import Dropzone from 'react-dropzone';
 import { DropzoneArea } from 'material-ui-dropzone'
 //import { DropzoneDialog } from 'material-ui-dropzone'
 //import ModalImage from "react-modal-image"
 //material-ui
+import { useTheme } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -158,7 +161,7 @@ export class QwikieEditor extends Component {
         if (actions.fetchDraftChildQwiket) {
             //console.log("fetchDraftChildQwiket")
             if (!this.state.drafts)
-                actions.fetchDraftChildQwiket({ qwiketid: topic.get("threadid") });
+                actions.fetchDraftChildQwiket({ qwiketid: topic.get("qwiketid") });
             this.setState({ drafts: true })
         }
     }
@@ -169,9 +172,9 @@ export class QwikieEditor extends Component {
         const cqid = qparams ? qparams.cqid : 0;
 
         console.log("componentDidMount:", { level, topic: topic ? topic.toJS() : '' })
-        if (!topic.get('threadid') && level == 0) {
+        if (!topic.get('qwiketid') && level == 0) {
 
-            console.log("COMPONENT DID MOUNT")
+            console.log(" D17 COMPONENT DID MOUNT", { topic: topic.toJS() })
             actions.updateOpenEditor({ qwiketid: '__new:' + this.state.uid });
 
         }
@@ -269,17 +272,18 @@ export class QwikieEditor extends Component {
         let prevTopic = prevProps.topic;
         let prevQedit = prevProps.qedit;
         let prevItem = prevQedit ? prevTopic : prevProps.replyTopic;
+        console.log("prevItem", prevItem.toJS())
         let prevUid = prevState.uid;
-        let prevQwiketid = (!prevQedit && !prevItem) ? `__new:${prevUid}` : prevItem.get("threadid");
+        let prevQwiketid = (!prevQedit && !prevItem) ? `__new:${prevUid}` : prevItem.get("qwiketid");
         let topic = props.topic;
         let qedit = props.qedit;
         let item = qedit ? prevTopic : props.replyTopic;
         let uid = state.uid;
-        let qwiketid = (!qedit && !item) ? `__new:${uid}` : item.get("threadid");
+        let qwiketid = (!qedit && !item) ? `__new:${uid}` : item.get("qwiketid");
         if (props.context.get("openEditor") == prevQwiketid) {
 
             if (qwiketid != prevQwiketid) {
-                console.log("componentDidUpdate 22 calling updateOpenEditor", { qwiketid, prevQwiketid, openEditor: prevProps.context.get("openEditor"), qedit, replyTopic: props.replyTopic ? props.replyTopic.toJS() : null })
+                console.log("D17 componentDidUpdate 22 calling updateOpenEditor", { qwiketid, prevQwiketid, openEditor: prevProps.context.get("openEditor"), qedit, replyTopic: props.replyTopic ? props.replyTopic.toJS() : null })
                 props.actions.updateOpenEditor({ qwiketid });
                 console.log("opened2");
                 this.setFocus();
@@ -293,7 +297,7 @@ export class QwikieEditor extends Component {
     }
     static getDerivedStateFromProps(props, state) {
         console.log("getDero");
-        let { qedit, route, topic, replyTopic, rootThreadid, setState, context, actions, defaultTitle, globals, online: os, cs, zoom, channel } = props; //qedit- type of QwiketEditor, edit- mode of QwiketComment
+        let { qedit, route, topic, replyTopic, rootThreadid, setState, context, actions, defaultTitle, globals, user, zoom, channel } = props; //qedit- type of QwiketEditor, edit- mode of QwiketComment
 
         const childDraft = context.get("childDraft");
         const draftParentThreadid = context.get("draftParentThreadid");
@@ -301,7 +305,7 @@ export class QwikieEditor extends Component {
         let loadingDraft = context.get("loadingDraft");
         if (qedit && loadingDraft)
             return;
-        let draft = qedit && drafts && topic ? drafts.get(topic.get("threadid")) : null;
+        let draft = qedit && drafts && topic ? drafts.get(topic.get("qwiketid")) : null;
         const hasInitReply = replyTopic ? true : false;
         const hasInitTopic = draft ? true : false;
         const newReply = hasInitReply && (!state || !state.hasInitReply || state.rootThreadid != rootThreadid);
@@ -322,8 +326,8 @@ export class QwikieEditor extends Component {
                 threadid: rootThreadid,
                 qwiketid: rootThreadid,
                 reshare: 59,
-                author: os.get("user_name"),
-                username: os.get("userName"),
+                author: user.get("user_name"),
+                username: user.get("username"),
                 site_name: `${os.get("user_name")} on Qwiket`
 
             })
@@ -353,7 +357,6 @@ export class QwikieEditor extends Component {
             //console.log("qedit body is a string", state.body)
             if (topic.get("reshare") == 8 || topic.get("reshare") == 108) {
                 //console.log("qedit CONVERTING ARTICLE");
-                const muiTheme = globals.get("muiTheme");
                 const theme = +globals.get("theme");
 
                 let htm = renderToHtml({ topic, d: topic.toJS(), theme, globals, os, cs, zoom, channel, approver: true });
@@ -402,23 +405,24 @@ export class QwikieEditor extends Component {
             hasInitReply: false,
             hasInitTopic: false,
             newSaved: false,
+
             uid: randomstring()
         });
     }
 
     saveComment({ publish, chain }) {
         let { description, image_src, title, body, author, site_name, stickie, dq, uid } = this.state;
-        let { qedit, topic, replyTopic, online, actions, channel, test, rootThreadid, columnType, defaultTitle } = this.props;
+        let { qedit, topic, replyTopic, user, actions, channel, test, rootThreadid, columnType, defaultTitle } = this.props;
 
-        let username = online.get("username");
-        let user_name = online.get("user_name");
+        let username = user.get("username");
+        let user_name = user.get("user_name");
         let item = qedit ? topic : replyTopic;
         if (!title && item)
             title = item.title;
         if (!title)
             title = defaultTitle;
 
-        let qwiketid = (!qedit && !item) ? '__new' : item.get("threadid");
+        let qwiketid = (!qedit && !item) ? '__new' : item.get("qwiketid");
         console.log("saveComment", { topic: topic ? topic.toJS() : {}, qwiketid })
         if (qwiketid == '__new') {
             if (!uid) {
@@ -438,15 +442,16 @@ export class QwikieEditor extends Component {
 		/*if (qwiketid == '__new') {
 			this.setState({ newSaved: true });
 		}*/
-        let catIcon = online.get("avatar");
-        let cat = online.get("userName");
-        let catName = online.get("user_name");
+        let catIcon = user.get("avatar");
+        let cat = user.get("username");
+        let catName = user.get("user_name");
+        //  console.log("RENDER COMMENT", { catIcon, cat, catName });
         if (!author)
             author = catName;
         if (!site_name) site_name = catName + " on Qwiket";
         let rootId = item ? item.get("rootId") : (topic.get("rootId") ? topic.get("rootId") : '') + `/${qwiketid}`;
         let root_threadid = rootThreadid;
-        let parent_threadid = qedit ? item.get("parent_threadid") ? item.get("parent_threadid") : '' : topic.get("threadid");
+        let parent_threadid = qedit ? item.get("parent_threadid") ? item.get("parent_threadid") : '' : topic.get("qwiketid");
         let published_time = (new Date()).getTime() / 1000 | 0;
         let shared_time = (new Date()).getTime() / 1000 | 0;
         let updated_time = (new Date()).getTime() / 1000 | 0;
@@ -556,12 +561,12 @@ export class QwikieEditor extends Component {
         return { success: true }
     }
     publishComment() {
-        let { updateOpenEditor, cancelRoute, qedit, columnType, topic, replyTopic, online, actions, channel, test, rootThreadid, setState, unfocusUrl, router } = this.props;
+        let { updateOpenEditor, cancelRoute, qedit, columnType, topic, replyTopic, user, actions, channel, test, rootThreadid, setState, unfocusUrl, router } = this.props;
         this.saveComment({ publish: 1, chain: true });
         this.saveComment.flush();
         setTimeout(() => this.reset(), 200);
         setState({ edit: false });
-        //console.log("calling updateOpenEditor")
+        console.log("D17 calling updateOpenEditor")
         updateOpenEditor({ qwiketid: 0 });
         //Router.replace(cancelRoute);
 		/*let { qedit, columnType, topic, replyTopic, online, actions, channel, test, rootThreadid, setState, unfocusUrl, router } = this.props;
@@ -604,18 +609,18 @@ export class QwikieEditor extends Component {
     }
 
     render() {
-        let { updateOpenEditor, qedit, isHovering1, topic, context, dq: isDq, stickie: isStickie, selected, globals, online, cs, actions, rootThreadid, focusUrl, unfocusUrl, test, setState, dirty, level, replyTopic, columnType, channel, allowOpen } = this.props;
+        let { updateOpenEditor, session, qedit, theme: muiTheme, isHovering1, topic, context, dq: isDq, stickie: isStickie, selected, globals, user, actions, rootThreadid, focusUrl, unfocusUrl, test, setState, dirty, level, replyTopic, columnType, channel, allowOpen } = this.props;
         let { dqHelpOpen, stickieHelpOpen, description, image_src, dropzone, body, site_name, author, title, dq, stickie, extraFields, tab, descrOpenMD, newSaved, uid } = this.state;
-        let catIcon = online.get("avatar");
-        let cat = online.get("userName");
-        let catName = online.get("user_name");
+        let catIcon = user.get("avatar");
+        let cat = user.get("username");
+        let catName = user.get("user_name");
         let loadingDraft = context.get("loadingDraft");
         let published_time = (new Date()).getTime() / 1000 | 0;
         let shared_time = (new Date()).getTime() / 1000 | 0;
         let updated_time = (new Date()).getTime() / 1000 | 0;
         let avatar = catIcon;
         let item = qedit ? topic : replyTopic;
-        let qwiketid = (!qedit && !item) ? `__new:${uid}` : item.get("threadid");
+        let qwiketid = (!qedit && !item) ? `__new:${uid}` : item.get("qwiketid");
         if (!rootThreadid && qedit && level == 0) {
             console.log("FIXUP")
             rootThreadid = context.get("openEditor");
@@ -624,13 +629,13 @@ export class QwikieEditor extends Component {
                 threadid: rootThreadid,
                 qwiketid: rootThreadid,
                 reshare: 59,
-                author: online.get("user_name"),
-                username: online.get("userName"),
-                site_name: `${online.get("user_name")} on Qwiket`
+                author: user.get("user_name"),
+                username: user.get("username"),
+                site_name: `${user.get("user_name")} on Qwiket`
 
             })
-            author = online.get("user_name"),
-                site_name = `${online.get("user_name")} on Qwiket`,
+            author = user.get("user_name"),
+                site_name = `${user.get("user_name")} on Qwiket`,
                 stickie = true;
         }
         console.log("QwiketEditor render", { item: item ? item.toJS() : {}, topic: topic ? topic.toJS() : {}, qedit, replyTopic, qwiketid })
@@ -664,18 +669,13 @@ export class QwikieEditor extends Component {
             channel
         });
         const edit = qedit;
-        const muiTheme = globals.get("muiTheme");
-        const theme = +globals.get("theme");
+        // const muiTheme = globals.get("muiTheme");
+        const theme = +globals.get("dark") == 0 ? 1 : 0;
         const lapsed = "10 sec";
         const color = muiTheme.palette.text.primary;
         const backgroundColor = muiTheme.palette.background.default;
         const linkColor = theme == 1 ? red[900] : red[200];
-        //	console.log({ color, muiTheme, site_name });
-        const onlineUsername = online.get("username");
-        const username = topic.get("username");
-        let article = topic.get("article");
-        let defaultDescription = topic.get("description");
-        let defaultImage_src = topic.get("image_src");
+
         let loadingChildDraft = context.get("loadingChildDraft");
         //console.log("qedit1 ", { body });
         if (typeof body === "string" || body instanceof String)
@@ -1264,7 +1264,7 @@ export class QwikieEditor extends Component {
                             </FormControl> : null}
                         </Collapse>
                     </div> : null}
-                    {stickie && newTabUrl ? <div className="q-edit-new-tab"><Link href={newTabUrl}>Edit in own context</Link></div> : null}
+                    {stickie && newTabUrl ? <div className="q-edit-new-tab"><Link route={newTabUrl}>Edit in own context</Link></div> : null}
 
                     {!loadingDraft && (description || open || stickie) ?
 
@@ -1450,11 +1450,10 @@ export class QwikieEditor extends Component {
                             </div>
                             <QwiketRenderer
                                 setLong={(val) => actions.updateOnlineState({ long: val }, true)}
-                                long={online.get("long")}
+                                long={user.get("long")}
                                 type="full"
                                 topic={preview}
-                                os={online}
-                                cs={cs}
+
                                 channel={channel}
                                 globals={globals}
                                 state={this.state}
@@ -1504,7 +1503,7 @@ export class QwikieEditor extends Component {
                 )}>
                 {open && (allowOpen || level == 0 || qedit) ? <div ><div className={width > 750 ? "q-editor-container" : "q-editor-container-small"}>{qEditor}</div></div> :
                     !allowOpen && false ? <div style={{ marginTop: 20, marginBottom: 20 }}>
-                        <Link to={level > 0 ? focusUrl : unfocusUrl}>
+                        <Link route={level > 0 ? focusUrl : unfocusUrl}>
                             <Textarea
                                 ref={(element) => { console.log("<><><><><>"); this.setLastBlockRef(element) }}
 
@@ -1562,7 +1561,7 @@ export class QwikieEditor extends Component {
                                     })
 
                                 }}
-                            /></Link></div> : null} {!open ? <Link to={level > 0 ? focusUrl : unfocusUrl}><div style={{ marginLeft: level == 0 ? 0 : 10, marginTop: width < 750 ? 4 : 10, marginBottom: width < 750 ? 4 : 10, display: 'flex', alignItems: 'center' }}>{qedit ? null : <img style={{ maxWidth: '20%', maxHeight: 36, marginLeft: 0, paddingTop: 0, marginRight: 6 }} src={avatar} />} <Textarea
+                            /></Link></div> : null} {!open ? <Link route={level > 0 ? focusUrl : unfocusUrl}><div style={{ marginLeft: level == 0 ? 0 : 10, marginTop: width < 750 ? 4 : 10, marginBottom: width < 750 ? 4 : 10, display: 'flex', alignItems: 'center' }}>{qedit ? null : <img style={{ maxWidth: '20%', maxHeight: 36, marginLeft: 0, paddingTop: 0, marginRight: 6 }} src={avatar} />} <Textarea
                                 style={{ maxWidth: 368 - 36 }}
                                 maxLength="3000"
                                 ref={this.setLastBlockRef}
@@ -1901,11 +1900,11 @@ export class QwikieEditor extends Component {
     }
 }
 function Qwikie(props) {
-    const { edit, topic, selected, online, cs, actions, unfocusUrl, focusUrl, test, setState, dropzone, state, globals, type, approver, loud, commentsOnly, topicOnly, level, channel, zoom } = props;
-    const onlineUsername = online.get("username");
+    const { edit, topic, selected, user, cs, actions, unfocusUrl, focusUrl, test, setState, dropzone, state, globals, type, approver, loud, commentsOnly, topicOnly, level, channel, zoom } = props;
+    const onlineUsername = user.get("username");
     const username = topic.get("username");
     const image_src = topic.get("image") ? topic.get("image") : topic.get("image_src");
-    console.log("QWIKIE", { edit, topic })
+    // console.log("QWIKIE", { edit, topic, user: user.toJS() })
     return (
         <div>
             {edit ? < QwikieEditor columnType="comment" qedit={true} {...props} />
@@ -1915,11 +1914,10 @@ function Qwikie(props) {
                         {(commentsOnly && level == 0) ? null : <div data-id="markdown2" className="q-qwiket-markdown" >
                             <QwiketRenderer
                                 setLong={(val) => actions.updateOnlineState({ long: val }, true)}
-                                long={online.get("long")}
+                                long={user.get("long")}
                                 type="comment"
                                 topic={topic}
-                                os={online}
-                                cs={cs}
+
                                 channel={channel}
                                 globals={globals}
                                 state={state}
@@ -1982,107 +1980,104 @@ export class QwiketComment extends Component {
     componentWillUnmount() {
         document.removeEventListener("keydown", this.escFunction, false);
     }
-    shouldComponentUpdate(nextProps, nextState) {
-        //console.log({props:this.props,nprops:nextProps})
-        //return nextProps!=this.props||(this.props.level==0&&this.state!=nextState);
-        //console.log("qq comment shouldComponentUpdate0");
-        const props = this.props;
-        const topic = props.topic;
-        const nextTopic = nextProps.topic;
-        const nextRootThreadid = nextTopic ? nextTopic.get("threadid") : 0;
-        const rootThreadid = topic ? topic.get("threadid") : 0;
-        const nextContext = nextProps.context;
-        const context = props.context;
-        const nextQwiketChildren = nextTopic ? nextTopic.get('qcChildren') : null;
-        //console.log("qq shouldComponentUpdate nextQwiketChildren=", nextQwiketChildren ? nextQwiketChildren.toJS() : 'none', { cqid: props.online ? props.online.get("cqid") : '', ncqid: nextProps.online ? nextProps.online.get("cqid") : '' });
-        const qwiketChildren = topic ? topic.get('qcChildren') : null;
-
-        let { qparams } = props;
-        let { qparams: nqParams } = nextProps;
-        const cqid = qparams ? qparams.cqid : 0;
-        const ncqid = nqParams ? nqParams.cqid : 0;
-        let level = nextProps.level;
-        if (rootThreadid != nextRootThreadid) {
-			/*if (level == 0) {
-				console.log("rootThreadid != nextRootThreadid", { rootThreadid, nextRootThreadid })
-				this.fetchContextComments(nextTopic);
-			}*/
-            return true;
-        }
-        if (cqid != ncqid) {
-			/*if (level == 0) {
-				console.log("should cqid exit", { cqid, ncqid })
-				this.fetchContextComments(nextTopic);
-			}*/
-            //console.log("CQID changed")
-            return true;
-        }
-
-        if (qwiketChildren != nextQwiketChildren) {
-            //console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
-            return true;
-        }
-        if (topic != nextTopic) {
-            //if (level == 0)
-            //	console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
-            return true;
-        }
-        if (context != nextContext) {
-            //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
-            return true;
-        }
-        if (this.state != nextState) {
-            if (this.state.dirty != nextState.dirty) {
-                //console.log("dirty changed")
-                return true;
-            }
-            if (this.state.lightbox != nextState.lightbox) {
-                //	console.log("lightbox changed")
-                return true;
-            }
-            if (this.state.edit != nextState.edit) {
-                //	console.log("edit changed")
-                return true;
-            }
-            if (this.state.commentMenuOpen != nextState.commentMenuOpen) {
-                //	console.log("commentMenuOpen changed")
-                return true;
-            }
-            if (this.state.firstVisibleId != nextState.firstVisibleId) {
-                //	console.log("firstVisibleId changed")
-                return true;
-            }
-
-            if (this.state.lastVisibleId != nextState.lastVisibleId) {
-                //	console.log("lastVisibleId changed")
-                return true;
-            }
-            if (this.state.postCount != nextState.postCount) {
-                //	console.log("preCount changed")
-                return true;
-            }
-            if (this.state.preCount != nextState.preCount) {
-                //	console.log("preCount changed")
-                return true;
-            }
-            if (this.state.long != nextState.long) {
-                //	console.log("long changed")
-                return true;
-            }
-
-        }
-        //console.log("qq shouldComponentUpdate nothing", { qwiketChildren: qwiketChildren ? qwiketChildren.toJS() : 'none', nextQwiketChildren: nextQwiketChildren ? nextQwiketChildren.toJS() : 'none' })
-        const ret = nextProps.params != props.params || props.session != nextProps.session || props.online != nextProps.online
-        return ret;
-    }
+    /*  shouldComponentUpdate(nextProps, nextState) {
+          //console.log({props:this.props,nprops:nextProps})
+          //return nextProps!=this.props||(this.props.level==0&&this.state!=nextState);
+          //console.log("qq comment shouldComponentUpdate0");
+          const props = this.props;
+          const topic = props.topic;
+          const nextTopic = nextProps.topic;
+          const nextRootThreadid = nextTopic ? nextTopic.get("qwiketid") : 0;
+          const rootThreadid = topic ? topic.get("qwiketid") : 0;
+          const nextContext = nextProps.context;
+          const context = props.context;
+          const user = props.user;
+          const nextUser = nextProps.user;
+          const nextQwiketChildren = nextTopic ? nextTopic.get('qcChildren') : null;
+          //console.log("qq shouldComponentUpdate nextQwiketChildren=", nextQwiketChildren ? nextQwiketChildren.toJS() : 'none', { cqid: props.online ? props.online.get("cqid") : '', ncqid: nextProps.online ? nextProps.online.get("cqid") : '' });
+          const qwiketChildren = topic ? topic.get('qcChildren') : null;
+  
+          let { qparams } = props;
+          let { qparams: nqParams } = nextProps;
+          const cqid = qparams ? qparams.cqid : 0;
+          const ncqid = nqParams ? nqParams.cqid : 0;
+          let level = nextProps.level;
+          if (rootThreadid != nextRootThreadid) {
+      	
+              return true;
+          }
+          if (cqid != ncqid) {
+      	
+              //console.log("CQID changed")
+              return true;
+          }
+  
+          if (qwiketChildren != nextQwiketChildren) {
+              //console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+              return true;
+          }
+          if (topic != nextTopic) {
+              //if (level == 0)
+              //	console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+              return true;
+          }
+          if (context != nextContext) {
+              //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+              return true;
+          }
+          if (user != nextUser) {
+              //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+              return true;
+          }
+          if (this.state != nextState) {
+              if (this.state.dirty != nextState.dirty) {
+                  //console.log("dirty changed")
+                  return true;
+              }
+              if (this.state.lightbox != nextState.lightbox) {
+                  //	console.log("lightbox changed")
+                  return true;
+              }
+              if (this.state.edit != nextState.edit) {
+                  //	console.log("edit changed")
+                  return true;
+              }
+              if (this.state.commentMenuOpen != nextState.commentMenuOpen) {
+                  //	console.log("commentMenuOpen changed")
+                  return true;
+              }
+              if (this.state.firstVisibleId != nextState.firstVisibleId) {
+                  //	console.log("firstVisibleId changed")
+                  return true;
+              }
+  
+              if (this.state.lastVisibleId != nextState.lastVisibleId) {
+                  //	console.log("lastVisibleId changed")
+                  return true;
+              }
+              if (this.state.postCount != nextState.postCount) {
+                  //	console.log("preCount changed")
+                  return true;
+              }
+              if (this.state.preCount != nextState.preCount) {
+                  //	console.log("preCount changed")
+                  return true;
+              }
+  
+  
+          }
+          //console.log("qq shouldComponentUpdate nothing", { qwiketChildren: qwiketChildren ? qwiketChildren.toJS() : 'none', nextQwiketChildren: nextQwiketChildren ? nextQwiketChildren.toJS() : 'none' })
+          const ret = nextProps.params != props.params || props.session != nextProps.session || props.user != nextProps.user
+          return ret;
+      }*/
     componentDidUpdate(prevProps) {
         // Typical usage (don't forget to compare props):
         const props = this.props;
         const { topic, level, actions, channel, qparams, context, commentsOnly } = props;
         if (!level && topic && (topic !== prevProps.topic)) {
-            const rootThreadid = topic.get("threadid");
+            const rootThreadid = topic.get("qwiketid");
 
-            if (level == 0 && commentsOnly && (rootThreadid != prevProps.topic.get("threadid"))) {
+            if (level == 0 && commentsOnly && (rootThreadid != prevProps.topic.get("qwiketid"))) {
                 //console.log("componentDidUpdate", { rootThreadid, fetched: this.fetched })
                 //if (!this.fetched) {
                 //	this.fetched = true;
@@ -2117,14 +2112,14 @@ export class QwiketComment extends Component {
         const props = this.props;
         let { qparams, topic, level, commentsOnly, actions } = props;
         const cqid = qparams.cqid;
-        const threadid = topic ? topic.get("threadid") : null;
+        const qwiketid = topic ? topic.get("qwiketid") : null;
 
         if (level == 0 && cqid && commentsOnly) {
             //console.log("componentDidMount 1")
             this.fetchContextComments(topic);
         }
         else {
-            if (!cqid && level == 0 && threadid && commentsOnly) {
+            if (!cqid && level == 0 && qwiketid && commentsOnly) {
                 //console.log("componentDidMount 2")
                 this.fetchContextComments(topic);
             }
@@ -2132,7 +2127,7 @@ export class QwiketComment extends Component {
 
         document.addEventListener("keydown", this.escFunction, false);
         //console.log("cqid>:",{cqid,threadid})s
-        if (cqid && cqid == threadid && this.myRef.current) {
+        if (cqid && cqid == qwiketid && this.myRef.current) {
             //console.log("CQID> ref", { top: this.myRef.current.offsetTop, ref: this.myRef.current });
 
             setTimeout(() => { if (this.myRef.current) this.myRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' }) }, 1000);
@@ -2198,7 +2193,7 @@ export class QwiketComment extends Component {
             rootId = pageRootThreadid;
             let qcComments = context.get('topic') ? context.get('topic').get("qcComments") : new Immutable.Map({});
             const first = qcComments ? qcComments.first() : new Immutable.Map({});
-            firstId = first ? first.get("threadid") : "";
+            firstId = first ? first.get("qwiketid") : "";
             //console.log("FETCHING NEW COMMENTS with *NO& rootId", { topic: topic.toJS() })
             nodes = topic.get("nodes");
         }
@@ -2220,7 +2215,7 @@ export class QwiketComment extends Component {
         actions.fetchComments(request);
     }
     fetchContextComments(topic) {
-        const { channel, test, actions, pageRootThreadid, context, qparams, online } = this.props;
+        const { channel, test, actions, pageRootThreadid, context, qparams, user } = this.props;
         let rootId = topic.get('rootId');
         let cqid = qparams.cqid;
         if (test && !cqid && online)
@@ -2232,7 +2227,7 @@ export class QwiketComment extends Component {
             rootId = pageRootThreadid;
             let qcComments = context.get('topic') ? context.get('topic').get("qcComments") : new Immutable.Map({});
             const first = qcComments ? qcComments.first() : new Immutable.Map({});
-            firstId = first ? first.get("threadid") : "";
+            firstId = first ? first.get("qwiketid") : "";
             //console.log("FETCHING NEW COMMENTS with *NO& rootId", { topic: topic.toJS() })
             nodes = topic.get("nodes");
         }
@@ -2258,16 +2253,16 @@ export class QwiketComment extends Component {
 
     render() {
         let {
-		/*passed:*/		replyTo, replyToUsername, parentSelected, topic, channel, qparams: params, updateQwiketState, zoom, test, renderCallback, topicOnly, commentsOnly,
-		/*bound: */		showQwiket, context, globals, session, cs, online, level, pageRootThreadid,
+		/*passed:*/		replyTo, theme: muiTheme, replyToUsername, parentSelected, topic, channel, qparams: params, updateQwiketState, zoom, test, renderCallback, topicOnly, commentsOnly, level, pageRootThreadid,
+		/*bound: */		showQwiket, context, globals, session, user,
             actions, /*bound actions*/
             ...rest /* styles */
         } = this.props;
 
-        const muiTheme = globals.get("muiTheme");
+        //  const muiTheme = useTheme();
         const width = u.width(globals);
         let loud = width > 900 ? (+session.get("loud")) : 1;
-        const userEntities = online.get("userEntities");
+        const userEntities = user.get("userEntities");
         const backgroundColor = muiTheme.palette.background.default;
         //console.log({ muiTheme });
         const color = muiTheme.palette.text.primary;
@@ -2282,17 +2277,19 @@ export class QwiketComment extends Component {
         let route = params.route;
 
         //console.log({ params })
-        if (test && !cqid && online)
-            cqid = online.get("cqid");
+        // if (test && !cqid && user)
+        //     cqid = user.get("cqid");
         //console.log("comment:", { cqid })
-        pageRootThreadid = pageRootThreadid ? pageRootThreadid : topic ? topic.get('threadid') : 0;
+        pageRootThreadid = pageRootThreadid ? pageRootThreadid : topic ? topic.get('qwiketid') : 0;
         if (level == 0)
             renderCallback = this.renderCallback.bind(this);
 
-        let qwiketid = topic.get("threadid");
+        let qwiketid = topic.get("qwiketid");
         let open = qwiketid == context.get('openEditor') ? true : false;
+        console.log("************************************>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", { open, qwiketid, openEditor: context.get('openEditor') })
         if (level == 0 && open)
             edit = true;
+
         if (!qwiketid) {
             edit = true;
             open = true;
@@ -2303,7 +2300,7 @@ export class QwiketComment extends Component {
         //console.log("APPROVER:", { approver, entity, userEntities: userEntities ? userEntities.toJS() : '' });
         if (!qwiketid)
             edit = true;
-        console.log("MAIN RENDERw", { edit, level, qwiketid, openEditor: context.get("openEditor") })
+        //  console.log("MAIN RENDERw", { edit, level, qwiketid, openEditor: context.get("openEditor") })
 
         //if(level==0)
         //console.log({ commentMenuOpen, level, dirty })
@@ -2313,7 +2310,7 @@ export class QwiketComment extends Component {
 
             return null;
         }
-        const rootThreadid = topic ? topic.get('threadid') : 0;
+        const rootThreadid = topic ? topic.get('qwiketid') : 0;
         let reshare = +topic.get("reshare");
 
         const focusUrl = [109, 9, 59].indexOf(reshare) < 0 ? level == 0 ? `/context/channel/${channel}/topic/${pageRootThreadid}` : `/context/channel/${channel}/topic/${pageRootThreadid}/q/${rootThreadid}` : `/context/channel/${channel}/topic/${qwiketid}`;
@@ -2399,11 +2396,11 @@ export class QwiketComment extends Component {
         const author = topic.get("author")// ? topic.get("author") : topic.get("s_un");
         const cat = topic.get("site_name") ? topic.get("site_name") : topic.get("cat");
         const username = topic.get("username");
-        const onlineUsername = online.get("userName");
+        const onlineUsername = user.get("username");
         const user_name = topic.get("s_un");
         const image = topic.get("image");
-        const avatar = topic.get("catIcon") ? topic.get("catIcon") : online.get("avatar");
-        const onlineAvatar = online.get("avatar");
+        const avatar = topic.get("catIcon") ? topic.get("catIcon") : user.get("avatar");
+        const onlineAvatar = user.get("avatar");
         const shaded = topic.get("shaded");
         const lastId = context.get("topic").get("lastId");
         const newFlag = topic.get("new");
@@ -2449,8 +2446,8 @@ export class QwiketComment extends Component {
         const buttonColor = theme ? blue[600] : blue[100];
         let rootTargetLink = `/context${ch}/topic/${pageRootThreadid}`;
         //let selectLink = `/context${ch}/topic/${pageRootThreadid}/q/` + topic.get("threadid");
-        const replyLink = rootTargetLink + '/qedit/__new/' + pageRootThreadid + '/' + topic.get("threadid");
-        const stickyLink = `/context${ch}/topic/${topic.get("threadid")}`;
+        const replyLink = rootTargetLink + '/qedit/__new/' + pageRootThreadid + '/' + topic.get("qwiketid");
+        const stickyLink = `/context${ch}/topic/${topic.get("qwiketid")}`;
         //console.log("qq replyLink4:", replyLink);
         const likeLink = "";
         const flagLink = "";
@@ -2462,7 +2459,7 @@ export class QwiketComment extends Component {
         if (!topicOnly)
             myChildren ? myChildren.forEach((o, i) => {
                 //console.log("qq myChidren.forEach", { o: o ? o.toJS() : o, i })
-                if (cqid == o.get('threadid'))
+                if (cqid == o.get('qwiketid'))
                     parent = true;
                 if (!o)
                     return;
@@ -2488,7 +2485,7 @@ export class QwiketComment extends Component {
                 }
                 else {
                     //	console.log("CQID", { cqid, threadid: o.get("threadid") })
-                    if (cqid == o.get('threadid'))
+                    if (cqid == o.get('qwiketids'))
                         chiRows.push(<BoundQwiketComment level={level + 1}
                             topic={o}
                             pageRootThreadid={pageRootThreadid}
@@ -2615,8 +2612,7 @@ export class QwiketComment extends Component {
                                                                         context={context}
                                                                         dq={reshare == 6 || reshare == 56 || reshare == 106}
                                                                         stickie={stickie}
-                                                                        online={online}
-                                                                        cs={cs}
+
                                                                         actions={actions}
                                                                         channel={channel}
                                                                         selected={selected}
@@ -2690,7 +2686,7 @@ export class QwiketComment extends Component {
                                                                                                 onClose={() => this.setState({ commentMenuOpen: false })}
                                                                                             >
                                                                                                 {approver || (username == onlineUsername) ? <MenuItem classes={{ root: 'q-comment-action-menu-item' }} onClick={() => {
-                                                                                                    console.log("SELECT EDIT")
+                                                                                                    console.log("D17 SELECT EDIT")
                                                                                                     this.setState({ commentMenuOpen: false, edit: true });
                                                                                                     //Router.replace(editRoute);
                                                                                                     actions.updateOnlineState({ cqid: qwiketid }, true);
@@ -2766,7 +2762,7 @@ export class QwiketComment extends Component {
                                                                                 </div> : null}
                                                                             </div> : null}
                                                                             {stickie && level > 0 ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 32, marginBottom: 0, marginTop: 8 }}>
-                                                                                <Link href={focusUrl}><a href={focusUrl}><img className="q-comment-sticky-logo" src="/static/css/blue-bell.png" /></a> </Link>
+                                                                                <Link route={focusUrl}><a href={focusUrl}><img className="q-comment-sticky-logo" src="/static/css/blue-bell.png" /></a> </Link>
 
                                                                             </div> : null}
 
@@ -2841,8 +2837,7 @@ export class QwiketComment extends Component {
                     context={context}
                     dq={reshare == 6 || reshare == 56 || reshare == 106}
                     stickie={reshare == 9 || reshare == 59 || reshare == 109}
-                    online={online}
-                    cs={cs}
+
                     actions={actions}
                     channel={channel}
                     selected={selected}
@@ -2879,8 +2874,6 @@ export class QwiketComment extends Component {
                     context={context}
                     dq={reshare == 6 || reshare == 56 || reshare == 106}
                     stickie={reshare == 9 || reshare == 59 || reshare == 109}
-                    online={online}
-                    cs={cs}
                     actions={actions}
                     channel={channel}
                     selected={true}
@@ -3255,18 +3248,16 @@ QwiketComment.propTypes = {
     level: PropTypes.number.isRequired,
     topic: PropTypes.object.isRequired,
     updateQwiketState: PropTypes.func.isRequired, //(xid,updatePOJSO)
-    requestIcon: PropTypes.func.isRequired,
+
     globals: PropTypes.object.isRequired,
-    online: PropTypes.object.isRequired,
+
     baseThreadid: PropTypes.string,
     rootThreadid: PropTypes.string,
     channel: PropTypes.string,
     columnType: PropTypes.string, 				//feed,story-qwikets, disq-tids,sticky-qwikets,story-stickies,comments,newsline,context
-    showQwiket: PropTypes.object,
     forceShow: PropTypes.bool,
     qparams: PropTypes.object,
-    showQwiket: PropTypes.object,
-    invalidateContext: PropTypes.func.isRequired,
+
 };
 
 
@@ -3277,25 +3268,23 @@ QwiketComment.propTypes = {
 function mapStateToProps(state) {
     return {
         context: state.context,
-        session: state.app.get("session"),
-        cs: state.app.get("community"),
-        online: state.app ? state.app.get("online") : new Immutable.Map({}),
-        globals: state.app.get("globals"),
-        app: state.app,
-        newslineMaskMap: state.app.get("newslineMaskMap"),
-        showQwiket: state.context.get("showQwiket"),
+        session: state.session,
+        globals: state.session,
+        user: state.user,
+        app: state.app
 
     };
 }
 function mapDispatchToProps(dispatch) {
     return {
         actions: bindActionCreators({
-            updateOpenEditor, fetchDraftQwiket, unshareNewslineQwiket, localUpdateQwiket, createQwiket, saveQwiket, publishQwiket, updateOnlineState, fetchComments: debounce(fetchComments, 1000, { trailing: false, leading: true }), unpublishQwiket, itemAction, fetchShowQwiket, invalidateContext, requestIcon
+            updateOpenEditor, fetchDraftQwiket, unshareNewslineQwiket, localUpdateQwiket, saveQwiket, publishQwiket, updateOnlineState, fetchComments: debounce(fetchComments, 1000, { trailing: false, leading: true }), unpublishQwiket, fetchShowQwiket,
         }, dispatch)
     }
 }
-
+QwiketComment = withTheme(QwiketComment)
+QwikieEditor = withTheme(QwikieEditor)
 const BoundQwiketComment = connect(mapStateToProps, mapDispatchToProps)(QwiketComment);
 QwiketComment = connect(mapStateToProps, mapDispatchToProps)(QwiketComment);
-
-QwikieEditor = withRouter(QwikieEditor);
+Qwikie = connect(mapStateToProps, mapDispatchToProps)(Qwikie);
+QwikieEditor = connect(mapStateToProps, mapDispatchToProps)(QwikieEditor);

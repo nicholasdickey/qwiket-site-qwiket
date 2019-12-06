@@ -1,5 +1,6 @@
 // server.js
-
+require("regenerator-runtime");
+require("regenerator-runtime/runtime");
 require = require("esm")(module/*, options*/)
 var favicon = require('serve-favicon');
 
@@ -92,6 +93,63 @@ var optionsApi = {
     },
 };
 
+var loginApi = {
+    target: url, // target host
+    //  logLevel: 'debug',
+
+    onError(err, req, res) {
+        console.log("ERROR", { url, err })
+        res.writeHead(500, {
+            'Content-Type': 'text/plain'
+        });
+        res.end(
+            'Something went wrong. And we are reporting a custom error message.' + err
+        );
+    },
+    pathRewrite: function (path, req) {
+        let newPath = path;
+        newPath = newPath.replace(/robots.txt/g, 'api?task=robots');
+        newPath = newPath.replace(/sitemap.txt/, 'api?task=sitemap2');
+
+        newPath = newPath.replace(/\bipn\b/, 'server/ipn.php?prod=1');
+        newPath = newPath.replace(/\bipndev\b/, 'server/ipn.php?prod=0');
+
+        if (newPath.indexOf("/sitemaps/") === 0)
+            newPath = '/api?task=sitemap&name=req.params.name';
+        else
+            if (newPath.indexOf("/dl/") === 0)
+                newPath = '/server/dl.php?image=req.params.filename';
+
+        if (newPath.indexOf("ssr") < 0) {
+            let { host, ip, ua, pxid, anon } = ssrParams(req);
+
+
+            newPath = updateQueryStringParameter(newPath, 'host', host);
+            newPath = updateQueryStringParameter(newPath, 'xip', ip);
+            newPath = updateQueryStringParameter(newPath, 'ua', ua);
+            newPath = updateQueryStringParameter(newPath, 'pxid', pxid);
+            newPath = updateQueryStringParameter(newPath, 'anon', anon);
+            // console.log(chalk.green("PROXY API:"), { url: newPath });
+        }
+        else {
+            //  console.log(chalk.blue("SSR PROXY API:"), { url: newPath });
+
+        }
+        return newPath;
+    },
+    /*
+     let json = await response.json();
+
+        console.log("Return:", json)
+        if (json.success) {
+            const redirect = json.redirect;
+            console.log(chalk.red.bold("Login redirect: "), redirect)
+            return res.redirect(redirect);
+        }
+        else {
+            return res.status(500).json(json);
+        }*/
+};
 console.log("call prepare")
 app.prepare().then(() => {
     console.log("prepare")
@@ -114,6 +172,60 @@ app.prepare().then(() => {
 
     var apiProxy = proxy(optionsApi);
     server.use("/robots.txt", apiProxy);
+    server.use('/disqus-login', async (req, res) => {
+        let { host, ip, ua, pxid, anon } = ssrParams(req);
+
+        let u = `${url}/disqus-login?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
+        console.log(chalk.red.bold("LOGIN API URL:"), u)
+        let response = await fetch(u, {
+            credentials: 'same-origin'
+        })
+        let json = await response.json();
+
+        console.log("Return:", json)
+        if (json.success) {
+            const redirect = json.redirect;
+            console.log(chalk.red.bold("Login redirect: "), redirect)
+            return res.redirect(redirect);
+        }
+        else {
+            return res.status(500).json(json);
+
+        }
+    });
+    server.get('/disqus-logout', async (req, res) => {
+        let { host, ip, ua, pxid, anon } = ssrParams(req);
+        let channel = req.query.channel;
+        let u = `${url}/qapi/user/disqus-logout?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
+        console.log(chalk.red.bold("LOGOUT API URL:"), u)
+        console.log(chalk.red.bold("CHANNELL:"), channel, host)
+        let response = await fetch(u, {
+            credentials: 'same-origin'
+        })
+        let json = await response.json();
+
+        console.log("Return:", json)
+        if (json.cookie) {
+
+            const identity = json.cookie.identity;
+            const anon = json.cookie.anon;
+            const maxAge = 24 * 3600 * 30 * 1000 * 100;
+            res.cookie('_ga', 'GA1.2.' + identity, { maxAge, sameSite: 'Lax' });
+            res.cookie('qid', identity, { maxAge, sameSite: 'Lax' });
+            res.cookie('identity', identity, { maxAge, sameSite: 'Lax' });
+            res.cookie('anon', anon, { maxAge, sameSite: 'Lax' });
+            server.get('/channel/:channel', (req, res) => {
+                const actualPage = '/channel'
+                const queryParams = { route: 'channel', channel: req.params.channel }
+                app.render(req, res, actualPage, queryParams)
+            })
+            // return res.redirect(`${host}:/channel/${channel}`);
+        }
+        else {
+            return res.status(500).json(json);
+
+        }
+    });
 
     server.use("/jsapi/?*", apiProxy);
     server.use("/api/?*", apiProxy);
@@ -124,10 +236,144 @@ app.prepare().then(() => {
     // server.use("/sitemaps/:name/?*", apiProxy);
     server.use("/dl/:filename?*", apiProxy);
     server.use('/cdn', apiProxy);
-    server.use('/login', apiProxy);
-    server.use('/logout', apiProxy);
+
+
     server.use('/upload', apiProxy)
 
+    server.get('/channel/:channel', async (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'channel', channel: req.params.channel, sel: 'newsline' }
+        let logout = req.query.logout;
+        if (logout) {
+            let { host, ip, ua, pxid, anon } = ssrParams(req);
+
+            let u = `${url}/qapi/user/disqus-logout?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
+            console.log(chalk.red.bold("LOGOUT API URL:"), u)
+            // console.log(chalk.red.bold("CHANNELL:"), req.params.channel, host)
+            let response = await fetch(u, {
+                credentials: 'same-origin'
+            })
+            let json = await response.json();
+
+            console.log("Return:", json)
+            if (json.cookie) {
+                const identity = json.cookie.identity;
+                const anon = json.cookie.anon;
+                const maxAge = 24 * 3600 * 30 * 1000 * 100;
+                res.cookie('_ga', 'GA1.2.' + identity, { maxAge, sameSite: 'Lax' });
+                res.cookie('qid', identity, { maxAge, sameSite: 'Lax' });
+                res.cookie('identity', identity, { maxAge, sameSite: 'Lax' });
+                res.cookie('anon', anon, { maxAge, sameSite: 'Lax' });
+                req.cookies['identity'] = identity;
+                req.cookies['anon'] = anon;
+
+                // return res.redirect(`${host}:/channel/${channel}`);
+            }
+            else {
+                return res.status(500).json(json);
+
+            }
+        }
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/channel/:channel/find', (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'channel', channel: req.params.channel, find: 1, sel: 'newsline' }
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/channel/:channel/qshow/:rootThreadid/:qwiketid', (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'qshow', channel: req.params.channel, rootThreadid: req.params.rootThreadid, qwiketid: req.params.qwiketid, sel: 'newsline' }
+        console.log("QSHOW ======== --------------   >>>>>>>>>", queryParams)
+        app.render(req, res, actualPage, queryParams)
+    })
+
+    server.get('/context/channel/:channel/rediro/topic/:threadid/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+
+    server.get('/context/rediro/topic/:threadid/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/rediro/topic/:threadid/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/context/channel/:channel/topic/:threadid/?*', (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'context' }
+        // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
+        app.render(req, res, actualPage, queryParams)
+    })
+    /*
+    server.get('/context/channel/:channel/topic/:threadid/tag/:shortname', (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'context', qwiketid: req.params.threadid, channel: req.params.channel, sel: 'context', shortname: req.params.shortname }
+        // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/context/channel/:channel/topic/:threadid/tag/:shortname/cc/:cc', (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'context', qwiketid: req.params.threadid, channel: req.params.channel, sel: 'context', cc: req.params.cc, shortname: req.params.shortname }
+        // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/context/channel/:channel/topic/:threadid/cc/:cc', (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'context', qwiketid: req.params.threadid, channel: req.params.channel, sel: 'context', cc: req.params.cc }
+        // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
+        app.render(req, res, actualPage, queryParams)
+    })
+
+    server.get('/context/channel/:channel/topic/:threadid', (req, res) => {
+        const actualPage = '/channel'
+        const queryParams = { route: 'context', qwiketid: req.params.threadid, channel: req.params.channel, sel: 'context' }
+        // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
+        app.render(req, res, actualPage, queryParams)
+    })
+    */
+    server.get('/home/:shortname/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+
+    server.get('/channel/:channel/home:shortname/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/context/topic/:threadid/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/context/topic/:shortname/url/:url/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+    server.get('/context/channel/:channel/topic/:shortname/url/:url/?*', (req, res) => {
+        const actualPage = '/context'
+        const queryParams = { route: 'valid', sel: 'context' }
+        app.render(req, res, actualPage, queryParams)
+    })
+
+
+
+    //  .add('qview', '/qview/:rootThreadid/:qwiketid/(.*)?', 'dest')
+    // .add('cc', '/cc/:cc/(.*)?', 'dest')
+    /* server.get('/channel/:channel/?*', (req, res) => {
+         const actualPage = '/channel'
+         const queryParams = { route: 'valid' }
+         // console.log("NEWSLINE ======== --------------   >>>>>>>>>", queryParams)
+         app.render(req, res, actualPage, queryParams)
+     })*/
     server.use("/get-session", async (req, res) => {
         var session = initSession(req);
         let r = {};
@@ -161,6 +407,13 @@ app.prepare().then(() => {
         server.get(path, function (req, res) {
             handle(req, res)
         })
+    })
+    server.get('/', (req, res) => {
+        let { code, appid } = req.query;
+
+        const actualPage = '/channel'
+        const queryParams = { route: 'default', channel: 'landing', code, appid }
+        app.render(req, res, actualPage, queryParams)
     })
     server.get('*', (req, res) => {
         // console.log("APP request headers:", req.headers)

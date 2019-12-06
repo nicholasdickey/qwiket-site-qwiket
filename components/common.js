@@ -11,12 +11,13 @@ import Typography from '@material-ui/core/Typography';
 import { updateSession, checkAlerts, onlineCount } from '../qwiket-lib/actions/app'
 import { fetchShowQwiket } from '../qwiket-lib/actions/context'
 import { fetchComments } from '../qwiket-lib/actions/comments'
-import { fetchNotifications } from '../qwiket-lib/actions/queues'
-
+import { fetchNotifications } from '../qwiket-lib/actions/queue'
+import u from '../qwiket-lib/lib/utils'
 import Topline from './topline';
 import { Layout, InnerGrid } from '../qwiket-lib/components/layout';
 import QwiketView from '../components/qwikets/qwiketView'
 import Header from './header'
+import LayoutView from './layoutView'
 
 export class Common extends React.Component {
     constructor(props, context) {
@@ -75,11 +76,13 @@ export class Common extends React.Component {
         }
     }
     componentDidMount() {
+        console.log("componentDidMount")
         //window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 1000, { 'leading': true, 'trailing': false, 'maxWait': 1000 }));
         window.goBack = false;
         // this.updateDimensions();
         const props = this.props;
-        const { sel, actions, path, router, app, user } = props;
+        const { actions, path, router, app, user, qparams } = props;
+        let { sel } = qparams;
         let alerts = app.get("alerts");
         let username = user.get("username")
 
@@ -118,14 +121,19 @@ export class Common extends React.Component {
 
         if (Root.__CLIENT__) {
             //console.log("GA:", path);
-            ga('set', 'page', path);
-            ga('send', 'pageview');
+            Root.__WEB__ = true;
+
+            if (typeof ga !== 'undefined') {
+                ga('set', 'page', path);
+                ga('send', 'pageview');
+            }
             this.lazyLoadInstance = new LazyLoad({
                 elements_selector: ".lazyload"
                 // ... more custom settings?
             });
 
         }
+
         // console.log("common did mount")
 
     }
@@ -184,6 +192,9 @@ export class Common extends React.Component {
     }
     render() {
         const { app, qparams, context, user } = this.props;
+        let pageType = qparams.sel ? qparams.sel : "newsline";
+
+        // console.log({ user: user.toJS() })
         /* let qwiket = Immutable.fromJS({
              title: 'Test Title',
              description: "Test Description",
@@ -214,6 +225,8 @@ export class Common extends React.Component {
         display:flex;
         flex-direction:column;
         align-items:center;
+        opacity:${user.get("mask") ? 0.5 : 1.0};
+      
        `;
         const QwiketViewWrap = styled.div`
             width:20%;
@@ -225,17 +238,18 @@ export class Common extends React.Component {
                             <QwiketViewWrap>
                                 <QwiketView qwiket={qwiket} qparams={qparams} />
                             </QwiketViewWrap>*/
+        /*
+        <Typography variant="subtitile2" gutterBottom>CHANNEL: {app.get('channel').get('channelDetails').get('name')}</Typography>*/
         const InnerWrapper = ({ layout }) => <div>
             <Topline layout={layout} />
             <InnerGrid layout={layout}>
                 <PageWrap>
-                    <Header pageType="context" layout={layout} />
-
-
+                    <Header pageType={pageType} layout={layout} qparams={qparams} />
+                    <LayoutView pageType={pageType} layout={layout} qparams={qparams} />
                 </PageWrap>
             </InnerGrid>
         </div>;
-        return <div> <Typography variant="subtitile2" gutterBottom>CHANNEL: {app.get('channel').get('channelDetails').get('name')}</Typography><Layout pageType="context">
+        return <div> <Layout pageType={pageType}>
             <InnerWrapper /></Layout></div>
     }
 }

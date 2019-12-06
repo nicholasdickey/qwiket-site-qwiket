@@ -6,7 +6,7 @@ import $ from "jquery";
 import PropTypes from "prop-types";
 import { withTheme } from '@material-ui/core/styles';
 import Immutable from "immutable";
-import Router from "next/router";
+
 import ReactHoverObserver from "react-hover-observer";
 import Tooltip from "@material-ui/core/Tooltip";
 //MaterialUI:
@@ -55,7 +55,8 @@ import blueGrey from "@material-ui/core/colors/blueGrey";
 import blue from "@material-ui/core/colors/blue";
 
 import MediaQuery from "react-responsive";
-import Link, { MaskedLink, linkPush } from "../../qwiket-lib/components/link";
+import { ssRoutes } from '../../qwiket-lib/routes'
+let { Link, Router } = ssRoutes;
 import u from "../../qwiket-lib/lib/utils";
 import Root from "window-or-global";
 
@@ -422,9 +423,11 @@ export class QwiketFamily extends Component {
         const state = this.state;
         if (!meta) {
             if (parents) {
-                //console.log("QGBG Qwiket:: add parent row")
+                // console.log("QGBG Qwiket:: add parent row", datum)
                 const parentRows = parents.map((datum, i) => {
-          /*console.log("QGBG map parent",i);*/ if (!datum) return null;
+                    if (!datum) return null;
+                    // console.log("QGBG map parent", i, datum.toJS());
+
                     //return <SubQwiket test={test} updateOnlineState={updateOnlineState} itemAction={itemAction} unpublishQwiket={unpublishQwiket} long={state.long} doLong={update.bind(this)} key={"subqwiket-parents" + i} datum={datum} inShow={inShow} channel={channel} globals={globals} session={session} history={history} approver={approver} zoom={zoom} /> })
                     return (
                         <div onClick={datum.get("onClick")}><QwiketRenderer
@@ -447,14 +450,14 @@ export class QwiketFamily extends Component {
                             link={datum.get("link")}
                             onClick={datum.get("onClick")}
                             setLong={val => updateOnlineState({ long: val }, true)}
-                            long={online.get("long")}
+                            long={state.long}
                             qwiketOpened={qwiketOpened}
                             type={columnType}
 
                         /></div>
                     );
                 });
-
+                // console.log("after map --->>")
                 rows = rows.concat(parentRows);
             }
             /*	const levelRow = <SubQwiket test={test} updateOnlineState={updateOnlineState} itemAction={itemAction} unpublishQwiket={unpublishQwiket} long={state.long} doLong={update.bind(this)}
@@ -493,7 +496,7 @@ export class QwiketFamily extends Component {
                     link={level.get("link")}
                     onClick={level.get("onClick")}
                     setLong={val => updateOnlineState({ long: val }, true)}
-                    long={online.get("long")}
+                    long={this.state.long}
                     qwiketOpened={qwiketOpened}
                     type={columnType}
                 />
@@ -696,7 +699,7 @@ export class QwiketFamily extends Component {
                                     <div data-id="w1">
                                         <ReactHoverObserver>
                                             {({ isHovering }) => (
-                                                <Link data-id="dots-link" to={levelLink}>
+                                                <a><Link data-id="dots-link" route={levelLink}>
                                                     <div
                                                         style={{
                                                             fontSize: "1.0rem",
@@ -714,7 +717,7 @@ export class QwiketFamily extends Component {
                                                                 <Dots style={{ color: textColor, height: 24 }} />
                                                             )}
                                                     </div>
-                                                </Link>
+                                                </Link></a>
                                             )}
                                         </ReactHoverObserver>
                                     </div>
@@ -784,7 +787,7 @@ export class QwiketFamily extends Component {
                                                                                 }}
                                                                             />
                                                                         ) : (
-                                                                                <Link data-id="dots-link" to={levelLink}>
+                                                                                <Link data-id="dots-link" route={levelLink}>
                                                                                     <Comment
                                                                                         style={{
                                                                                             height: 16,
@@ -958,12 +961,13 @@ export class QwiketFamily extends Component {
                 <style global jsx>{`
 			
 			
-			 .q-inner-qwiket{
-                overflow:hidden;
-                padding-left:4px;
-                padding-right:4px;
-                
-            }
+                .q-inner-qwiket{
+                    overflow:hidden;
+                    padding-left:4px;
+                    padding-right:4px;
+                    text-decoration:none;
+                }
+               
 				.zoom-wrapper{
 					width:100%;
 					display:flex;
