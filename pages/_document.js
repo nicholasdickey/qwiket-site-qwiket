@@ -1,11 +1,11 @@
-
+import "core-js";
+import regeneratorRuntime from "regenerator-runtime";
 import React from 'react';
 import Document, { Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheet } from 'styled-components'
 import { ServerStyleSheets } from '@material-ui/styles';
 import theme from '../views/theme';
-import "core-js";
-import regeneratorRuntime from "regenerator-runtime";
+
 class MyDocument extends Document {
     static async getInitialProps(ctx) {
         const styledComponentsSheet = new ServerStyleSheet()
