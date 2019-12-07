@@ -1982,96 +1982,96 @@ export class QwiketComment extends Component {
     componentWillUnmount() {
         document.removeEventListener("keydown", this.escFunction, false);
     }
-    /*  shouldComponentUpdate(nextProps, nextState) {
-          //console.log({props:this.props,nprops:nextProps})
-          //return nextProps!=this.props||(this.props.level==0&&this.state!=nextState);
-          //console.log("qq comment shouldComponentUpdate0");
-          const props = this.props;
-          const topic = props.topic;
-          const nextTopic = nextProps.topic;
-          const nextRootThreadid = nextTopic ? nextTopic.get("qwiketid") : 0;
-          const rootThreadid = topic ? topic.get("qwiketid") : 0;
-          const nextContext = nextProps.context;
-          const context = props.context;
-          const user = props.user;
-          const nextUser = nextProps.user;
-          const nextQwiketChildren = nextTopic ? nextTopic.get('qcChildren') : null;
-          //console.log("qq shouldComponentUpdate nextQwiketChildren=", nextQwiketChildren ? nextQwiketChildren.toJS() : 'none', { cqid: props.online ? props.online.get("cqid") : '', ncqid: nextProps.online ? nextProps.online.get("cqid") : '' });
-          const qwiketChildren = topic ? topic.get('qcChildren') : null;
-  
-          let { qparams } = props;
-          let { qparams: nqParams } = nextProps;
-          const cqid = qparams ? qparams.cqid : 0;
-          const ncqid = nqParams ? nqParams.cqid : 0;
-          let level = nextProps.level;
-          if (rootThreadid != nextRootThreadid) {
-      	
-              return true;
-          }
-          if (cqid != ncqid) {
-      	
-              //console.log("CQID changed")
-              return true;
-          }
-  
-          if (qwiketChildren != nextQwiketChildren) {
-              //console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
-              return true;
-          }
-          if (topic != nextTopic) {
-              //if (level == 0)
-              //	console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
-              return true;
-          }
-          if (context != nextContext) {
+    shouldComponentUpdate(nextProps, nextState) {
+        //console.log({props:this.props,nprops:nextProps})
+        //return nextProps!=this.props||(this.props.level==0&&this.state!=nextState);
+        //console.log("qq comment shouldComponentUpdate0");
+        const props = this.props;
+        const topic = props.topic;
+        const nextTopic = nextProps.topic;
+        const nextRootThreadid = nextTopic ? nextTopic.get("qwiketid") : 0;
+        const rootThreadid = topic ? topic.get("qwiketid") : 0;
+        const nextContext = nextProps.context;
+        const context = props.context;
+        const user = props.user;
+        const nextUser = nextProps.user;
+        const nextQwiketChildren = nextTopic ? nextTopic.get('qcChildren') : null;
+        //console.log("qq shouldComponentUpdate nextQwiketChildren=", nextQwiketChildren ? nextQwiketChildren.toJS() : 'none', { cqid: props.online ? props.online.get("cqid") : '', ncqid: nextProps.online ? nextProps.online.get("cqid") : '' });
+        const qwiketChildren = topic ? topic.get('qcChildren') : null;
+
+        let { qparams } = props;
+        let { qparams: nqParams } = nextProps;
+        const cqid = qparams ? qparams.cqid : 0;
+        const ncqid = nqParams ? nqParams.cqid : 0;
+        let level = nextProps.level;
+        if (rootThreadid != nextRootThreadid) {
+
+            return true;
+        }
+        if (cqid != ncqid) {
+
+            //console.log("CQID changed")
+            return true;
+        }
+
+        if (qwiketChildren != nextQwiketChildren) {
+            //console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+            return true;
+        }
+        if (topic != nextTopic) {
+            //if (level == 0)
+            //	console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+            return true;
+        }
+        if (context != nextContext) {
+            //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+            return true;
+        }
+        /*  if (user != nextUser) {
               //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
               return true;
-          }
-          if (user != nextUser) {
-              //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
-              return true;
-          }
-          if (this.state != nextState) {
-              if (this.state.dirty != nextState.dirty) {
-                  //console.log("dirty changed")
-                  return true;
-              }
-              if (this.state.lightbox != nextState.lightbox) {
-                  //	console.log("lightbox changed")
-                  return true;
-              }
-              if (this.state.edit != nextState.edit) {
-                  //	console.log("edit changed")
-                  return true;
-              }
-              if (this.state.commentMenuOpen != nextState.commentMenuOpen) {
-                  //	console.log("commentMenuOpen changed")
-                  return true;
-              }
-              if (this.state.firstVisibleId != nextState.firstVisibleId) {
-                  //	console.log("firstVisibleId changed")
-                  return true;
-              }
-  
-              if (this.state.lastVisibleId != nextState.lastVisibleId) {
-                  //	console.log("lastVisibleId changed")
-                  return true;
-              }
-              if (this.state.postCount != nextState.postCount) {
-                  //	console.log("preCount changed")
-                  return true;
-              }
-              if (this.state.preCount != nextState.preCount) {
-                  //	console.log("preCount changed")
-                  return true;
-              }
-  
-  
-          }
-          //console.log("qq shouldComponentUpdate nothing", { qwiketChildren: qwiketChildren ? qwiketChildren.toJS() : 'none', nextQwiketChildren: nextQwiketChildren ? nextQwiketChildren.toJS() : 'none' })
-          const ret = nextProps.params != props.params || props.session != nextProps.session || props.user != nextProps.user
-          return ret;
-      }*/
+          }*/
+        if (this.state != nextState) {
+            if (this.state.dirty != nextState.dirty) {
+                //console.log("dirty changed")
+                return true;
+            }
+            if (this.state.lightbox != nextState.lightbox) {
+                //	console.log("lightbox changed")
+                return true;
+            }
+            if (this.state.edit != nextState.edit) {
+                //	console.log("edit changed")
+                return true;
+            }
+            if (this.state.commentMenuOpen != nextState.commentMenuOpen) {
+                //	console.log("commentMenuOpen changed")
+                return true;
+            }
+            if (this.state.firstVisibleId != nextState.firstVisibleId) {
+                //	console.log("firstVisibleId changed")
+                return true;
+            }
+
+            if (this.state.lastVisibleId != nextState.lastVisibleId) {
+                //	console.log("lastVisibleId changed")
+                return true;
+            }
+            if (this.state.postCount != nextState.postCount) {
+                //	console.log("preCount changed")
+                return true;
+            }
+            if (this.state.preCount != nextState.preCount) {
+                //	console.log("preCount changed")
+                return true;
+            }
+
+
+        }
+        //console.log("qq shouldComponentUpdate nothing", { qwiketChildren: qwiketChildren ? qwiketChildren.toJS() : 'none', nextQwiketChildren: nextQwiketChildren ? nextQwiketChildren.toJS() : 'none' })
+        const ret = nextProps.params != props.params || props.session != nextProps.session || props.user != nextProps.user
+        return ret;
+    }
     componentDidUpdate(prevProps) {
         // Typical usage (don't forget to compare props):
         const props = this.props;
