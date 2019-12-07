@@ -60,6 +60,7 @@ class Channel extends React.Component {
             console.log("layout:", sel, layout)
             let width = session.get('width');
             let widthSelector = `w${width}`;
+            console.log({ width, widthSelector })
             columns = layout.layoutView[widthSelector].columns;
 
             if (!req) {
