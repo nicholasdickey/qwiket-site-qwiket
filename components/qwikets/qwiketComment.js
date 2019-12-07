@@ -30,6 +30,8 @@ import QwiketRenderer from './qwiketRenderer';
 import { ClickWalledGarden } from '../../qwiket-lib/components/walledGarden';
 //import { ArticleView, renderToHtml } from '../../qwiket-lib/components/articleView'
 //import Dropzone from 'react-dropzone';
+import "core-js";
+import regeneratorRuntime from "regenerator-runtime";
 import { DropzoneArea } from 'material-ui-dropzone'
 //import { DropzoneDialog } from 'material-ui-dropzone'
 //import ModalImage from "react-modal-image"
