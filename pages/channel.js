@@ -58,7 +58,14 @@ class Channel extends React.Component {
             let session = state.session;
             let layout = parseLayout({ app, session, pageType: sel });
             console.log("layout:", sel, layout)
-            let width = session.get('width');
+            let width = +session.get('width');
+            if (width > 900 && width < 1200)
+                width = 900;
+            else if (width > 1200 && width < 1800)
+                width = 1200;
+            else if (width > 1800 && width < 2100)
+                width = 1800
+            else width = 2100;
             let widthSelector = `w${width}`;
             console.log({ width, widthSelector })
             columns = layout.layoutView[widthSelector].columns;
