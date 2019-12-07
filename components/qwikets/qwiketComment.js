@@ -2069,7 +2069,7 @@ export class QwiketComment extends Component {
 
         }
         //console.log("qq shouldComponentUpdate nothing", { qwiketChildren: qwiketChildren ? qwiketChildren.toJS() : 'none', nextQwiketChildren: nextQwiketChildren ? nextQwiketChildren.toJS() : 'none' })
-        const ret = nextProps.params != props.params || props.session != nextProps.session || props.user != nextProps.user
+        const ret = nextProps.params != props.params || props.session != nextProps.session /*|| props.user != nextProps.user*/
         return ret;
     }
     componentDidUpdate(prevProps) {
