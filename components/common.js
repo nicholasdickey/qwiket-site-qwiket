@@ -18,6 +18,7 @@ import { Layout, InnerGrid } from '../qwiket-lib/components/layout';
 import QwiketView from '../components/qwikets/qwiketView'
 import Header from './header'
 import LayoutView from './layoutView'
+var debounce = require('lodash.debounce');
 
 export class Common extends React.Component {
     constructor(props, context) {
@@ -70,16 +71,17 @@ export class Common extends React.Component {
             const width = props.session.get("width");
             const clientWidth = u.width(null);
             if (width != clientWidth) {
-                // props.actions.updateSession({ width: clientWidth });
+                console.log("WIDTH changed", { clientWidth, width })
+                props.actions.updateSession({ width: clientWidth });
             }
 
         }
     }
     componentDidMount() {
         console.log("componentDidMount")
-        //window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 1000, { 'leading': true, 'trailing': false, 'maxWait': 1000 }));
+        window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 1000, { 'leading': true, 'trailing': false, 'maxWait': 1000 }));
         window.goBack = false;
-        // this.updateDimensions();
+        this.updateDimensions();
         const props = this.props;
         const { actions, path, router, app, user, qparams } = props;
         let { sel } = qparams;
@@ -193,7 +195,7 @@ export class Common extends React.Component {
     render() {
         const { app, qparams, context, user } = this.props;
         let pageType = qparams.sel ? qparams.sel : "newsline";
-
+        console.log("COMMON RENDER", { pageType, qparams })
         // console.log({ user: user.toJS() })
         /* let qwiket = Immutable.fromJS({
              title: 'Test Title',

@@ -397,6 +397,7 @@ export class QwiketFamily extends Component {
         } = this.props;
         let globals = session;
         if (test) approver = 1;
+        //  console.log("QwiketFamily", { columnType })
         //console.log("SUP QWIKET",{test,approver})
         //if (inShow)
         //console.log(" Qwiket: render: level:", level, 'meta:', meta)
@@ -984,13 +985,6 @@ export class QwiketFamily extends Component {
 }
 QwiketFamily.propTypes = {
     fullScreen: PropTypes.bool.isRequired,
-    level: PropTypes.object.isRequired,
-    children: PropTypes.array,
-    parents: PropTypes.array,
-    replyLink: PropTypes.string,
-    likeLink: PropTypes.string,
-    shareLink: PropTypes.string,
-    flagLink: PropTypes.string
-};
+}
 QwiketFamily = withTheme(QwiketFamily);
 //Qwiket=withMobileDialog()(Qwiket);

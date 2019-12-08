@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux';
+import Immutable from "immutable"
 import styled from 'styled-components';
 import { useTheme } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper'
@@ -72,15 +73,24 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
     console.log("Tag getting tags", tags.toJS());
     shortname = tags.get(0);
   }
+  console.log({ app })
   let tags = app.get("tags");
   console.log("app tags", { tags: tags.toJS(), shortname })
   let metaTag = tags.get(shortname)
-  console.log({ metaTag: metaTag.toJS() });
-  let parent = metaTag.get("parentObject");
-  let parentShortname = parent.get("shortname");
-  let parentName = parent.get("name");
-  console.log("parent:::", parent.toJS())
-  let link = metaTag.get("link");
+  console.log({ metaTag });
+  if (metaTag)
+    console.log({ raw_metaTag: metaTag, metaTag: metaTag.toJS() });
+  else
+    metaTag = Immutable.fromJS({ name: '', image: '', link: '', description: '' });
+  let parent = metaTag ? metaTag.get("parentObject") : null;
+  if (!parent) {
+    console.log("NO PARENT!!!")
+  }
+  let parentShortname = parent ? parent.get("shortname") : '';
+  let parentName = parent ? parent.get("name") : '';
+  if (parent)
+    console.log("parent:::", parent.toJS())
+  let link = metaTag ? metaTag.get("link") : '';
   let metaLink = {};
   if (!link) {
     metaLink.params = { channel, shortname };

@@ -19,6 +19,7 @@ import linkifyHtml from 'linkifyjs/html';
 import u from '../../qwiket-lib/lib/utils'
 import { ssRoutes } from '../../qwiket-lib/routes'
 let { Link, Router } = ssRoutes;
+
 //import { ArticleView, renderToHtml } from '../../qwiket-lib/components/articleView'
 //material-ui
 import { withTheme } from '@material-ui/core/styles';
@@ -889,7 +890,8 @@ export default class QwiketRenderer extends Component {
         const linkColor = theme == 1 ? red[900] : red[200];
 
         let d = topic.toJS();
-        // console.log("TOPIC>>>:", d)
+        // console.log("QWIKETRENDER", { type })
+        //console.log("TOPIC>>>:", d)
         if (d.deleted || d.reshare > 1000)
             return <div>comment deleted by the user</div>
         //  if (type == 'reacts')
@@ -1266,13 +1268,13 @@ export default class QwiketRenderer extends Component {
                     `;
         return (<StyledDiv data-id="QWIKET_RENDERER2" key={key} className={full ? 'q-full' : subtype == 'parent' && !top ? 'q-column q-weak' : shaded ? 'q-column-shaded' : 'q-column'}>
             {header}
-            <div>{type == "full" ? <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="inner-blocks">
+            <div data-id={`d1-${type}`}>{type == "full" ? <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="inner-blocks">
                 {blocks}
-            </div> : <Link data-id="masked-link" route={link} refUrl={link} >
-                    <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="inner-blocks">
-                        {blocks}
-                    </div>
-                </Link>}</div>
+            </div> : <div data-id="m1"> <a><Link data-id="masked-link" route={d.v10Link.route} params={d.v10Link.params}  >
+                <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="d2-inner-blocks">
+                    {blocks}
+                </div>
+            </Link></a></div>}</div>
 
 
 

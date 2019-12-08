@@ -6,16 +6,18 @@ import { bindActionCreators } from 'redux'
 import Root from 'window-or-global'
 import { connect } from 'react-redux'
 import chalk from "chalk"
-import Router from "next/router";
+//import Router from "next/router";
+import { withRouter } from 'next/router';
 import parseCommonRoute, { getSel } from "../qwiket-lib/lib/parseCommonRoute";
 import { fetchApp, dispatchSession, fetchColumns } from '../qwiket-lib/lib/ssrParams'
 import { parseLayout } from '../qwiket-lib/lib/layout';
 import { Common } from '../components/common'
 import Landing from '../components/landing'
+import u from '../qwiket-lib/lib/utils'
 
 class Channel extends React.Component {
-    static async getInitialProps({ store, isServer, req, res, query }) {
-        console.log(isServer, "**********************************************************************************************")
+    static async getInitialProps({ asPath, pathname, store, isServer, req, res, query }) {
+        console.log({ isServer }, "getInitialProps ***********************************************************************")
         if (isServer && req) {
             Root.host = req.headers.host;
             Root.__SERVER__ = true
@@ -28,12 +30,12 @@ class Channel extends React.Component {
             Root.__CLIENT__ = true;
         }
         let { code, appid, utm_source, utm_medium } = query;
-        const path = req ? req.url : location.href;
-        console.log("PATH:", path, '====================================>')
+        const path = req ? req.url : asPath;
+        console.log("PATH:", { path, hasReq: req ? 1 : 0, query, pathname: asPath })
         //console.log({ store, isServer, query })
         let props = path ? parseCommonRoute(path) : { qparams: Object.assign(query, { route: {}, path: req ? req.url : location.href }), nothing: true, path: req ? req.url : location.href };
         let params = props.qparams;
-        let sel = params.route.qroute;
+        let sel = props.sel;
         console.log("sel", sel)
         let { channel, q, solo } = params;
         if (!sel)
@@ -42,7 +44,8 @@ class Channel extends React.Component {
         console.log({ props })
 
         console.log("fetchApp args", { channel, q, solo, code, appid, sel, utm_source, utm_medium })
-        await fetchApp({ req, store, channel, q, solo, code, appid, utm_source, utm_medium });
+        if (Root.__SERVER__)
+            await fetchApp({ req, store, channel, q, solo, code, appid, utm_source, utm_medium });
         let columns = null;
         if (req) {
             await dispatchSession({ req, store });
@@ -58,16 +61,9 @@ class Channel extends React.Component {
             let session = state.session;
             let layout = parseLayout({ app, session, pageType: sel });
             console.log("layout:", sel, layout)
-            let width = +session.get('width');
-            if (width > 900 && width < 1200)
-                width = 900;
-            else if (width > 1200 && width < 1800)
-                width = 1200;
-            else if (width > 1800 && width < 2100)
-                width = 1800
-            else width = 2100;
+            let width = u.getLayoutWidth({ session })
             let widthSelector = `w${width}`;
-            console.log({ width, widthSelector })
+            console.log("## ## ## ", { width, widthSelector })
             columns = layout.layoutView[widthSelector].columns;
 
             if (!req) {
@@ -75,9 +71,10 @@ class Channel extends React.Component {
                 params.url = window.location;
                 console.log("client side app:", app ? app.toJS() : {})
             }
-            //  console.log("after fetchApp", columns)
+            console.log("after fetchApp", columns, params)
 
             await fetchColumns({ columns, store, query: params, app, req });
+            console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ DONE WITH FETCH")
         }
         else if (req) {
             console.log("LANDING");

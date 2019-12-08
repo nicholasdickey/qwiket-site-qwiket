@@ -304,9 +304,21 @@ app.prepare().then(() => {
         const queryParams = { route: 'valid', sel: 'context' }
         app.render(req, res, actualPage, queryParams)
     })
-    server.get('/context/channel/:channel/topic/:threadid/?*', (req, res) => {
+    /*  server.get('/context/channel/:channel/topic/:threadid/?*', (req, res) => {
+          const actualPage = '/channel'
+          const queryParams = { route: 'context' }
+          // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
+          app.render(req, res, actualPage, queryParams)
+      })
+      server.get('/context/channel/:channel/hub/:hub/topic/:threadid/?*', (req, res) => {
+          const actualPage = '/channel'
+          const queryParams = { route: 'context' }
+          // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
+          app.render(req, res, actualPage, queryParams)
+      })*/
+    server.get('/context/?*', (req, res) => {
         const actualPage = '/channel'
-        const queryParams = { route: 'context' }
+        const queryParams = { route: 'context', sel: "context" }
         // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
         app.render(req, res, actualPage, queryParams)
     })

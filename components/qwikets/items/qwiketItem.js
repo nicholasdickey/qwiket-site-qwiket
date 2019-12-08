@@ -82,6 +82,8 @@ export class QwiketItem extends Component {
         } = this.props;
         if (!qparams || !topic)
             return <div >QPARAMS:{qparams}</div>
+
+        //  console.log("qwiketItem RENDER ", { qparams })
         let globals = session;
         const { fetchStoryQwikets, fetchShowQwiket, invalidateContext, requestIcon } = actions;
 		/**
@@ -91,6 +93,7 @@ export class QwiketItem extends Component {
             columnType = 'mix';
             // console.log("qwiketItem", { channel })
         }
+        //console.log("QWIKETITEM")
         const typeOfQwiket = columnType == 'context' ? 'full' : (columnType == 'reacts' || columnType == 'mix' || columnType == 'story-qwikets') ? 'commentStream' : 'qwiketColumn'; //full,commentStream,qwiketColumn, TBA - meta qwikets, hotlist?
         const zoom = qparams.z;
         // console.log({ topic })
@@ -365,6 +368,88 @@ export class QwiketItem extends Component {
                 // console.log("xTargetLink datum", { topic, topLevel, xTargetLink, typeOfQwiket, xQwiketSubtype, xId, xKey, xOpenLink, xQwiketType, routePageLink, routeRootKey, key, datumQwiketLink, levelLink, targetLink, xLink });
 
             }
+            let qroute = qparams.route.qroute;
+            const url = topic.get("url");
+            const s1 = url ? url.split("//") : [];
+            const s2 = s1 ? s1[1] : '';
+            const s3 = s2 ? s2.split(":")[0] : '';
+
+            let shub = 0;
+            let sthreadid;
+            if (s3) {
+                let chunks = s3.split('-slug-');
+                shub = chunks[0];
+                sthreadid = chunks[1];
+                //  console.log({ chunks })
+            }
+
+            let hub = qparams.hub;
+            let qthreadid = qparams.threadid;
+            if (!hub && qthreadid) {
+                let chunks = qthreadid.split('-slug-');
+                hub = chunks[0];
+                qthreadid = chunks[1];
+            }
+            if (!hub)
+                hub = 0;
+
+            let tthreadid = topic.get('threadid');
+            // console.log("topic:", topic.toJS())
+            let thub = 0;
+
+            if (tthreadid) {
+                let chunks = tthreadid.split('-slug-');
+                thub = chunks[0];
+                tthreadid = chunks[1];
+                // console.log({ chunks })
+            }
+            let category = topic.get("cat") || topic.get("category");
+            let v10Link = {
+                route: isDisqus ? "taghub-disqus-context" : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? "taghub-view-context" : "taghub-view-context-home" : "taghub-native-context" : (loud || opened) ? "taghub-context" : "taghub-show-context",
+                pathname: '/channel',
+
+                params: isDisqus ? {
+                    channel,
+                    hub: thub,
+                    tag: category,
+                    threadid: tthreadid,
+                    cc: topic.get('id')
+                } : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? {
+                    channel,
+                    hub,
+                    tag: category,
+                    threadid: qthreadid,
+
+                    qwiketid: topic.get("threadid")
+
+                } : {
+                        channel,
+                        shortname: qparams.shortname,
+                        rootThreadid: topic.get("threadid"),
+                        qwiketid: topic.get("threadid")
+
+                    } : {
+                        channel,
+                        hub: shub,
+                        tag: category,
+                        threadid: sthreadid,
+                        cqid: topic.get("threadid")
+
+                    } : (loud || opened) ? {
+                        channel,
+                        hub: thub,
+                        tag: category,
+                        threadid: tthreadid
+                    } : {
+                                channel,
+                                hub,
+                                tag: category,
+                                threadid: qthreadid,
+                                rootThreadid: topic.get("threadid"),
+                                qwiketid: topic.get("threadid")
+                            }
+            }
+            // console.log({ v10Link, tthreadid });
             //if (inShow && relation == 'level' && typeOfQwiket == 'commentStream' && Root.__CLIENT__)
             //if (relation == 'parent')
             //	console.log("Q1GBG 4: createDatum", { targetLink, levelLink, routePageLink, qparams, props: this.props })
@@ -407,6 +492,7 @@ export class QwiketItem extends Component {
             // if (relation == 'parent')
             //   console.log("QGBG: parent_summary QGBG link:", link, datumQwiketLink, routePageLink, 'muzzled:', muzzled)
             const onClick = () => {
+                console.log("ONCLICK")
                 //console.log(" setTop onClick invalidateContext:", { topic: topic.toJS(), isDisqus, topLevel })
                 if (isDisqus) {
                     if (muzzled) {
@@ -517,6 +603,7 @@ export class QwiketItem extends Component {
                 cat: topic.get("cat"),
                 channel,
                 link: xLink,
+                v10Link,
                 targetLink: xTargetLink,
                 opened,
                 approver,
@@ -584,9 +671,9 @@ export class QwiketItem extends Component {
 
         //if(typeOfQwiket=='full')
         //console.log("QGBG links:replyLink:",replyLink,"likeLink:",likeLink,levelIsDisqus)
-		/**
-		Children:
-		**/
+        /**
+        Children:
+        **/
         //if (typeOfQwiket == 'full')
         //	console.log("catedit level: ", { reshare, levelQwiket: levelQwiket.toJS(), rootThreadid })
 
@@ -625,9 +712,9 @@ export class QwiketItem extends Component {
             })
         }
 
-		/**
-		Parents:
-		**/
+        /**
+        Parents:
+        **/
         let parentQwikets = null;
         let parent_summary = topic.get("parent_summary") ? topic.get("parent_summary") : Immutable.fromJS([]);
         const showParents = typeOfQwiket == 'commentStream' || rootOpened && typeOfQwiket != 'full';
@@ -646,6 +733,7 @@ export class QwiketItem extends Component {
                 threadid: topic.get("threadid"),
                 cat_name: topic.get("cat_name"),
                 cat_icon: topic.get("cat_icon"),
+                cat: topic.get("cat") || topic.get("category"),
                 published_time: topic.get("published_time")
             }));
         }
