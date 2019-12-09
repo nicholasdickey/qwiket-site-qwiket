@@ -7,7 +7,7 @@ import { QwiketItem } from './qwikets/items/qwiketItem'
 import Topic from './topic'
 import Tag from './tag'
 import u from '../qwiket-lib/lib/utils'
-let Column = ({ column, qparams }) => {
+let Column = ({ column, qparams, tag }) => {
     let width = column.percentWidth;
     const StyledColumn = styled.div`
         width:${width};
@@ -24,7 +24,7 @@ let Column = ({ column, qparams }) => {
     switch (selector) {
         case 'newsviews':
         case 'topics': {
-            console.log(`Column: ${selector}`)
+            // console.log(`Column: ${selector}`)
             const renderer = ({ item, index, x, y, tag, qparams, channel }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", item)
@@ -35,7 +35,7 @@ let Column = ({ column, qparams }) => {
             return <StyledColumn data-id="styled-column"><Queue tag={selector} renderer={renderer} qparams={qparams} listRenderer={listRenderer} /></StyledColumn>
         }
         case 'feed': {
-            console.log("Column:feed")
+            // console.log("Column:feed")
             const renderer = ({ item, index, x, y, tag, qparams, channel }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", item)
@@ -43,10 +43,10 @@ let Column = ({ column, qparams }) => {
 
                 return <QwiketItem columnType={tag} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
             }
-            return <Queue tag={selector} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
+            return <Queue tag={tag} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
         }
         case "topic": {
-            console.log("Column:topic")
+            // console.log("Column:topic")
             let InnerTagWrap = styled.div`
                 width:100%;
                 display:flex;
@@ -60,10 +60,11 @@ let Column = ({ column, qparams }) => {
             let InnerFeedWrap = styled.div`
                 width:100% !important;
             `
-            console.log("Column:feed")
+            tag = tag || qparams.tag || qparams.shortname;
+            console.log("Column:feed", { tag })
             const renderer = ({ item, index, x, y, tag, qparams, channel }) => {
                 //const [ref, setRef] = useState(false);
-                //  console.log("RENDERER:", item)
+                //  console.log("RENDERER:", tag)
 
 
                 return <QwiketItem data-id="qwiket-item" columnType={tag} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
@@ -77,7 +78,7 @@ let Column = ({ column, qparams }) => {
 
                     <FeedWrap data-id="feed-wrap" >
                         <InnerFeedWrap data-id="inner-feed-wrap">
-                            <Queue tag={msc} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
+                            <Queue tag={tag} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
                         </InnerFeedWrap>
                     </FeedWrap>
                 </InnerTagWrap>
@@ -106,11 +107,11 @@ let LayoutRes = ({ layout, res, qparams }) => {
 
 }
 let LayoutView = ({ app, session, pageType, layout, user, qparams, actions }) => {
-    // console.log("LAYOUT_VIEW:", layout);
+    console.log("LAYOUT_VIEW:", layout);
     let layoutView = layout.layoutView;
     let columns = layout.columns;
     let defaultWidth = session.get("defaultWidth");
-    console.log("defaultWidth:", +defaultWidth, +session.get("width"))
+    //  console.log("defaultWidth:", +defaultWidth, +session.get("width"))
     let width = u.getLayoutWidth({ session });
     let W000 = styled.div`
       //  display:none;
@@ -150,7 +151,7 @@ let LayoutView = ({ app, session, pageType, layout, user, qparams, actions }) =>
     const OuterWrapper = styled.div`
         width:100%;
     `;
-    console.log("LAYOUTVIEW ", { width })
+    //console.log("LAYOUTVIEW ", { width })
     return <OuterWrapper>
         {width == 750 ? <W000><LayoutRes layout={layoutView} res="w900" qparams={qparams} /></W000> : null}
         {width == 900 ? <W900><LayoutRes layout={layoutView} res="w900" qparams={qparams} /></W900> : null}

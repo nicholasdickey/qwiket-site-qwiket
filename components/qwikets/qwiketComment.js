@@ -1985,7 +1985,7 @@ export class QwiketComment extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         //console.log({props:this.props,nprops:nextProps})
         //return nextProps!=this.props||(this.props.level==0&&this.state!=nextState);
-        //console.log("qq comment shouldComponentUpdate0");
+        console.log("qq comment shouldComponentUpdate0");
         const props = this.props;
         const topic = props.topic;
         const nextTopic = nextProps.topic;
@@ -1996,7 +1996,7 @@ export class QwiketComment extends Component {
         const user = props.user;
         const nextUser = nextProps.user;
         const nextQwiketChildren = nextTopic ? nextTopic.get('qcChildren') : null;
-        //console.log("qq shouldComponentUpdate nextQwiketChildren=", nextQwiketChildren ? nextQwiketChildren.toJS() : 'none', { cqid: props.online ? props.online.get("cqid") : '', ncqid: nextProps.online ? nextProps.online.get("cqid") : '' });
+        //  console.log("qq shouldComponentUpdate nextQwiketChildren=", nextQwiketChildren ? nextQwiketChildren.toJS() : 'none', { cqid: props.online ? props.online.get("cqid") : '', ncqid: nextProps.online ? nextProps.online.get("cqid") : '' });
         const qwiketChildren = topic ? topic.get('qcChildren') : null;
 
         let { qparams } = props;
@@ -2005,72 +2005,75 @@ export class QwiketComment extends Component {
         const ncqid = nqParams ? nqParams.cqid : 0;
         let level = nextProps.level;
         if (rootThreadid != nextRootThreadid) {
-
+            console.log("000111")
             return true;
         }
         if (cqid != ncqid) {
-
+            console.log("000222")
             //console.log("CQID changed")
             return true;
         }
 
         if (qwiketChildren != nextQwiketChildren) {
+            console.log("000333")
             //console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
             return true;
         }
         if (topic != nextTopic) {
             //if (level == 0)
-            //	console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+            console.log("000444")
+            console.log(" RECEIVE_FETCH_COMMENTS qq 3 topic changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
             return true;
         }
-        if (context != nextContext) {
-            //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
-            return true;
-        }
+        /* if (context != nextContext) {
+             //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
+             return true;
+         }*/
         /*  if (user != nextUser) {
               //console.log("qq 3 context changed, update", { topic: topic.toJS(), nextTopic: nextTopic.toJS() });
               return true;
           }*/
         if (this.state != nextState) {
+            console.log("000555")
             if (this.state.dirty != nextState.dirty) {
-                //console.log("dirty changed")
+                console.log("dirty changed")
                 return true;
             }
             if (this.state.lightbox != nextState.lightbox) {
-                //	console.log("lightbox changed")
+                console.log("lightbox changed")
                 return true;
             }
             if (this.state.edit != nextState.edit) {
-                //	console.log("edit changed")
+                console.log("edit changed")
                 return true;
             }
             if (this.state.commentMenuOpen != nextState.commentMenuOpen) {
-                //	console.log("commentMenuOpen changed")
+                console.log("commentMenuOpen changed")
                 return true;
             }
             if (this.state.firstVisibleId != nextState.firstVisibleId) {
-                //	console.log("firstVisibleId changed")
+                console.log("firstVisibleId changed")
                 return true;
             }
 
             if (this.state.lastVisibleId != nextState.lastVisibleId) {
-                //	console.log("lastVisibleId changed")
+                console.log("lastVisibleId changed")
                 return true;
             }
             if (this.state.postCount != nextState.postCount) {
-                //	console.log("preCount changed")
+                console.log("preCount changed")
                 return true;
             }
             if (this.state.preCount != nextState.preCount) {
-                //	console.log("preCount changed")
+                console.log("preCount changed")
                 return true;
             }
 
 
         }
-        //console.log("qq shouldComponentUpdate nothing", { qwiketChildren: qwiketChildren ? qwiketChildren.toJS() : 'none', nextQwiketChildren: nextQwiketChildren ? nextQwiketChildren.toJS() : 'none' })
-        const ret = nextProps.params != props.params || props.session != nextProps.session /*|| props.user != nextProps.user*/
-        return ret;
+        //  console.log("qq shouldComponentUpdate nothing", { qwiketChildren: qwiketChildren ? qwiketChildren.toJS() : 'none', nextQwiketChildren: nextQwiketChildren ? nextQwiketChildren.toJS() : 'none' })
+        //  const ret = nextProps.params != props.params || props.session != nextProps.session /*|| props.user != nextProps.user*/
+        return false;
     }
     componentDidUpdate(prevProps) {
         // Typical usage (don't forget to compare props):
@@ -2158,7 +2161,7 @@ export class QwiketComment extends Component {
                         mode = 'visible';
                         firstVisibleId = p.qwiketid;
                         if (i != 0) {
-                            console.log('counting in newCount', newCount);
+                            // console.log('counting in newCount', newCount);
                             preCount += newCount;
                         }
                     }
@@ -2269,8 +2272,8 @@ export class QwiketComment extends Component {
         //console.log({ muiTheme });
         const color = muiTheme.palette.text.primary;
         const theme = globals.get("theme");
-        //if (level == 0)
-        //	console.log("TOPIC COMMENT RENDER:", { props: this.props })
+        // if (level == 0)
+        //     console.log("TOPIC COMMENT RENDER:", { props: this.props })
         const state = this.state;
         let { preCount, postCount, firstVisibleId, edit, commentMenuOpen, dirty, dropzone } = state;
 
@@ -2288,7 +2291,7 @@ export class QwiketComment extends Component {
 
         let qwiketid = topic.get("qwiketid");
         let open = qwiketid == context.get('openEditor') ? true : false;
-        console.log("************************************>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", { open, qwiketid, openEditor: context.get('openEditor') })
+        //  console.log("************************************>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", { open, qwiketid, openEditor: context.get('openEditor') })
         if (level == 0 && open)
             edit = true;
 
@@ -2296,7 +2299,7 @@ export class QwiketComment extends Component {
             edit = true;
             open = true;
         }
-        console.log("MAIN RENDER", { edit, open, level, qwiketid, openEditor: context.get("openEditor") })
+        //   console.log("MAIN RENDER", { edit, open, level, qwiketid, openEditor: context.get("openEditor") })
         let entity = topic.get("entity");
         const approver = userEntities ? userEntities.includes(entity) : true;
         //console.log("APPROVER:", { approver, entity, userEntities: userEntities ? userEntities.toJS() : '' });
@@ -2348,7 +2351,7 @@ export class QwiketComment extends Component {
             },
             as: editUrl
         }
-        console.log({ edit, focusUrl, qwiketid, reshare, index: [109, 9, 59].indexOf(reshare) })
+        //   console.log({ edit, focusUrl, qwiketid, reshare, index: [109, 9, 59].indexOf(reshare) })
         const unfocusUrl = `/context/channel/${channel}/topic/${pageRootThreadid}`;
         const selected = level == 0 || cqid == rootThreadid//||state.focus;
         //console.log("qq RENDER selected:", { params, selected, cqid, rootThreadid, topic: selected && topic ? topic.toJS() : '' });
@@ -2409,8 +2412,8 @@ export class QwiketComment extends Component {
         let ordinal = topic.get("ordinal");
         let typingCount = topic.get("typingCount") ? 1 : 0;
 
-        if (level == 0)
-            console.log({ onlineUsername, username })
+        //  if (level == 0)
+        //     console.log({ onlineUsername, username })
         //	console.log("lastId:", lastId)
         //let offset = level > 12 ? 4 : level > 1 ? 25 - level * 1.6 > 8 ? 25 - level * 1.6 : 8 : level > 0 ? 0 : 10;
         //let offset2 = level * 25 - (25 - level * 1.6);//(level-1)*15;
@@ -2427,7 +2430,7 @@ export class QwiketComment extends Component {
         let timestamp = topic.get("published_time");
         if (test && timestamp < 1500000000)
             timestamp = (Date.now() / 1000 | 0) - timestamp * 10;
-        console.log({ edit, timestamp })
+        //  console.log({ edit, timestamp })
         const more = topic.get("more");
         const newCount = topic.get("newCount") ? topic.get("newCount") : 0;
 
@@ -2526,16 +2529,16 @@ export class QwiketComment extends Component {
         const threadElevation = 4;
 
         //if (selected)
-        console.log({ edit, rightBorder })
+        // console.log({ edit, rightBorder })
         let isZoom = false;
         if (level == 0) {
             if (!cqid) {
                 if (params.route == 'qreply') {
-                    console.log("QREPLY")
+                    // console.log("QREPLY")
                 }
                 else
                     if (params.route == 'qedit') {
-                        console.log("QEDIT")
+                        //  console.log("QEDIT")
                     }
             }
             isZoom = state.z == 'zz';
@@ -2564,7 +2567,7 @@ export class QwiketComment extends Component {
         //sconsole.log({ stripeInd, level })
         //console.log({ parentSelected, selected, approver, username, onlineUsername })
         //if (level == 0)
-        console.log("EDIT", edit);
+        // console.log("EDIT", edit);
         let borderColors = ['#81D4FA', '#CE93D8', '#FFAB91']
         return <div>
 

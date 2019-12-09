@@ -143,23 +143,23 @@ const x = (html, isZoom, image) => {
     else
         return html;
 }
-const renderArticle = ({ topic, index, theme, globals, os, cs, zoom, channel, approver }) => {
+const renderArticle = ({ topic, index, theme, globals, zoom, channel, approver }) => {
 
     let threadid = topic.get("threadid");
     let editor = false;
     zoom = 'out';
     console.log("Render Article", { topic: topic ? topic.toJS() : 'no topic' })
-    return <div globals={globals} approver={approver} os={os} cs={cs} zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />
+    return <div globals={globals} approver={approver} zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />
 
 
 }
-const renderArticleHtml = ({ topic, index, theme, globals, os, cs, zoom, channel, approver }) => {
+const renderArticleHtml = ({ topic, index, theme, globals, zoom, channel, approver }) => {
 
     let threadid = topic.get("threadid");
     let editor = false;
     zoom = 'out';
     console.log("Render Article", { topic: topic ? topic.toJS() : 'no topic' })
-    return "<div globals={globals} approver={approver} os={os} cs={cs} zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />"
+    return "<div globals={globals} approver={approver}  zoom={zoom} editor={editor} topic={topic} threadid={threadid} channel={channel} />"
 
 
 }
@@ -878,9 +878,16 @@ export default class QwiketRenderer extends Component {
     state = {
 
     }
-
+    shouldComponentUpdate(nextProps) {
+        let props = this.props;
+        let changedTopic = props.topic != nextProps.topic;
+        let changedSession = props.session != nextProps.session;
+        let longChanged = props.long != nextProps.long;
+        console.log("QwiketRenderer shouldComponentsUpdate", { changedTopic, changedSession, longChanged })
+        return changedTopic || changedSession || longChanged;
+    }
     render() {
-        let { theme, type, subtype, topic, os, cs, globals, state, setState, approver, channel, loud, keyprop, long, setLong, link, onClick, inShow, qwiketOpened, zoom } = this.props;
+        let { theme, type, subtype, topic, globals, state, setState, approver, channel, loud, keyprop, long, setLong, link, onClick, inShow, qwiketOpened, zoom } = this.props;
         const muiTheme = theme;
         theme = +globals.get("theme");
         const palette = muiTheme.palette;
@@ -890,7 +897,7 @@ export default class QwiketRenderer extends Component {
         const linkColor = theme == 1 ? red[900] : red[200];
 
         let d = topic.toJS();
-        // console.log("QWIKETRENDER", { type })
+        //   console.log("QWIKETRENDER", { type })
         //console.log("TOPIC>>>:", d)
         if (d.deleted || d.reshare > 1000)
             return <div>comment deleted by the user</div>
@@ -1012,11 +1019,11 @@ export default class QwiketRenderer extends Component {
             let html = <div />;
             switch (p.blockType) {
                 case 'article1':
-                    return renderArticle({ topic, d, theme, globals, os, cs, zoom, channel, approver })
+                    return renderArticle({ topic, d, theme, globals, zoom, channel, approver })
                 case 'text':
                     return renderMarkdown({ blockType: p.blockType, dataId: 'text-block', md: p.text, index: i, theme, reshare, linkColor, dropCap: p.dropCap ? true : false, state: this.state, setState: (update) => this.setState(update) });
                 case 'article':
-                    return renderMarkdown({ md: renderToHtml({ topic, d, theme, globals, os, cs, zoom, channel, approver }), dataId: 'markdown-block12', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
+                    return renderMarkdown({ md: renderToHtml({ topic, d, theme, globals, zoom, channel, approver }), dataId: 'markdown-block12', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'html': // scraped from external page or description block 
                     if (!p.html)
                         return;

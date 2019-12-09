@@ -34,7 +34,7 @@ let Topic = ({ app, session, context, qparams, user }) => {  // a.k.a context ma
   let OuterTopic = styled.div`
 
     `;
-  console.log("TOPIC:", topic.toJS())
+  //console.log("TOPIC:", topic.toJS())
   //< QwiketItem columnType = { 'context'} topic = { topic } channel = { channel } qparams = { qparams } forceShow = { true} approver = { false} test = { false} />
   return <OuterTopic><QwiketComment
     topic={topic}

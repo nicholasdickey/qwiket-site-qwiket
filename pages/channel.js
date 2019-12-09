@@ -14,10 +14,11 @@ import { parseLayout } from '../qwiket-lib/lib/layout';
 import { Common } from '../components/common'
 import Landing from '../components/landing'
 import u from '../qwiket-lib/lib/utils'
+import nextReduxWrapper from "next-redux-wrapper";
 
 class Channel extends React.Component {
     static async getInitialProps({ asPath, pathname, store, isServer, req, res, query }) {
-        console.log({ isServer }, "getInitialProps ***********************************************************************")
+        // console.log({ isServer }, "getInitialProps ***********************************************************************")
         if (isServer && req) {
             Root.host = req.headers.host;
             Root.__SERVER__ = true
@@ -25,25 +26,26 @@ class Channel extends React.Component {
 
         }
         else {
-            console.log("CLIENT INIT")
+            console.log("CLIENT INIT", store.getState().queues.toJS())
             Root.__WEB__ = true;
             Root.__CLIENT__ = true;
+
         }
         let { code, appid, utm_source, utm_medium } = query;
         const path = req ? req.url : asPath;
-        console.log("PATH:", { path, hasReq: req ? 1 : 0, query, pathname: asPath })
+        //  console.log("PATH:", { path, hasReq: req ? 1 : 0, query, pathname: asPath })
         //console.log({ store, isServer, query })
         let props = path ? parseCommonRoute(path) : { qparams: Object.assign(query, { route: {}, path: req ? req.url : location.href }), nothing: true, path: req ? req.url : location.href };
         let params = props.qparams;
         let sel = props.sel;
-        console.log("sel", sel)
+        //  console.log("sel", sel)
         let { channel, q, solo } = params;
         if (!sel)
             sel = "newsline"
         params.sel = sel;
-        console.log({ props })
+        // console.log({ props })
 
-        console.log("fetchApp args", { channel, q, solo, code, appid, sel, utm_source, utm_medium })
+        //  console.log("fetchApp args", { channel, q, solo, code, appid, sel, utm_source, utm_medium })
         if (Root.__SERVER__)
             await fetchApp({ req, store, channel, q, solo, code, appid, utm_source, utm_medium });
         let columns = null;
@@ -60,24 +62,24 @@ class Channel extends React.Component {
             let app = state.app;
             let session = state.session;
             let layout = parseLayout({ app, session, pageType: sel });
-            console.log("layout:", sel, layout)
+            //  console.log("layout:", sel, layout)
             let width = u.getLayoutWidth({ session })
             let widthSelector = `w${width}`;
-            console.log("## ## ## ", { width, widthSelector })
+            //  console.log("## ## ## ", { width, widthSelector })
             columns = layout.layoutView[widthSelector].columns;
 
             if (!req) {
                 //let props = this.props;
                 params.url = window.location;
-                console.log("client side app:", app ? app.toJS() : {})
+                // console.log("client side app:", app ? app.toJS() : {})
             }
-            console.log("after fetchApp", columns, params)
+            //  console.log("after fetchApp", columns, params)
 
             await fetchColumns({ columns, store, query: params, app, req });
-            console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ DONE WITH FETCH")
+            //  console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ DONE WITH FETCH")
         }
         else if (req) {
-            console.log("LANDING");
+            //  console.log("LANDING");
             let state = store.getState()
             let session = state.session;
             if (req.session.options[`loginRedirect`]) {
@@ -88,9 +90,9 @@ class Channel extends React.Component {
                 let cookie = app.get("cookie");
                 let identity = cookie.get("identity");
                 let anon = cookie.get("anon")
-                console.log(chalk.cyan.bold("COOKIE"), { cookie, identity, anon });
+                //   console.log(chalk.cyan.bold("COOKIE"), { cookie, identity, anon });
                 if (res) {
-                    console.log(chalk.cyan.bold("REDIRECTING 302", redirect));
+                    //  console.log(chalk.cyan.bold("REDIRECTING 302", redirect));
                     const maxAge = 24 * 3600 * 30 * 1000 * 100;
                     res.cookie('_ga', 'GA1.2.' + identity, { maxAge, sameSite: 'Lax' });
                     res.cookie('qid', identity, { maxAge, sameSite: 'Lax' });
@@ -132,17 +134,26 @@ class Channel extends React.Component {
         let channelName = app.get("channel").get("channel");
         // console.log("+++CLIENT")
         if (qparams.url.indexOf('logout') >= 0) {
-            console.log("+++LOGOUT !!!!");
+            //  console.log("+++LOGOUT !!!!");
             const as = `/channel/${channelName}`
             const href = `/channel?channel=${channelName}`
             Router.replace(href, as);
         }
 
     }
-
+    shouldComponentUpdate(nextProps) {
+        let props = this.props;
+        let contextChanged = props.context != nextProps.context;
+        let appChanged = props.app != nextProps.app;
+        let qparamsChanged = props.qparams != nextProps.qparams;
+        let queuesChanged = props.queues != nextProps.queues;
+        console.log("CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
+        return contextChanged || appChanged || qparamsChanged || queuesChanged;
+    }
     render() {
         const { app, qparams, context, user } = this.props;
         let channelName = app.get("channel").get("channel");
+        console.log("RENDER CHANNEL")
         //  console.log("channel+++", { qparams, channelName, RootC: Root.__CLIENT__ })
         if (channelName && channelName == 'landing') {
 

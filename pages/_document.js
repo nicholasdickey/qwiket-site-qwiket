@@ -63,7 +63,18 @@ class MyDocument extends Document {
 
                     <link href="https://fonts.googleapis.com/css?family=Asap+Condensed|Domine|Playfair+Display|Stint+Ultra+Condensed" rel="stylesheet" />
                     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
+                    <script async defer crossOrigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2&appId=995006553995561&autoLogAppEvents=1" > </script>
 
+                    < script async src="https://www.googletagmanager.com/gtag/js?id=UA-85541506-1" > </script>
+
+                    < script dangerouslySetInnerHTML={{
+                        __html: ` window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                      
+                        gtag('config', 'UA-85541506-1');`
+                    }
+                    } />
                 </Head>
                 <body>
                     <Main />

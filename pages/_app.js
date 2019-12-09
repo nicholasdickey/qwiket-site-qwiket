@@ -10,7 +10,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import withRedux from 'next-redux-wrapper'
 import { initStore } from '../qwiket-lib/store'
 import theme from '../views/theme';
-
+import Root from 'window-or-global'
 class MyApp extends App {
     static async getInitialProps({ Component, ctx }) {
         //  console.log({ ctx })
@@ -36,7 +36,9 @@ class MyApp extends App {
             meta = meta.toJS();
         else
             meta = {};
-        //  console.log("RENDER APP:", { meta })
+        console.log("RENDER APP:", { meta, store, Root })
+        if (Root.__CLIENT__)
+            Root.store = store;
         return (
             <div>
                 <Head>
@@ -67,18 +69,7 @@ class MyApp extends App {
                     <meta name="msvalidate.01" content="F6078DEB781FF7EEBAAF3723CBE56F5E" />
                     <title>My page</title>
 
-                    <script async defer crossOrigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2&appId=995006553995561&autoLogAppEvents=1" > </script>
 
-                    < script async src="https://www.googletagmanager.com/gtag/js?id=UA-85541506-1" > </script>
-
-                    < script dangerouslySetInnerHTML={{
-                        __html: ` window.dataLayer = window.dataLayer || [];
-                        function gtag(){dataLayer.push(arguments);}
-                        gtag('js', new Date());
-                      
-                        gtag('config', 'UA-85541506-1');`
-                    }
-                    } />
                 </Head>
                 <ThemeProvider theme={theme}>
                     {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}

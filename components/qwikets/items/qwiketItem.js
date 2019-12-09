@@ -67,7 +67,7 @@ export class QwiketItem extends Component {
         const props = this.props;
         //if(props.full)
         //console.log("QwiketRenderer: shouldComponentUpdate props.topic:",props.topic?props.topic.toJS():'none',"nextProps.topic:",nextProps.topic?nextProps.topic.toJS():'none')
-        const ret = (nextProps.columnType != props.columnType) || nextProps.topic != props.topic || nextProps.showQwiket != props.showQwiket || props.session != nextProps.session || nextProps.context != props.context
+        const ret = (nextProps.columnType != props.columnType) || nextProps.topic != props.topic || nextProps.showQwiket != props.showQwiket || props.session != nextProps.session || nextProps.context.get("topic") != props.context.get("topic")
         //if(props.full)
         //console.log("QwiketRenderer: shouldComponentUpdate ret=",ret);
         return ret;

@@ -194,7 +194,7 @@ const DatelineBand = ({ session, channelDetails, user, actions }) => {
     let avatar = user.get("avatar");
 
     let isLoggedIn = user.get("isLoggedIn");
-    console.log({ isLoggedIn })
+    // console.log({ isLoggedIn })
     return <StyledWrapper>
         <HorizWrap><SubTitle>{`${dateStrging}  ${hometown}`}</SubTitle></HorizWrap>
         {isLoggedIn ? <HorizWrap><AvatarGroup><Image src={avatar} width={32} height={32} />{subscr_status > 0 ? <SubscriberStar /> : null}</AvatarGroup></HorizWrap> : null}

@@ -62,7 +62,7 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
   let topic = context.get("topic");
   let dark = +session.get('dark');
   if (!topic) {
-    console.log("NO TOPIC");
+    // console.log("NO TOPIC");
     return <div />
   }
   let channel = app.get("channel").get("channel");
@@ -70,26 +70,27 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
 
   if (!shortname) { //if explicit shortname is not present in url, then pick the first tag from the topic itself
     let tags = topic.get("tags");
-    console.log("Tag getting tags", tags.toJS());
+    //console.log("Tag getting tags", tags.toJS());
     shortname = tags.get(0);
   }
-  console.log({ app })
+  // console.log({ app })
   let tags = app.get("tags");
-  console.log("app tags", { tags: tags.toJS(), shortname })
+  // console.log("app tags", { tags: tags.toJS(), shortname })
   let metaTag = tags.get(shortname)
-  console.log({ metaTag });
-  if (metaTag)
-    console.log({ raw_metaTag: metaTag, metaTag: metaTag.toJS() });
+  //console.log({ metaTag });
+  if (metaTag) {
+    // console.log({ raw_metaTag: metaTag, metaTag: metaTag.toJS() });
+  }
   else
     metaTag = Immutable.fromJS({ name: '', image: '', link: '', description: '' });
   let parent = metaTag ? metaTag.get("parentObject") : null;
   if (!parent) {
-    console.log("NO PARENT!!!")
+    // console.log("NO PARENT!!!")
   }
   let parentShortname = parent ? parent.get("shortname") : '';
   let parentName = parent ? parent.get("name") : '';
-  if (parent)
-    console.log("parent:::", parent.toJS())
+  //if (parent)
+  //  console.log("parent:::", parent.toJS())
   let link = metaTag ? metaTag.get("link") : '';
   let metaLink = {};
   if (!link) {
@@ -116,6 +117,10 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
   const linkColor = dark == 1 ? muiTheme.palette.linkColor.dark : muiTheme.palette.linkColor.light;
 
   let included = isIncluded(shortname);
+  let OW = styled.div`
+    width:100%;
+    padding-right:8px;
+  `
   let OuterWrap = styled.div`
       width:100%;
       margin-top:10px;
@@ -190,9 +195,9 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
     justify-content:flex-begin;
     font-family:Asap Condensed;
     `;
-  console.log("TOPIC:", topic.toJS())
+  //console.log("TOPIC:", topic.toJS())
 
-  return <OuterWrap>
+  return <OW><OuterWrap>
 
     <LeftWrap>
       <ParentLinks>
@@ -242,7 +247,7 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
     />
 
     </RightWrap>
-  </OuterWrap>
+  </OuterWrap></OW>
 }
 function mapStateToProps(state) {
   return {
