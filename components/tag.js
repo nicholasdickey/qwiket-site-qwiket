@@ -66,7 +66,7 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
     return <div />
   }
   let channel = app.get("channel").get("channel");
-  let shortname = qparams.shortname;
+  let shortname = qparams.tag || qparams.shortname;
 
   if (!shortname) { //if explicit shortname is not present in url, then pick the first tag from the topic itself
     let tags = topic.get("tags");
