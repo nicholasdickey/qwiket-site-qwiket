@@ -38,7 +38,7 @@ export class Common extends React.Component {
         let qparamsChanged = props.qparams != nextProps.qparams;
         let queuesChanged = props.queues != nextProps.queues;
         //console.log("CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
-        return contextChanged || appChanged || qparamsChanged || queuesChanged;
+        return contextChanged || qparamsChanged || queuesChanged;
     }
     newItemsNotificationsAPI() {
         if (this.api)
@@ -115,99 +115,99 @@ export class Common extends React.Component {
         // console.log("registerComment seInterval");
         let usedQwiketids = [];
         let usedTags = [];
-        this.intervalHandler2 = setInterval(async () => {
-            let store = Root.store;
-            if (!store)
-                return;
-            let currentState = store.getState();
-            let cache = currentState.cache;
-            console.log("intervalHandler2")
-            let t1 = Date.now();
-            const [...keys] = cache.get('queues').keys();
-            console.log({ keys, size: keys.length })
-            for (var j = 0; j < keys.length; j++) {
-                //console.log({ j })
-                let tag = keys[j];
-                if (tag == 'qwikets')
-                    continue;
-                let q = cache.get('queues').get(tag);
-                let t2 = Date.now();
-                //console.log({ t1, t2 })
-                // if (t2 - t1 > 5000)
-                //    return;
-                // console.log("QUEUE", tag, q.toJS())
-                let items = q.get("items");
-                if (!items) {
-                    console.log("QUEUE - NO ITEMS", tag, q.toJS())
-
-                    continue;
-                }
-                //console.log({ items, size: items.size });
-                for (var i = 0; i < items.size; i++) {
-                    let item = items.get(i);
-                    // console.log({ i, item })
-                    let t3 = Date.now();
-                    //  if (t3 - t1 > 8000)
-                    //     return;
-                    // await sleep(1000);
-                    // console.log("item process")
-                    let qwiketid = item.get("qwiketid") || item.get("threadid");
-                    // console.log("item process", { qwiketid, usedQwiketids })
-                    if (!props.cache.get("qwikets").get(qwiketid) && usedQwiketids.indexOf(qwiketid) < 0) {
-                        usedQwiketids.push(qwiketid);
-                        console.log("fetching item", qwiketid, usedQwiketids)
-                        await actions.fetchQwiket({
-                            channel,
-                            qwiketid,
-                            cache: true,
-                        })
-                        // await sleep(1000);
-                    }
-                }
-                // if (tag == 'newsviews' || tag == 'topics')
-                //    return;
-
-            }
-            const [...keys2] = cache.get("qwikets").keys();
-            console.log("KEYS2@:", keys2, { cache: cache.toJS() })
-            for (var k = 0; k < keys2.length; k++) {
-                let qwiketid = keys2[k];
-                let qwiket = cache.get("qwikets").get(qwiketid);
-                let tag = qwiket.get("cat") || qwiket.get("categoy");
-                if (!tag)
-                    tag = qwiket.get("tags") ? qwiket.get("tags").get(0) : '';
-                console.log("processTag", { qwiketid, tag, qwiket: qwiket.toJS(), usedTags, cacheTags: cache.get("tags").toJS(), cacheQueues: cache.get('queues').toJS() });
-                if (tag && usedTags.indexOf(tag) < 0) {
-                    console.log("###############", { qwiketid, tag, qwiket: qwiket.toJS() });
-                    let tags = cache.get("tags");
-                    console.log({ tags: tags.toJS() })
-                    if (!tags.get(tag)) {
-                        console.log("PREFETCH TAG", tag)
-                        actions.fetchTag({ tag, cache: true })
-                    }
-                    usedTags.push(tag);
-                    if (!cache.get('queues').get(tag)) {
-                        console.log("PREFETCH FEED", tag)
-                        await actions.fetchQueue({
-                            tag,
-                            cache: true,
-                            channel,
-                            homeChannel: props.app.get("channel").get("homeChannel"),
-                            solo: 0,
-                            shortname: tag,
-                            lastid: 0,
-                            page: 0,
-                            type: 'feed',
-                            tail: ''
-
-                        })
-                    }
-
-
-                }
-            }
-        }, 10000);
-
+        /* this.intervalHandler2 = setInterval(async () => {
+             let store = Root.store;
+             if (!store)
+                 return;
+             let currentState = store.getState();
+             let cache = currentState.cache;
+             console.log("intervalHandler2")
+             let t1 = Date.now();
+             const [...keys] = cache.get('queues').keys();
+             console.log({ keys, size: keys.length })
+             for (var j = 0; j < keys.length; j++) {
+                 //console.log({ j })
+                 let tag = keys[j];
+                 if (tag == 'qwikets')
+                     continue;
+                 let q = cache.get('queues').get(tag);
+                 let t2 = Date.now();
+                 //console.log({ t1, t2 })
+                 // if (t2 - t1 > 5000)
+                 //    return;
+                 // console.log("QUEUE", tag, q.toJS())
+                 let items = q.get("items");
+                 if (!items) {
+                     console.log("QUEUE - NO ITEMS", tag, q.toJS())
+ 
+                     continue;
+                 }
+                 //console.log({ items, size: items.size });
+                 for (var i = 0; i < items.size; i++) {
+                     let item = items.get(i);
+                     // console.log({ i, item })
+                     let t3 = Date.now();
+                     //  if (t3 - t1 > 8000)
+                     //     return;
+                     // await sleep(1000);
+                     // console.log("item process")
+                     let qwiketid = item.get("qwiketid") || item.get("threadid");
+                     // console.log("item process", { qwiketid, usedQwiketids })
+                     if (!props.cache.get("qwikets").get(qwiketid) && usedQwiketids.indexOf(qwiketid) < 0) {
+                         usedQwiketids.push(qwiketid);
+                         console.log("fetching item", qwiketid, usedQwiketids)
+                         await actions.fetchQwiket({
+                             channel,
+                             qwiketid,
+                             cache: true,
+                         })
+                         // await sleep(1000);
+                     }
+                 }
+                 // if (tag == 'newsviews' || tag == 'topics')
+                 //    return;
+ 
+             }
+             const [...keys2] = cache.get("qwikets").keys();
+             console.log("KEYS2@:", keys2, { cache: cache.toJS() })
+             for (var k = 0; k < keys2.length; k++) {
+                 let qwiketid = keys2[k];
+                 let qwiket = cache.get("qwikets").get(qwiketid);
+                 let tag = qwiket.get("cat") || qwiket.get("categoy");
+                 if (!tag)
+                     tag = qwiket.get("tags") ? qwiket.get("tags").get(0) : '';
+                 console.log("processTag", { qwiketid, tag, qwiket: qwiket.toJS(), usedTags, cacheTags: cache.get("tags").toJS(), cacheQueues: cache.get('queues').toJS() });
+                 if (tag && usedTags.indexOf(tag) < 0) {
+                     console.log("###############", { qwiketid, tag, qwiket: qwiket.toJS() });
+                     let tags = cache.get("tags");
+                     console.log({ tags: tags.toJS() })
+                     if (!tags.get(tag)) {
+                         console.log("PREFETCH TAG", tag)
+                         actions.fetchTag({ tag, cache: true })
+                     }
+                     usedTags.push(tag);
+                     if (!cache.get('queues').get(tag)) {
+                         console.log("PREFETCH FEED", tag)
+                         await actions.fetchQueue({
+                             tag,
+                             cache: true,
+                             channel,
+                             homeChannel: props.app.get("channel").get("homeChannel"),
+                             solo: 0,
+                             shortname: tag,
+                             lastid: 0,
+                             page: 0,
+                             type: 'feed',
+                             tail: ''
+ 
+                         })
+                     }
+ 
+ 
+                 }
+             }
+         }, 10000);
+         */
         this.intervalHandler = setInterval(() => {
             // console.log("registerQueue notificationsHandler:", { newItemsNotifications: this.queues.newItemsNotifications.toJS() });
             this.queues.newItemsNotifications.forEach((p, i) => {

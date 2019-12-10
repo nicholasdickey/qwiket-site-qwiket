@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux';
 import Immutable from "immutable"
+import Root from 'window-or-global'
 import styled from 'styled-components';
 import { useTheme } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper'
@@ -52,6 +53,8 @@ const StyledCheckbox = styled(({ ...other }) => <div classes={{ checked: 'checke
   }
 `;
 let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main panel
+  //  if (Root.qparams)
+  //   qparams = Root.qparams;
   const muiTheme = useTheme();
   const backgroundColor = muiTheme.palette.background.default;
   const color = muiTheme.palette.text.primary;

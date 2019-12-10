@@ -403,7 +403,10 @@ export class QwiketItem extends Component {
                 tthreadid = chunks[1];
                 // console.log({ chunks })
             }
-            let category = topic.get("cat") || topic.get("category");
+            let category = topic.get("cat") || topic.get("category") || topic.get("cat_shortname");
+            console.log({ category, topic: topic.toJS() })
+            if (!category && topic.get('tags'))
+                category = topic.get('tags')[0];
             let v10Link = {
                 route: isDisqus ? "taghub-disqus-context" : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? "taghub-view-context" : "taghub-view-context-home" : "taghub-native-context" : (loud || opened) ? "taghub-context" : "taghub-show-context",
                 pathname: '/channel',
@@ -447,7 +450,7 @@ export class QwiketItem extends Component {
                                 qwiketid: topic.get("threadid")
                             }
             }
-            //  console.log({ v10Link, tthreadid });
+            console.log({ v10Link, tthreadid });
             //if (inShow && relation == 'level' && typeOfQwiket == 'commentStream' && Root.__CLIENT__)
             //if (relation == 'parent')
             //	console.log("Q1GBG 4: createDatum", { targetLink, levelLink, routePageLink, qparams, props: this.props })

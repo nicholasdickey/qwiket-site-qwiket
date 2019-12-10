@@ -7,7 +7,10 @@ import { QwiketItem } from './qwikets/items/qwiketItem'
 import Topic from './topic'
 import Tag from './tag'
 import u from '../qwiket-lib/lib/utils'
+import Root from 'window-or-global'
 let Column = ({ column, qparams, tag }) => {
+    //  if (Root.qparams)
+    //     qparams = Root.qparams;
     let width = column.percentWidth;
     const StyledColumn = styled.div`
         width:${width};
@@ -88,6 +91,8 @@ let Column = ({ column, qparams, tag }) => {
     return <StyledColumn>{JSON.stringify(column, null, 4)}</StyledColumn>
 }
 let LayoutRes = ({ layout, res, qparams }) => {
+    // if (Root.qparams)
+    //    qparams = Root.qparams;
     let layres = layout[res];
     //console.log("LAYRES", layres);
     let columns = layres.columns;

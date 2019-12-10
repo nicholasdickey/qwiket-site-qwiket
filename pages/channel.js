@@ -119,8 +119,8 @@ class Channel extends React.Component {
         req.res.cookie('anon', anon, { maxAge, sameSite: 'Lax' })
         console.log("SET COOKIE ", { identity, anon }) */
         console.log("dbb Channel:getInitialProps done", params, Date.now())
-        if (Root.__CLIENT__)
-            Root.qparams = params;
+        //if (Root.__CLIENT__)
+        //    Root.qparams = params;
         return {
             qparams: params
         }
@@ -153,7 +153,7 @@ class Channel extends React.Component {
         let qparamsChanged = props.qparams != nextProps.qparams;
         let queuesChanged = props.queues != nextProps.queues;
         console.log("dbb CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
-        return contextChanged || appChanged || qparamsChanged || queuesChanged;
+        return contextChanged || qparamsChanged || queuesChanged;
     }
     render() {
         let { app, qparams, context, user } = this.props;
