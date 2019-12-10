@@ -37,7 +37,7 @@ export class Common extends React.Component {
         let appChanged = props.app != nextProps.app;
         let qparamsChanged = props.qparams != nextProps.qparams;
         let queuesChanged = props.queues != nextProps.queues;
-        console.log("CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
+        //console.log("CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
         return contextChanged || appChanged || qparamsChanged || queuesChanged;
     }
     newItemsNotificationsAPI() {

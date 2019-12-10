@@ -28,25 +28,26 @@ let Topic = ({ app, session, context, qparams, user }) => {  // a.k.a context ma
     console.log("NO TOPIC");
     return <div />
   }
+  let qwiketid = topic.get("qwiketid") || topic.get("threadid");
   let channel = app.get("channel").get("channel");
   let homeChannel = app.get("channel").get("homeChannel")
 
   let OuterTopic = styled.div`
 
     `;
-  //console.log("TOPIC:", topic.toJS())
+  //console.log("dbb TOPIC:", qwiketid)
   //< QwiketItem columnType = { 'context'} topic = { topic } channel = { channel } qparams = { qparams } forceShow = { true} approver = { false} test = { false} />
   return <OuterTopic><QwiketComment
     topic={topic}
     level={0}
-    pageRootThreadid={qparams.threadid}
+    pageRootThreadid={qwiketid}
 
     homeChannel={homeChannel}
     shortname={qparams.shortname}
     //approver={approver || isCatAdmin}
     channel={channel}
-    rootThreadid={qparams.threadid}
-    baseThreadid={qparams.threadid}
+    rootThreadid={qwiketid}
+    baseThreadid={qwiketid}
     qparams={qparams}
     topicOnly={true}
 

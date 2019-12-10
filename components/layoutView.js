@@ -46,7 +46,7 @@ let Column = ({ column, qparams, tag }) => {
             return <Queue tag={tag} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
         }
         case "topic": {
-            // console.log("Column:topic")
+            console.log("dbb Column:topic ", { qwiketid: qparams.threadid, time: Date.now() })
             let InnerTagWrap = styled.div`
                 width:100%;
                 display:flex;
@@ -106,7 +106,7 @@ let LayoutRes = ({ layout, res, qparams }) => {
 
 
 }
-let LayoutView = ({ app, session, pageType, layout, user, qparams, actions }) => {
+let LayoutView = ({ session, pageType, layout, user, qparams, actions }) => {
     console.log("LAYOUT_VIEW:", layout);
     let layoutView = layout.layoutView;
     let columns = layout.columns;
@@ -170,7 +170,7 @@ function mapDispatchToProps(dispatch) {
 }
 function mapStateToProps(state) {
     return {
-        app: state.app,
+
         session: state.session,
         user: state.user
     };

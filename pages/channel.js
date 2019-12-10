@@ -26,7 +26,7 @@ class Channel extends React.Component {
 
         }
         else {
-            console.log("CLIENT INIT", store.getState().queues.toJS())
+            console.log("dbb CLIENT INIT", store.getState().queues.toJS(), Date.now())
             Root.__WEB__ = true;
             Root.__CLIENT__ = true;
 
@@ -74,9 +74,11 @@ class Channel extends React.Component {
                 // console.log("client side app:", app ? app.toJS() : {})
             }
             //  console.log("after fetchApp", columns, params)
-
-            await fetchColumns({ columns, store, query: params, app, req });
-            //  console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ DONE WITH FETCH")
+            if (Root.__SERVER__)
+                await fetchColumns({ columns, store, query: params, app, req });
+            else
+                fetchColumns({ columns, store, query: params, app, req });
+            console.log("dbb DONE WITH FETCH", Date.now())
         }
         else if (req) {
             //  console.log("LANDING");
@@ -116,6 +118,9 @@ class Channel extends React.Component {
         req.res.cookie('identity', identity, { maxAge, sameSite: 'Lax' })
         req.res.cookie('anon', anon, { maxAge, sameSite: 'Lax' })
         console.log("SET COOKIE ", { identity, anon }) */
+        console.log("dbb Channel:getInitialProps done", params, Date.now())
+        if (Root.__CLIENT__)
+            Root.qparams = params;
         return {
             qparams: params
         }
@@ -147,13 +152,15 @@ class Channel extends React.Component {
         let appChanged = props.app != nextProps.app;
         let qparamsChanged = props.qparams != nextProps.qparams;
         let queuesChanged = props.queues != nextProps.queues;
-        console.log("CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
+        console.log("dbb CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
         return contextChanged || appChanged || qparamsChanged || queuesChanged;
     }
     render() {
-        const { app, qparams, context, user } = this.props;
+        let { app, qparams, context, user } = this.props;
+        if (Root.__CLIENT__ && Root.qparams)
+            qparams = Root.qparams;
         let channelName = app.get("channel").get("channel");
-        console.log("RENDER CHANNEL")
+        console.log("dbb RENDER CHANNEL", qparams, Date.now())
         //  console.log("channel+++", { qparams, channelName, RootC: Root.__CLIENT__ })
         if (channelName && channelName == 'landing') {
 
