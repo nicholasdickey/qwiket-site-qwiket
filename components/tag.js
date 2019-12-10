@@ -85,7 +85,7 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
     // console.log({ raw_metaTag: metaTag, metaTag: metaTag.toJS() });
   }
   else
-    metaTag = Immutable.fromJS({ name: '', image: '', link: '', description: '' });
+    metaTag = Immutable.fromJS({ name: 'Loading...', image: '', link: '', description: '' });
   let parent = metaTag ? metaTag.get("parentObject") : null;
   if (!parent) {
     // console.log("NO PARENT!!!")
@@ -107,6 +107,8 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
   }
   let image = metaTag.get("image");
   let name = metaTag.get("name");
+  if (!name)
+    name = "Loading..."
   let description = metaTag.get("description");
   let myfeeds = app.get("channel").get('myfeeds');
   let isIncluded = shortname => {
@@ -155,12 +157,14 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
     padding:10px 40px 10px 15px;
     margin-left:10px;
     margin-top:4px;
+  
     font-family:roboto;
 
   `;
   const StyledImage = styled(({ ...other }) => <Image{...other} />)`
    max-height:66px;
    margin:4px;
+
   `;
   const StyledIconButton = styled(({ ...other }) => <IconButton{...other} />)`
   margin-top:0px !important;
@@ -169,6 +173,7 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
   const TitleOuterDiv = styled.div`
      margin-left:10px;
      flex-grow:10;
+    
      display:flex;
      flex-direction:column;
      align-items:flex-end;
@@ -205,7 +210,7 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
     <LeftWrap>
       <ParentLinks>
         {parentName ? <a><Link route='solo-newsline' params={{ channel, soloShortname: parentShortname }}>{parentName}</Link></a> : null}
-        <a><Link route="news" params={{ channel }}>&nbsp;&nbsp;To Newsline</Link></a>
+        <a><Link route="news" params={{ channel }}>&nbsp;&nbsp;&nbsp;&nbsp;To Newsline</Link></a>
       </ParentLinks>
       <OuterLink>
 

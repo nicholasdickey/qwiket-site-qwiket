@@ -1278,7 +1278,7 @@ export default class QwiketRenderer extends Component {
             <div data-id={`d1-${type}`}>{type == "full" ? <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="inner-blocks">
                 {blocks}
             </div> : <div data-id="m1"> <a><Link data-id="masked-link" route={d.v10Link.route} params={d.v10Link.params}  >
-                <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="d2-inner-blocks">
+                <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="d2-inner-blocks" onClick={onClick}>
                     {blocks}
                 </div>
             </Link></a></div>}</div>

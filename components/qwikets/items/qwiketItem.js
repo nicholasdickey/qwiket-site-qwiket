@@ -14,9 +14,10 @@ import amber from '@material-ui/core/colors/amber';
 import red from '@material-ui/core/colors/red';
 import indigo from '@material-ui/core/colors/indigo';
 import blueGrey from '@material-ui/core/colors/blueGrey';
-import { fetchStoryQwikets, fetchShowQwiket, invalidateContext, localUpdateQwiket, createQwiket, saveQwiket, publishQwiket, unpublishQwiket, fetchDraftChildQwiket } from '../../../qwiket-lib/actions/contextActions';
+import { fetchStoryQwikets, fetchShowQwiket, localUpdateQwiket, createQwiket, saveQwiket, publishQwiket, unpublishQwiket, fetchDraftChildQwiket } from '../../../qwiket-lib/actions/contextActions';
 import { updateQwiketState, itemAction } from '../../../qwiket-lib/actions/newslineActions';
 import { requestIcon, updateOnlineState, } from '../../../qwiket-lib/actions/appActions';
+import { invalidateContext } from '../../../qwiket-lib/actions/context';
 
 import u from '../../../qwiket-lib/lib/utils';
 
@@ -492,8 +493,11 @@ export class QwiketItem extends Component {
             }
             // if (relation == 'parent')
             //   console.log("QGBG: parent_summary QGBG link:", link, datumQwiketLink, routePageLink, 'muzzled:', muzzled)
-            const onClick = () => {
-                console.log("ONCLICK")
+            const onClick = (topParent) => {
+                console.log("ONCLICK", topParent)
+                if (!topParent)
+                    topParent = topic;
+                let tag = topParent.get("category") || topParent.get("cat") || topParent.get("cat_shortname");
                 //console.log(" setTop onClick invalidateContext:", { topic: topic.toJS(), isDisqus, topLevel })
                 if (isDisqus) {
                     if (muzzled) {
@@ -504,7 +508,7 @@ export class QwiketItem extends Component {
                     }
                     else {
                         //console.log("invalidateContext:",topic.toJS())
-                        invalidateContext(true, topic.get("category"), topic.get("threadid"));
+                        invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
                         //console.log("setTop1")
                         window.setTop = true;
 
@@ -524,7 +528,8 @@ export class QwiketItem extends Component {
                     //console.log("QGBG link onClick topLevel", { opened, loud, link: topic.get("link") });
                     if (opened || loud) {
                         //console.log("QGBG link onClick opened", "cat:", topic.get("cat"), 'threadid:', topic.get("threadid"), 'topic:', topic ? topic.toJS() : 'no topic');
-                        invalidateContext(true, topic.get("cat"), topic.get("threadid"), topic);
+                        invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
+
                         //console.log("setTop2")
                         window.setTop = true;
                     }
@@ -554,7 +559,7 @@ export class QwiketItem extends Component {
 
                     if (opened) {
                         //console.log("QGBG link onClick not topLevel opened","cat:",topic.get("cat"),'threadid:',topic.get("threadid"),'topic:',topic?topic.toJS():'no topic');
-                        invalidateContext(true, topic.get("cat"), topic.get("threadid"), topic);
+                        invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
                         window.setTop = true;
                         //	console.log("setTop3")
                     }
@@ -738,6 +743,7 @@ export class QwiketItem extends Component {
                 published_time: topic.get("published_time")
             }));
         }
+        let topParent = levelQwiket;
         if (parent_summary && showParents) {
             //console.log("QGBG: parent_summary 0 adding item", { parent_summary: parent_summary.toJS() });
 
@@ -769,7 +775,8 @@ export class QwiketItem extends Component {
                 //if(i!=0)
                 //	console.log("QGBG: parent_summary->>>datum",parentDatum.toJS());
                 //console.log("QGBG: parent_summary 4 adding item", p.toJS(), 'opened:', opened, opened ? opened : p);
-
+                if (i == 0 && !levelTopLevel)
+                    topParent = parentDatum;
                 return parentDatum;
             })
         }
@@ -784,6 +791,7 @@ export class QwiketItem extends Component {
                     level={levelQwiket}
                     children={childrenQwikets}
                     parents={parentQwikets}
+                    topParent={topParent}
                     levelLink={levelLink}
                     replyLink={replyLink}
                     replyid={levelKey}

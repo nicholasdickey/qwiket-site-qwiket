@@ -393,7 +393,8 @@ export class QwiketFamily extends Component {
             lazy,
             test,
             online,
-            theme
+            theme,
+            topParent
         } = this.props;
         let globals = session;
         if (test) approver = 1;
@@ -428,34 +429,35 @@ export class QwiketFamily extends Component {
                 const parentRows = parents.map((datum, i) => {
                     if (!datum) return null;
                     // console.log("QGBG map parent", i, datum.toJS());
-
+                    let onClick = datum.get("onClick");
                     //return <SubQwiket test={test} updateOnlineState={updateOnlineState} itemAction={itemAction} unpublishQwiket={unpublishQwiket} long={state.long} doLong={update.bind(this)} key={"subqwiket-parents" + i} datum={datum} inShow={inShow} channel={channel} globals={globals} session={session} history={history} approver={approver} zoom={zoom} /> })
                     return (
-                        <div onClick={datum.get("onClick")}><QwiketRenderer
-                            subtype={"parent"}
-                            test={test}
-                            updateOnlineState={updateOnlineState}
-                            itemAction={itemAction}
-                            unpublishQwiket={unpublishQwiket}
-                            long={state.long}
-                            key={"subqwiket-parents" + i}
-                            topic={datum}
-                            inShow={inShow}
-                            channel={channel}
-                            globals={globals}
-                            session={session}
-                            approver={approver}
-                            state={state}
-                            loud={loud}
-                            zoom={zoom}
-                            link={datum.get("link")}
-                            onClick={datum.get("onClick")}
-                            setLong={val => updateOnlineState({ long: val }, true)}
-                            long={state.long}
-                            qwiketOpened={qwiketOpened}
-                            type={columnType}
+                        <div onClick={() => onClick(topParent)}>
+                            <QwiketRenderer
+                                subtype={"parent"}
+                                test={test}
+                                updateOnlineState={updateOnlineState}
+                                itemAction={itemAction}
+                                unpublishQwiket={unpublishQwiket}
+                                long={state.long}
+                                key={"subqwiket-parents" + i}
+                                topic={datum}
+                                inShow={inShow}
+                                channel={channel}
+                                globals={globals}
+                                session={session}
+                                approver={approver}
+                                state={state}
+                                loud={loud}
+                                zoom={zoom}
+                                link={datum.get("link")}
+                                onClick={() => onClick(topParent)}
+                                setLong={val => updateOnlineState({ long: val }, true)}
+                                long={state.long}
+                                qwiketOpened={qwiketOpened}
+                                type={columnType}
 
-                        /></div>
+                            /></div >
                     );
                 });
                 // console.log("after map --->>")
@@ -475,6 +477,7 @@ export class QwiketFamily extends Component {
                           }}
                           key="subqwiket-level" datum={level} inShow={inShow} globals={globals} session={session} history={history} levelLink={levelLink} approver={approver} channel={channel} zoom={this.state.z} />
                           */
+            let onClick = level.get("onClick");
             const levelRow = (
                 <QwiketRenderer
                     subtype={"level"}
@@ -495,7 +498,7 @@ export class QwiketFamily extends Component {
                     loud={loud}
                     zoom={this.state.z}
                     link={level.get("link")}
-                    onClick={level.get("onClick")}
+                    onClick={() => { console.log("family onClick"); onClick(topParent) }}
                     setLong={val => updateOnlineState({ long: val }, true)}
                     long={this.state.long}
                     qwiketOpened={qwiketOpened}
@@ -525,6 +528,7 @@ export class QwiketFamily extends Component {
 
                 const childRows = children.map((datum, i) => {
           /*console.log("QGBG map child",i);*/ if (!datum) return null;
+                    let onClick = datum.get("onClick");
                     //return <SubQwiket test={test} updateOnlineState={updateOnlineState} itemAction={itemAction} unpublishQwiket={unpublishQwiket} long={state.long} doLong={update.bind(this)} key={"subqwiket-children" + i} datum={datum} inShow={inShow} globals={globals} channel={channel} session={session} history={history} approver={approver} zoom={zoom} /> });
                     if (
                         !datum.get("reshare") ||
@@ -549,7 +553,7 @@ export class QwiketFamily extends Component {
                                 approver={approver}
                                 zoom={zoom}
                                 link={datum.get("link")}
-                                onClick={datum.get("onClick")}
+                                onClick={() => onClick(topParent)}
                                 setLong={val => updateOnlineState({ long: val }, true)}
                                 long={online.get("long")}
                                 qwiketOpened={qwiketOpened}
