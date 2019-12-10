@@ -37,8 +37,16 @@ export class Common extends React.Component {
         let appChanged = props.app != nextProps.app;
         let qparamsChanged = props.qparams != nextProps.qparams;
         let queuesChanged = props.queues != nextProps.queues;
-        //console.log("CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
-        return contextChanged || qparamsChanged || queuesChanged;
+
+        let nextSession = nextProps.session;
+        let session = props.session;
+
+        let width = u.getLayoutWidth({ session });
+        let nextWidth = u.getLayoutWidth({ nextSession });
+
+        let widthChanged = width != nextWidth
+        console.log("Common shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged, widthChanged })
+        return widthChanged;
     }
     newItemsNotificationsAPI() {
         if (this.api)
@@ -306,7 +314,11 @@ export class Common extends React.Component {
 
     }
     render() {
-        const { app, qparams, context, user } = this.props;
+        console.log("RENDER COMMON");
+        const { app, session, queues, qparams, context, user } = this.props;
+
+        let width = u.getLayoutWidth({ session });
+
         let pageType = qparams.sel ? qparams.sel : "newsline";
         //   console.log("COMMON RENDER", { pageType, qparams })
         // console.log({ user: user.toJS() })
@@ -326,9 +338,6 @@ export class Common extends React.Component {
              extraTags: [],
              published_time: 0
          }) */
-        let qwiket = context.get("topic");
-        let channel = app.get("channel");
-        //  console.log("qwiket", { qwiket })
         const PageTitle = styled.div`
         display:flex;
         justify-content:center;
@@ -356,11 +365,11 @@ export class Common extends React.Component {
         /*
         <Typography variant="subtitile2" gutterBottom>CHANNEL: {app.get('channel').get('channelDetails').get('name')}</Typography>*/
         const InnerWrapper = ({ layout }) => <div>
-            <Topline layout={layout} />
+            <Topline layout={layout} width={width} />
             <InnerGrid layout={layout}>
                 <PageWrap>
-                    <Header pageType={pageType} layout={layout} qparams={qparams} />
-                    <LayoutView pageType={pageType} layout={layout} qparams={qparams} />
+                    <Header width={width} pageType={pageType} layout={layout} qparams={qparams} />
+                    <LayoutView width={width} pageType={pageType} layout={layout} qparams={Root.qparams ? {} : qparams} />
                 </PageWrap>
             </InnerGrid>
         </div>;

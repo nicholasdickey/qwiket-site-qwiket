@@ -213,7 +213,7 @@ class LinkRenderer extends Component {
             let l = w ? w.length : 0;
             let vlink = 'https://www.youtube.com/embed/' + r3;
             //   console.log("youtu.be 3", { vlink, r2, r3, w });
-            return <iframe data-d1={r2} data-url={url} key={dataId + "-utube2-" + index} width='100%' height={315} src={vlink} style={{ marginLeft: "auto", marginRight: "auto" }} frameborder="0" allow="autoplay;encrypted-media" allowfullscreen={true} />;
+            return <iframe data-d1={r2} data-url={url} key={dataId + "-utube2-" + index} width='100%' height={315} src={vlink} style={{ marginLeft: "auto", marginRight: "auto" }} frameborder="0" allow="autoplay;encrypted-media" allowFullScreen={true} />;
         }
         else if (url.indexOf("youtu.be") >= 0 || url.indexOf("youtube.com") >= 0) {
             const htext = href;
@@ -257,7 +257,7 @@ class LinkRenderer extends Component {
             // }
             //  console.log("youtu.be 212", { vlink });
 
-            return <iframe data-url={url} key={dataId + "-utube-" + index} width='100%' height={315} src={vlink} style={{ marginLeft: "auto", marginRight: "auto" }} frameborder="0" allow="autoplay;encrypted-media" allowfullscreen={true} />;
+            return <iframe data-url={url} key={dataId + "-utube-" + index} width='100%' height={315} src={vlink} style={{ marginLeft: "auto", marginRight: "auto" }} frameborder="0" allow="autoplay;encrypted-media" allowFullScreen={true} />;
 
         }
 

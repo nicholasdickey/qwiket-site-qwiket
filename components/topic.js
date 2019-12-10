@@ -23,12 +23,15 @@ const StyledCheckbox = styled(({ ...other }) => <div classes={{ checked: 'checke
     color:  #aff; !important;
   }
 `;
-let Topic = ({ app, session, context, qparams, user }) => {  // a.k.a context main panel
+let Topic = ({ qparams, app, context }) => {  // a.k.a context main panel
+  if (Root.qparams)
+    qparams = Root.qparams;
   let topic = context.get("topic");
   if (!topic) {
     console.log("NO TOPIC");
     return <div />
   }
+  console.log("RENDER TOPIC", qparams);
   // if (Root.qparams)
   //   qparams = Root.qparams;
   let qwiketid = qparams.threadid;

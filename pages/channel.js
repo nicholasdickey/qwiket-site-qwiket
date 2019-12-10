@@ -119,8 +119,8 @@ class Channel extends React.Component {
         req.res.cookie('anon', anon, { maxAge, sameSite: 'Lax' })
         console.log("SET COOKIE ", { identity, anon }) */
         console.log("dbb Channel:getInitialProps done", params, Date.now())
-        //if (Root.__CLIENT__)
-        //    Root.qparams = params;
+        if (Root.__CLIENT__)
+            Root.qparams = params;
         return {
             qparams: params
         }
@@ -138,7 +138,7 @@ class Channel extends React.Component {
         const { app, qparams, context, user } = this.props;
         let channelName = app.get("channel").get("channel");
         // console.log("+++CLIENT")
-        if (qparams.url.indexOf('logout') >= 0) {
+        if (qparams.url && qparams.url.indexOf('logout') >= 0) {
             //  console.log("+++LOGOUT !!!!");
             const as = `/channel/${channelName}`
             const href = `/channel?channel=${channelName}`

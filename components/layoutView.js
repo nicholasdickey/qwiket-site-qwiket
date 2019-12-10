@@ -1,6 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux';
 import styled from 'styled-components';
 import Queue from '../qwiket-lib/components/queue'
 import { QwiketItem } from './qwikets/items/qwiketItem'
@@ -8,9 +6,10 @@ import Topic from './topic'
 import Tag from './tag'
 import u from '../qwiket-lib/lib/utils'
 import Root from 'window-or-global'
-let Column = ({ column, qparams, tag }) => {
-    //  if (Root.qparams)
-    //     qparams = Root.qparams;
+let Column = React.memo(({ column, qparams }) => {
+    if (Root.qparams)
+        qparams = Root.qparams;
+    let tag = qparams.tag || qparams.shortname;
     let width = column.percentWidth;
     const StyledColumn = styled.div`
         width:${width};
@@ -21,25 +20,25 @@ let Column = ({ column, qparams, tag }) => {
     let type = column.type;
     let selector = column.selector;
     let msc = column.msc;
-    const listRenderer = ({ qparams, rows, tag, ...rest }) => {
+    const listRenderer = ({ rows }) => {
         return <InnerStyledColumn data-id="inner-styled-column" className="q-column">{rows}</InnerStyledColumn>
     }
     switch (selector) {
         case 'newsviews':
         case 'topics': {
             // console.log(`Column: ${selector}`)
-            const renderer = ({ item, index, x, y, tag, qparams, channel }) => {
+            const renderer = ({ item, channel }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", item)
 
 
-                return <QwiketItem columnType={tag} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
+                return <QwiketItem qparams={qparams} columnType={tag} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
             }
-            return <StyledColumn data-id="styled-column"><Queue tag={selector} renderer={renderer} qparams={qparams} listRenderer={listRenderer} /></StyledColumn>
+            return <StyledColumn data-id="styled-column"><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} /></StyledColumn>
         }
         case 'feed': {
             // console.log("Column:feed")
-            const renderer = ({ item, index, x, y, tag, qparams, channel }) => {
+            const renderer = ({ item, channel }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", item)
 
@@ -63,14 +62,14 @@ let Column = ({ column, qparams, tag }) => {
             let InnerFeedWrap = styled.div`
                 width:100% !important;
             `
-            tag = tag || qparams.tag || qparams.shortname;
+            tag = tag;
             console.log("Column:feed", { tag })
-            const renderer = ({ item, index, x, y, tag, qparams, channel }) => {
+            const renderer = ({ item, channel }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", tag)
 
 
-                return <QwiketItem data-id="qwiket-item" columnType={tag} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
+                return <QwiketItem qparams={qparams} columnType={tag} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
             }
             return <StyledColumn data-id="styled-column">
                 <Tag qparams={qparams} />
@@ -81,7 +80,7 @@ let Column = ({ column, qparams, tag }) => {
 
                     <FeedWrap data-id="feed-wrap" >
                         <InnerFeedWrap data-id="inner-feed-wrap">
-                            <Queue tag={tag} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
+                            <Queue qparams={qparams} tag={tag} renderer={renderer} listRenderer={listRenderer} />
                         </InnerFeedWrap>
                     </FeedWrap>
                 </InnerTagWrap>
@@ -89,8 +88,8 @@ let Column = ({ column, qparams, tag }) => {
         }
     }
     return <StyledColumn>{JSON.stringify(column, null, 4)}</StyledColumn>
-}
-let LayoutRes = ({ layout, res, qparams }) => {
+});
+let LayoutRes = React.memo(({ layout, res, qparams }) => {
     // if (Root.qparams)
     //    qparams = Root.qparams;
     let layres = layout[res];
@@ -103,21 +102,20 @@ let LayoutRes = ({ layout, res, qparams }) => {
     })
     let View = styled.div`
         width:100%;
-        display:flex;
-        
+        display:flex;     
     `
     // <div>{JSON.stringify(layres, null, 4)}</div>
     return <View>{cols}</View>
 
 
-}
-let LayoutView = ({ session, pageType, layout, user, qparams, actions }) => {
-    console.log("LAYOUT_VIEW:", layout);
+});
+
+let LayoutView = React.memo(({ layout, width, qparams }) => {
+    console.log("queue LAYOUT_VIEW:", layout, width, qparams);
     let layoutView = layout.layoutView;
-    let columns = layout.columns;
-    let defaultWidth = session.get("defaultWidth");
+    // let columns = layout.columns;
+    // let defaultWidth = session.get("defaultWidth");
     //  console.log("defaultWidth:", +defaultWidth, +session.get("width"))
-    let width = u.getLayoutWidth({ session });
     let W000 = styled.div`
       //  display:none;
         width:100%;
@@ -156,31 +154,16 @@ let LayoutView = ({ session, pageType, layout, user, qparams, actions }) => {
     const OuterWrapper = styled.div`
         width:100%;
     `;
-    //console.log("LAYOUTVIEW ", { width })
+    // console.log("LAYOUTVIEW ", { width })
     return <OuterWrapper>
-        {width == 750 ? <W000><LayoutRes layout={layoutView} res="w900" qparams={qparams} /></W000> : null}
-        {width == 900 ? <W900><LayoutRes layout={layoutView} res="w900" qparams={qparams} /></W900> : null}
-        {width == 1200 ? <W1200><LayoutRes layout={layoutView} res="w1200" qparams={qparams} /></W1200> : null}
-        {width == 1800 ? <W1800><LayoutRes layout={layoutView} res="w1800" qparams={qparams} /></W1800> : null}
-        {width == 2100 ? <W2100><LayoutRes layout={layoutView} res="w2100" qparams={qparams} /></W2100> : null}
+        {width == 750 ? <W000><LayoutRes layout={layoutView} qparams={qparams} res="w900" /></W000> : null}
+        {width == 900 ? <W900><LayoutRes layout={layoutView} qparams={qparams} res="w900" /></W900> : null}
+        {width == 1200 ? <W1200><LayoutRes layout={layoutView} qparams={qparams} res="w1200" /></W1200> : null}
+        {width == 1800 ? <W1800><LayoutRes layout={layoutView} qparams={qparams} res="w1800" /></W1800> : null}
+        {width == 2100 ? <W2100><LayoutRes layout={layoutView} qparams={qparams} res="w2100" /></W2100> : null}
 
     </OuterWrapper>
     // return <div>{JSON.stringify(layout, null, 4)}</div>
-}
+})
 
-function mapDispatchToProps(dispatch) {
-    return {
-        // actions: bindActionCreators({ logout }, dispatch)
-    }
-}
-function mapStateToProps(state) {
-    return {
-
-        session: state.session,
-        user: state.user
-    };
-}
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(LayoutView)
+export default LayoutView

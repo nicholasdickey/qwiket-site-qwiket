@@ -16,7 +16,7 @@ import { Image } from 'react-bootstrap'
 var Markdown = require('react-markdown');
 let { Link, Router } = ssRoutes;
 import { ClickWalledGarden } from '../qwiket-lib/components/walledGarden';
-import { LinkPopup } from '../qwiket-lib/components/linkPage';
+import LinkPopup from '../qwiket-lib/components/linkPage';
 /**
  *
           {shortname == 'nro' ? <div style={{ textTransform: 'none', width: '100%', marginLeft: 'auto', alignItems: 'center', marginRight: 'auto', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
@@ -52,76 +52,22 @@ const StyledCheckbox = styled(({ ...other }) => <div classes={{ checked: 'checke
     color:  #aff; !important;
   }
 `;
-let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main panel
-  //  if (Root.qparams)
-  //   qparams = Root.qparams;
+
+let RenderTag = React.memo(({ channel, shortname, parentName, parentShortname, metaLink, name, description, image, included, dark, actions }) => {
   const muiTheme = useTheme();
   const backgroundColor = muiTheme.palette.background.default;
   const color = muiTheme.palette.text.primary;
 
   let [linkOpen, setLinkOpen] = useState(false);
-  let leftWidth = '70%';
-  let rightWidth = '30%';
-  let topic = context.get("topic");
-  let dark = +session.get('dark');
-  if (!topic) {
-    // console.log("NO TOPIC");
-    return <div />
-  }
-  let channel = app.get("channel").get("channel");
-  let shortname = qparams.tag || qparams.shortname;
-
-  if (!shortname) { //if explicit shortname is not present in url, then pick the first tag from the topic itself
-    let tags = topic.get("tags");
-    //console.log("Tag getting tags", tags.toJS());
-    shortname = tags.get(0);
-  }
-  // console.log({ app })
-  let tags = app.get("tags");
-  // console.log("app tags", { tags: tags.toJS(), shortname })
-  let metaTag = tags.get(shortname)
-  //console.log({ metaTag });
-  if (metaTag) {
-    // console.log({ raw_metaTag: metaTag, metaTag: metaTag.toJS() });
-  }
-  else
-    metaTag = Immutable.fromJS({ name: 'Loading...', image: '', link: '', description: '' });
-  let parent = metaTag ? metaTag.get("parentObject") : null;
-  if (!parent) {
-    // console.log("NO PARENT!!!")
-  }
-  let parentShortname = parent ? parent.get("shortname") : '';
-  let parentName = parent ? parent.get("name") : '';
-  //if (parent)
-  //  console.log("parent:::", parent.toJS())
-  let link = metaTag ? metaTag.get("link") : '';
-  let metaLink = {};
-  if (!link) {
-    metaLink.params = { channel, shortname };
-    metaLink.route = 'context-home';
-    metaLink.external = false;
-  }
-  else {
-    metaLink.external = true;
-    metaLink.link = link;
-  }
-  let image = metaTag.get("image");
-  let name = metaTag.get("name");
-  if (!name)
-    name = "Loading..."
-  let description = metaTag.get("description");
-  let myfeeds = app.get("channel").get('myfeeds');
-  let isIncluded = shortname => {
-    return myfeeds.find(feed => (feed.shortname == shortname) && feed.included
-    )
-  }
   let hcolor = '#eee';
   if (dark == 1) {
     hcolor = '#222';
   }
   const linkColor = dark == 1 ? muiTheme.palette.linkColor.dark : muiTheme.palette.linkColor.light;
 
-  let included = isIncluded(shortname);
+  let leftWidth = '70%';
+  let rightWidth = '30%';
+
   let OW = styled.div`
     width:100%;
     padding-right:8px;
@@ -209,8 +155,8 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
 
     <LeftWrap>
       <ParentLinks>
-        {parentName ? <a><Link route='solo-newsline' params={{ channel, soloShortname: parentShortname }}>{parentName}</Link></a> : null}
-        <a><Link route="news" params={{ channel }}>&nbsp;&nbsp;&nbsp;&nbsp;To Newsline</Link></a>
+        {parentName ? <Link route='solo-newsline' params={{ channel, soloShortname: parentShortname }}><a>{parentName}</a></Link> : null}
+        <Link route="news" params={{ channel }}><a>&nbsp;&nbsp;&nbsp;&nbsp;To Newsline</a></Link>
       </ParentLinks>
       <OuterLink>
 
@@ -226,9 +172,7 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
         <div>
 
           <LinkPopup
-            qparams={qparams}
             shortname={shortname}
-            channel={channel}
             open={linkOpen}
             onClose={() => setLinkOpen(false)}
           ></LinkPopup>
@@ -249,20 +193,95 @@ let Tag = ({ app, session, context, qparams, user }) => {  // a.k.a context main
           actions.includeFeed(channel, shortname, included ? 'exclude' : 'include');
         }}
 
-        color={red[900]}
+        color="primary"
       />}
       label={<span style={{ fontSize: '0.9rem' }}>In Newsline</span>}
     />
 
     </RightWrap>
-  </OuterWrap></OW>
+  </OuterWrap></OW >
+});
+let Tag = ({ qparams, context, app, session, actions }) => {  // a.k.a context main panel
+  //  if (Root.qparams)
+  //   qparams = Root.qparams;
+  if (Root.qparams)
+    qparams = Root.qparams;
+
+
+  let topic = context.get("topic");
+  let dark = +session.get('dark');
+  if (!topic) {
+    // console.log("NO TOPIC");
+    return <div />
+  }
+  let channel = app.get("channel").get("channel");
+  let shortname = qparams.tag || qparams.shortname;
+
+  if (!shortname) { //if explicit shortname is not present in url, then pick the first tag from the topic itself
+    let tags = topic.get("tags");
+    //console.log("Tag getting tags", tags.toJS());
+    shortname = tags.get(0);
+  }
+  // console.log({app})
+  let tags = app.get("tags");
+  // console.log("app tags", {tags: tags.toJS(), shortname })
+  let metaTag = tags.get(shortname)
+  //console.log({metaTag});
+  if (metaTag) {
+    // console.log({ raw_metaTag: metaTag, metaTag: metaTag.toJS() });
+  }
+  else
+    metaTag = Immutable.fromJS({ name: 'Loading...', image: '', link: '', description: '' });
+  let parent = metaTag ? metaTag.get("parentObject") : null;
+  if (!parent) {
+    // console.log("NO PARENT!!!")
+  }
+  console.log("RENDER TAG");
+  let parentShortname = parent ? parent.get("shortname") : '';
+  let parentName = parent ? parent.get("name") : '';
+  //if (parent)
+  //  console.log("parent:::", parent.toJS())
+  let link = metaTag ? metaTag.get("link") : '';
+  let metaLink = {};
+  if (!link) {
+    metaLink.params = { channel, shortname };
+    metaLink.route = 'context-home';
+    metaLink.external = false;
+  }
+  else {
+    metaLink.external = true;
+    metaLink.link = link;
+  }
+  let image = metaTag.get("image");
+  let name = metaTag.get("name");
+  if (!name)
+    name = "Loading..."
+  let description = metaTag.get("description");
+  let myfeeds = app.get("channel").get('myfeeds');
+  let isIncluded = shortname => {
+    return myfeeds.find(feed => (feed.shortname == shortname) && feed.included
+    )
+  }
+
+  let included = isIncluded(shortname);
+  return <RenderTag
+    channel={channel}
+    shortname={shortname}
+    parentName={parentName}
+    parentShortname={parentShortname}
+    metaLink={metaLink}
+    name={name}
+    description={description}
+    image={image}
+    included={included}
+    dark={dark}
+    actions={actions} />
 }
 function mapStateToProps(state) {
   return {
     app: state.app,
     session: state.session,
-    context: state.context,
-    user: state.user
+    context: state.context
   };
 }
 function mapDispatchToProps(dispatch) {
@@ -273,4 +292,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Tag)
+)(React.memo(Tag))
