@@ -405,7 +405,7 @@ export class QwiketItem extends Component {
                 // console.log({ chunks })
             }
             let category = topic.get("cat") || topic.get("category") || topic.get("cat_shortname");
-            console.log({ category, topic: topic.toJS() })
+            //  console.log({ category, topic: topic.toJS() })
             if (!category && topic.get('tags'))
                 category = topic.get('tags')[0];
             let v10Link = {
@@ -451,7 +451,7 @@ export class QwiketItem extends Component {
                                 qwiketid: topic.get("threadid")
                             }
             }
-            console.log({ v10Link, tthreadid });
+            // console.log({ v10Link, tthreadid });
             //if (inShow && relation == 'level' && typeOfQwiket == 'commentStream' && Root.__CLIENT__)
             //if (relation == 'parent')
             //	console.log("Q1GBG 4: createDatum", { targetLink, levelLink, routePageLink, qparams, props: this.props })
