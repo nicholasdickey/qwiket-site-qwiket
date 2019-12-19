@@ -1470,6 +1470,7 @@ export class QwikieEditor extends Component {
                                     //Router.replace(focusUrl, focusUrl, { shallow: true })
                                 }}
                                 link={null}
+                                qparams={qparams}
                             />
                         </div>
                     </div>
@@ -1902,7 +1903,7 @@ export class QwikieEditor extends Component {
     }
 }
 function Qwikie(props) {
-    const { edit, topic, selected, user, cs, actions, unfocusUrl, focusUrl, test, setState, dropzone, state, globals, type, approver, loud, commentsOnly, topicOnly, level, channel, zoom } = props;
+    const { qparams, edit, topic, selected, user, cs, actions, unfocusUrl, focusUrl, test, setState, dropzone, state, globals, type, approver, loud, commentsOnly, topicOnly, level, channel, zoom } = props;
     const onlineUsername = user.get("username");
     const username = topic.get("username");
     const image_src = topic.get("image") ? topic.get("image") : topic.get("image_src");
@@ -1935,6 +1936,7 @@ function Qwikie(props) {
                                     //Router.replace(focusUrl, focusUrl, { shallow: true })
                                 }}
                                 link={selected ? unfocusUrl : focusUrl}
+                                qparams={qparams}
                             />
                         </div>}
 
@@ -2635,6 +2637,7 @@ export class QwiketComment extends Component {
                                                                         level={level}
                                                                         topicOnly={topicOnly}
                                                                         unfocusUrl={unfocusUrl}
+                                                                        qparams={params}
                                                                         dropzone={dropzone} //to prevent clickAway while in Dialog
                                                                         setState={(update, callback) => { this.setState(update, callback ? callback : null);/* console.log("setState !!!!!", { update });*/ }}
                                                                     />

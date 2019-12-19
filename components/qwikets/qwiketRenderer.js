@@ -888,7 +888,7 @@ export default class QwiketRenderer extends Component {
         return changedTopic || changedSession || longChanged;
     }
     render() {
-        let { theme, type, subtype, topic, globals, state, setState, approver, channel, loud, keyprop, long, setLong, link, onClick, inShow, qwiketOpened, zoom } = this.props;
+        let { qparams, theme, type, subtype, topic, globals, state, setState, approver, channel, loud, keyprop, long, setLong, link, onClick, inShow, qwiketOpened, zoom } = this.props;
         const muiTheme = theme;
         theme = +globals.get("theme");
         const palette = muiTheme.palette;
@@ -1054,7 +1054,7 @@ export default class QwiketRenderer extends Component {
                     html = x('<div id="markdown-shell" class="q-qwiket-md-shell">' + html + '</div>', isZoom, image);
                     //console.log("catedit shtml-pos-x:", shtml);
                     if (isZoom) {
-                        html = `<div style = "display:flex;flex-direction:column;width:100%" class="${isZoom ? "html - zoom" : "html - body"}" > ${
+                        html = `<div data-id="aaaa" style = "display:flex;flex-direction:column;width:100%" class="${isZoom ? "html - zoom" : "html - body"}" > ${
                             html.replace(/\t/g, ``).replace(/\n/g, ``).trim()
                                 .replace(/float( *?):( *?)left;/g, `margin-left:auto;margin-right:auto;`)
                                 .replace(/float( *?):( *?)right;/g, `margin-left:auto;margin-right:auto;`)
@@ -1141,6 +1141,7 @@ export default class QwiketRenderer extends Component {
         // if (full)
         //     console.log("<<<<<END BLOCKS MAP");
         let header = null;
+        // console.log("##### ", { qparams })
         if (type == 'comment') {
             /*
              {image_src ? <ModalImage className="q-comment-main-image" small={image_src} medium={image_src} large={image_src} /> : null}

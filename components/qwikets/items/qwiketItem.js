@@ -398,7 +398,7 @@ export class QwiketItem extends Component {
             if (!hub)
                 hub = 0;
 
-            let tthreadid = topic.get('threadid');
+            let tthreadid = topic.get('threadid') || topic.get('qwiketid');
             // console.log("topic:", topic.toJS())
             let thub = 0;
 
@@ -411,16 +411,16 @@ export class QwiketItem extends Component {
             let category = topic.get("cat") || topic.get("category") || topic.get("cat_shortname");
             //  console.log({ category, topic: topic.toJS() })
             if (!category && topic.get('tags'))
-                category = topic.get('tags')[0];
-            //  console.log("Calling route", muzzled)
+                category = topic.get('tags').get(0);
+            //  console.log("Calling route", { muzzled, category, topic: topic.toJS(), tag: topic.get('tags') ? topic.get('tags').get(0) : '' })
             let v10Link = route({
                 sel: muzzled ? qparams.sel : 'context',
                 qparams, nextParams:
-                    isDisqus ? { hub: [{ hub: thub }], tag: [{ tag: category }], comments: { disqus: [{ cc: topic.get('id') }] }, topic: [{ threadid: tthreadid }], show: false }
+                    isDisqus ? { hub: [{ hub: thub }], tag: [{ tag: category }], comments: { disqus: [{ cc: `comment-${topic.get('id')}` }] }, topic: [{ threadid: tthreadid }], show: false }
                         : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ?
-                            { show: { qview: [{ qwiketid: topic.get("threadid") }] } }
+                            { comments: false, show: { qview: [{ qwiketid: topic.get("threadid") }] } }
                             : { hub: [{ hub: thub }], tag: [{ tag: category }], comments: { native: [{ cqid: topic.get("threadid") }] }, topic: [{ threadid: tthreadid }], show: false }
-                            : { hub: [{ hub: thub }], tag: [{ tag: category }], topic: [{ threadid: tthreadid }], show: false }
+                            : { hub: [{ hub: thub }], tag: [{ tag: category }], topic: [{ threadid: tthreadid }], comments: false, show: false }
             });
 
 
@@ -675,7 +675,7 @@ export class QwiketItem extends Component {
         }
         const levelTopLevel = topic.get("url") ? topic.get("url").indexOf('q://') < 0 : !topic.get("url") && (topic.get("qtype") != 'disqus') ? true : false
         const levelIsDisqus = (topic.get("qtype") == 'disqus') && (topic.get("body") ? true : false);
-        const levelId = levelIsDisqus ? topic.get("id") : topic.get("threadid");
+        const levelId = levelIsDisqus ? topic.get("id") : topic.get("threadid") || topic.get("qwiketid");
         const levelKey = levelIsDisqus ? ('postid:' + levelId) : levelId;
 
         const replyLink = levelIsDisqus ? null : `${routePageLink}/qedit/__new/${replyRootThreadid}/${levelKey}`;
@@ -685,13 +685,14 @@ export class QwiketItem extends Component {
         let slink = show == 'qshow' ? 'show' : 'view';
         //let route = qparams.route;
         //  let levelRoute = route.indexOf('context') > 0 ? `${qparams.tag ? 'tag' : ''}${qparams.hub ? 'hub' : ''}-${slink}-context` : route.indexOf('home') > 0 ? `${slink}-context-home` : route.indexO('news') >= 0 ? `${slink}-news` : ``;
-        //  console.log("QwiketItem1", { sel: qparams.sel, qparams, levelKey })
+        //  console.log("QwiketItem1", { sel: qparams.sel, qparams, levelKey, topic: topic.toJS() })
         let v10levelLink = route(
             {
                 sel: qparams.sel,
                 qparams,
                 nextParams: {
-                    show: { qshow: [{ qwiketid: levelKey }] }
+                    show: { qshow: [{ qwiketid: levelKey }] },
+                    comments: false
                 }
             });
         /* let v10levelLink = {
@@ -878,6 +879,7 @@ export class QwiketItem extends Component {
                     actions={actions}
                     replyTo={replyTo}
                     columnType={columnType}
+                    qparams={qparams}
                 />
             </ErrorBoundary>
 
