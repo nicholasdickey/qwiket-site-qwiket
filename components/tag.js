@@ -54,6 +54,7 @@ const StyledCheckbox = styled(({ ...other }) => <div classes={{ checked: 'checke
 `;
 
 let RenderTag = React.memo(({ channel, shortname, parentName, parentShortname, metaLink, name, description, image, included, dark, actions }) => {
+  console.log("RENDER RenderTag");
   const muiTheme = useTheme();
   const backgroundColor = muiTheme.palette.background.default;
   const color = muiTheme.palette.text.primary;

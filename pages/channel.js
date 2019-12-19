@@ -18,7 +18,7 @@ import nextReduxWrapper from "next-redux-wrapper";
 
 class Channel extends React.Component {
     static async getInitialProps({ asPath, pathname, store, isServer, req, res, query }) {
-        // console.log({ isServer }, "getInitialProps ***********************************************************************")
+        //  console.log({ isServer }, "getInitialProps ***********************************************************************", { query })
         if (isServer && req) {
             Root.host = req.headers.host;
             Root.__SERVER__ = true
@@ -35,9 +35,10 @@ class Channel extends React.Component {
         const path = req ? req.url : asPath;
         //  console.log("PATH:", { path, hasReq: req ? 1 : 0, query, pathname: asPath })
         //console.log({ store, isServer, query })
-        let props = path ? parseCommonRoute(path) : { qparams: Object.assign(query, { route: {}, path: req ? req.url : location.href }), nothing: true, path: req ? req.url : location.href };
-        let params = props.qparams;
-        let sel = props.sel;
+        // let props = path ? parseCommonRoute(path) : { qparams: Object.assign(query, { route: {}, path: req ? req.url : location.href }), nothing: true, path: req ? req.url : location.href };
+        let params = query;//props.qparams;
+        console.log("QUERY:", { params })
+        let sel = query.sel;
         //  console.log("sel", sel)
         let { channel, q, solo } = params;
         if (!sel)
@@ -152,8 +153,9 @@ class Channel extends React.Component {
         let appChanged = props.app != nextProps.app;
         let qparamsChanged = props.qparams != nextProps.qparams;
         let queuesChanged = props.queues != nextProps.queues;
-        console.log("dbb CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged })
-        return contextChanged || qparamsChanged || queuesChanged;
+        let sessionChanged = props.session != nextProps.session;
+        console.log("dbb CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged })
+        return qparamsChanged;
     }
     render() {
         let { app, qparams, context, user } = this.props;

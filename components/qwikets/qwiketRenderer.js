@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-
+import Link from 'next/link'
 import $ from 'jquery';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -17,8 +17,8 @@ import linkifyHtml from 'linkifyjs/html';
 
 //Qwiket
 import u from '../../qwiket-lib/lib/utils'
-import { ssRoutes } from '../../qwiket-lib/routes'
-let { Link, Router } = ssRoutes;
+
+import { route } from '../../qwiket-lib/lib/qwiketRouter';
 
 //import { ArticleView, renderToHtml } from '../../qwiket-lib/components/articleView'
 //material-ui
@@ -403,7 +403,7 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
         console.log("render processBlock7", md);
     html = (
         <div data-id={blockType == 'text' ? 'textblock-' + dataId : 'htmlblock-' + dataId} key={`pre-render-blocks-key-${index}`} className={reshare > 50 && reshare < 60 ? "q-qwiket-markdown-draft" : "q-qwiket-markdown"} >
-            {blockType == 'text' ? <Markdown options={{
+            {blockType == 'text' || blockType == 'html' ? <Markdown options={{
                 forceBlock: true,
                 overrides: {
                     img: {
@@ -681,6 +681,7 @@ export const renderMarkdown = ({ blockType, dataId, md, index, children, theme, 
     md = md.replace(/undefined!/ig, '!');
     if (md.indexOf("undefined") >= 0)
         console.log("renderMArkdown2", { blockType, md })
+    //console.log("renderMarkdown", blockType)
     try {
         //  md = md.replace(/(^|\s)(#[a-z\d-]+)/ig, `$1 < span class="hashtag" >\\$2</span > `);
         //  md = md.replace(/<a /ig, '<a target="article" ')
@@ -883,7 +884,7 @@ export default class QwiketRenderer extends Component {
         let changedTopic = props.topic != nextProps.topic;
         let changedSession = props.session != nextProps.session;
         let longChanged = props.long != nextProps.long;
-        console.log("QwiketRenderer shouldComponentsUpdate", { changedTopic, changedSession, longChanged })
+        console.log("QwiketRenderer shouldComponentsUpdate", { threadid: nextProps.topic.get("threadid") || nextProps.topic.get("qwiketid"), changedTopic, changedSession, longChanged })
         return changedTopic || changedSession || longChanged;
     }
     render() {
@@ -1023,8 +1024,9 @@ export default class QwiketRenderer extends Component {
                 case 'text':
                     return renderMarkdown({ blockType: p.blockType, dataId: 'text-block', md: p.text, index: i, theme, reshare, linkColor, dropCap: p.dropCap ? true : false, state: this.state, setState: (update) => this.setState(update) });
                 case 'article':
-                    return renderMarkdown({ md: renderToHtml({ topic, d, theme, globals, zoom, channel, approver }), dataId: 'markdown-block12', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
+                    return renderMarkdown({ blockType: p.blockType, md: renderToHtml({ topic, d, theme, globals, zoom, channel, approver }), dataId: 'markdown-block12', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'html': // scraped from external page or description block 
+                    // console.log("block:html")
                     if (!p.html)
                         return;
                     html = p.html.replace(/<p><\/p>/g, '').replace(/<br>/g, '<br /><br />');
@@ -1071,11 +1073,12 @@ export default class QwiketRenderer extends Component {
                                 .replace(/height:[",']([A-Za-z0-9 _]*)[",']/g, `minHeight:350px;height:${isZoom ? "500px" : "100%"}`)
 
 
-                            }</div > `;
+                            } `;
                     }
                     // if (full)
                     //     console.log("BLOCK2:", { html })
-                    return renderMarkdown({ md: html, dataId: 'markdown-block11', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
+                    html = html.replace('&rsquo;', "'");
+                    return renderMarkdown({ blockType: p.blockType, md: html, dataId: 'markdown-block11', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'image': {
                     if (description.indexOf("That was no sweet") >= 0)
                         console.log("image block", image)
@@ -1175,7 +1178,7 @@ export default class QwiketRenderer extends Component {
                     </div>
                         {(!full && top) ?
 
-                            <Link data-id="masked-link" route={link} refUrl={link} >
+                            <Link href={d.v10Link.href} as={d.v10Link.as}><a data-id={`title-link-${d.v10Link.href.query.route}`} >
                                 <div data-id="inner-block" onClick={() => { console.log("ONECLICK2"); onClick() }}>
                                     <div style={{ marginBottom: 10 }} >
                                         <div data-id="title31" className={full ? "q-qwiket-title-full" : "q-qwiket-title"} >{d.title}</div>
@@ -1183,7 +1186,7 @@ export default class QwiketRenderer extends Component {
 
                                     </div>
                                 </div>
-                            </Link>
+                            </a></Link>
                             : null}
                     </div>
                     break;
@@ -1222,9 +1225,11 @@ export default class QwiketRenderer extends Component {
 
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 <div className="q-qwiket-author" style={{ marginTop: 0 }}>Shared by {d.sharedBy}</div>
-                                                {(d.starColor && (!d.topLevel || d)) ? <a><Link route={'context'} params={{ channel, threadid: "become-qwiket-member" }}>
-                                                    <div data-id="g2"><Star style={{ marginLeft: 10, color: d.starColor }} /></div>
-                                                </Link></a> : null}
+                                                {(d.starColor && (!d.topLevel || d)) ?
+                                                    <Link  {...route({ sel: 'context', qparams, nextParams: { topic: [{ threadid: 'become-qwiket-member' }] } })}><a data-id={`subsribe-link-${d.v10Link.href.query.route}`} >
+
+                                                        <div data-id="g2"><Star style={{ marginLeft: 10, color: d.starColor }} /></div>
+                                                    </a></Link> : null}
                                             </div>
 
                                         </div> : null}
@@ -1235,19 +1240,21 @@ export default class QwiketRenderer extends Component {
 
                                 </div>
 
-                                {!full && type != 'comment' && subtype == 'level' && top ? <div data-id="a432" style={{ marginLeft: 2 }}><div className="q-qwiket-author-small" >{author}</div> </div> : null}
+                                {!full && type != 'comment' && subtype == 'level' && top ? <div data-id="a432" style={{ marginLeft: 2 }}>
+                                    <div className="q-qwiket-author-small" >{author}</div> </div> : null}
 
 
                             </div>
 
-                            {(!full && top) ? <Link data-id="masked-link" route={link} refUrl={link} >
+                            {(!full && top) ? <Link href={d.v10Link.href} as={d.v10Link.as}><a data-id={`title-full-link-${d.v10Link.href.query.route}`} >
+
                                 <div data-id="title-block" onClick={() => { console.log("ONECLICK3", { link, d }); onClick() }}>
                                     <div  >
                                         <div data-id="title3" className={full ? "q-qwiket-title-full" : "q-qwiket-title"} >{d.title}</div>
 
 
                                     </div></div>
-                            </Link> : null}
+                            </a></Link> : null}
                             {full ? <a data-id="masked-link" href={d.url} target="article" >
                                 <div data-id="title-block" onClick={() => { console.log("ONECLICK3", { link, d }); onClick() }}>
                                     <div  >
@@ -1268,20 +1275,21 @@ export default class QwiketRenderer extends Component {
         //    console.log("qwiket-renderer:", {link})
         const StyledDiv = styled.div`
            & a{
-                            cursor:pointer;
-                        text-decoration:none;
-            color:${textColor};
-                        }
-                    `;
+                cursor:pointer;
+                text-decoration:none;
+                color:${textColor};
+            }
+        `;
+        //console.log("QwiketRenderer RENDER", { textColor })
         return (<StyledDiv data-id="QWIKET_RENDERER2" key={key} className={full ? 'q-full' : subtype == 'parent' && !top ? 'q-column q-weak' : shaded ? 'q-column-shaded' : 'q-column'}>
             {header}
             <div data-id={`d1-${type}`}>{type == "full" ? <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="inner-blocks">
                 {blocks}
-            </div> : <div data-id="m1"> <a><Link data-id="masked-link" route={d.v10Link.route} params={d.v10Link.params}  >
+            </div> : <div data-id="m1">  <Link href={d.v10Link.href} as={d.v10Link.as}><a data-id={`blocks-link-${d.v10Link.href.query.route}`} >
                 <div style={{ opacity: subtype == 'parent' ? 0.9 : 1.0 }} data-id="d2-inner-blocks" onClick={onClick}>
                     {blocks}
                 </div>
-            </Link></a></div>}</div>
+            </a></Link></div>}</div>
 
 
 

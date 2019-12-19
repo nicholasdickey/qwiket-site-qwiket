@@ -20,9 +20,9 @@ import { requestIcon, updateOnlineState, } from '../../../qwiket-lib/actions/app
 import { invalidateContext } from '../../../qwiket-lib/actions/context';
 
 import u from '../../../qwiket-lib/lib/utils';
+import { route } from '../../../qwiket-lib/lib/qwiketRouter';
 
-
-import { QwiketFamily } from '../qwiketFamily2';
+import { QwiketFamily } from '../qwiketFamily';
 
 
 const green500 = green[500];
@@ -88,7 +88,7 @@ export class QwiketItem extends Component {
         if (!qparams || !topic)
             return <div >QPARAMS:{qparams}</div>
 
-        console.log("qwiketItem RENDER ", { qparams, Root })
+        //   console.log("qwiketItem RENDER ", { qparams, Root })
         let globals = session;
         const { fetchStoryQwikets, fetchShowQwiket, invalidateContext, requestIcon } = actions;
 		/**
@@ -98,7 +98,7 @@ export class QwiketItem extends Component {
             columnType = 'mix';
             // console.log("qwiketItem", { channel })
         }
-        //console.log("QWIKETITEM")
+        //  console.log(" QWIKETITEM", columnType)
         const typeOfQwiket = columnType == 'context' ? 'full' : (columnType == 'reacts' || columnType == 'mix' || columnType == 'story-qwikets') ? 'commentStream' : 'qwiketColumn'; //full,commentStream,qwiketColumn, TBA - meta qwikets, hotlist?
         const zoom = qparams.z;
         // console.log({ topic })
@@ -187,7 +187,7 @@ export class QwiketItem extends Component {
 			qparams is a combined match from the routes (have all the qparams)
 		**/
         const routeBaseKey = qparams.threadid;
-        let routeRootKey = (qparams.rootThreadid ? (qparams.rootThreadid) : ((typeOfQwiket == 'full') ? rootKey : null));
+        let routeRootKey = (qparams.rootThreadid ? (qparams.rootThreadid) : qparams.qwiketid ? qparams.qwiketid : ((typeOfQwiket == 'full') ? rootKey : null));
         //console.log("QGBG ==> typeOfQwiket:",typeOfQwiket,';approver:',approver);
         const routeTargetKey = qparams ? qparams.qwiketid : routeRootKey;
         const routePageLink = qparams ? qparams.path : 'https://qwiket.com';  //for links that want to stay on the same page, just change root or target key, like when you are browsing within the Qwiket or switching to a different Qwiket inside the page
@@ -412,50 +412,62 @@ export class QwiketItem extends Component {
             //  console.log({ category, topic: topic.toJS() })
             if (!category && topic.get('tags'))
                 category = topic.get('tags')[0];
-            let v10Link = {
-                route: isDisqus ? "taghub-disqus-context" : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? "taghub-view-context" : "taghub-view-context-home" : "taghub-native-context" : (loud || opened) ? "taghub-context" : "taghub-show-context",
-                pathname: '/channel',
+            //  console.log("Calling route", muzzled)
+            let v10Link = route({
+                sel: muzzled ? qparams.sel : 'context',
+                qparams, nextParams:
+                    isDisqus ? { hub: [{ hub: thub }], tag: [{ tag: category }], comments: { disqus: [{ cc: topic.get('id') }] }, topic: [{ threadid: tthreadid }], show: false }
+                        : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ?
+                            { show: { qview: [{ qwiketid: topic.get("threadid") }] } }
+                            : { hub: [{ hub: thub }], tag: [{ tag: category }], comments: { native: [{ cqid: topic.get("threadid") }] }, topic: [{ threadid: tthreadid }], show: false }
+                            : { hub: [{ hub: thub }], tag: [{ tag: category }], topic: [{ threadid: tthreadid }], show: false }
+            });
 
-                params: isDisqus ? {
-                    channel,
-                    hub: thub,
-                    tag: category,
-                    threadid: tthreadid,
-                    cc: topic.get('id')
-                } : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? {
-                    channel,
-                    hub,
-                    tag: category,
-                    threadid: qthreadid,
 
-                    qwiketid: topic.get("threadid")
-
-                } : {
-                        channel,
-                        shortname: qparams.shortname,
-                        qwiketid: topic.get("threadid")
-
-                    } : {
-                        channel,
-                        hub: shub,
-                        tag: category,
-                        threadid: sthreadid,
-                        cqid: topic.get("threadid")
-
-                    } : (loud || opened) ? {
-                        channel,
-                        hub: thub,
-                        tag: category,
-                        threadid: tthreadid
-                    } : {
-                                channel,
-                                hub,
-                                tag: category,
-                                threadid: qthreadid,
-                                qwiketid: topic.get("threadid")
-                            }
-            }
-            // console.log({ v10Link, tthreadid });
+            /* let v10Link = {
+                 route: isDisqus ? "taghub-disqus-context" : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? "taghub-view-context" : "taghub-view-context-home" : "taghub-native-context" : (loud || opened) ? "taghub-context" : "taghub-show-context",
+                 pathname: '/channel',
+ 
+                 params: isDisqus ? {
+                     channel,
+                     hub: thub,
+                     tag: category,
+                     threadid: tthreadid,
+                     cc: topic.get('id')
+                 } : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? {
+                     channel,
+                     hub,
+                     tag: category,
+                     threadid: qthreadid,
+ 
+                     qwiketid: topic.get("threadid")
+ 
+                 } : {
+                         channel,
+                         shortname: qparams.shortname,
+                         qwiketid: topic.get("threadid")
+ 
+                     } : {
+                         channel,
+                         hub: shub,
+                         tag: category,
+                         threadid: sthreadid,
+                         cqid: topic.get("threadid")
+ 
+                     } : (loud || opened) ? {
+                         channel,
+                         hub: thub,
+                         tag: category,
+                         threadid: tthreadid
+                     } : {
+                                 channel,
+                                 hub,
+                                 tag: category,
+                                 threadid: qthreadid,
+                                 qwiketid: topic.get("threadid")
+                             }
+             }*/
+            //  console.log({ v10Link, tthreadid });
             //if (inShow && relation == 'level' && typeOfQwiket == 'commentStream' && Root.__CLIENT__)
             //if (relation == 'parent')
             //	console.log("Q1GBG 4: createDatum", { targetLink, levelLink, routePageLink, qparams, props: this.props })
@@ -512,7 +524,7 @@ export class QwiketItem extends Component {
                     }
                     else {
                         //console.log("invalidateContext:",topic.toJS())
-                        invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
+                        //  invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
                         //console.log("setTop1")
                         window.setTop = true;
 
@@ -532,7 +544,7 @@ export class QwiketItem extends Component {
                     //console.log("QGBG link onClick topLevel", { opened, loud, link: topic.get("link") });
                     if (opened || loud) {
                         //console.log("QGBG link onClick opened", "cat:", topic.get("cat"), 'threadid:', topic.get("threadid"), 'topic:', topic ? topic.toJS() : 'no topic');
-                        invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
+                        // invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
 
                         //console.log("setTop2")
                         window.setTop = true;
@@ -563,7 +575,7 @@ export class QwiketItem extends Component {
 
                     if (opened) {
                         //console.log("QGBG link onClick not topLevel opened","cat:",topic.get("cat"),'threadid:',topic.get("threadid"),'topic:',topic?topic.toJS():'no topic');
-                        invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
+                        // invalidateContext({ local: true, shortname: tag, threadid: topParent.get("threadid"), qwiket: topParent });
                         window.setTop = true;
                         //	console.log("setTop3")
                     }
@@ -591,6 +603,7 @@ export class QwiketItem extends Component {
             let sticky = body ? true : false;
             //if (relation == 'parent' && inShow)
             //	console.log("QGBG: parent_summary QGBG BoundQwiket createDatum", { topic: topic.toJS(), opened, topLevel, muzzled, starColor, relation, typeOfQwiket })
+
             return Immutable.fromJS({
                 xid: topic.get("xid"),
                 threadid: id,
@@ -669,6 +682,44 @@ export class QwiketItem extends Component {
         const likeLink = `${routePageLink}/qlike/${levelKey}`;
         const shareLink = `${routePageLink}/qshare/${routeRootKey}/${levelKey}`;
         const levelLink = `${routePageLink}/${show}/${levelKey}/${levelKey}`;
+        let slink = show == 'qshow' ? 'show' : 'view';
+        //let route = qparams.route;
+        //  let levelRoute = route.indexOf('context') > 0 ? `${qparams.tag ? 'tag' : ''}${qparams.hub ? 'hub' : ''}-${slink}-context` : route.indexOf('home') > 0 ? `${slink}-context-home` : route.indexO('news') >= 0 ? `${slink}-news` : ``;
+        //  console.log("QwiketItem1", { sel: qparams.sel, qparams, levelKey })
+        let v10levelLink = route(
+            {
+                sel: qparams.sel,
+                qparams,
+                nextParams: {
+                    show: { qshow: [{ qwiketid: levelKey }] }
+                }
+            });
+        /* let v10levelLink = {
+             route: levelRoute,
+             pathname: '/channel',
+ 
+             params: route.indexOf('context') > 0 ? {
+                 channel,
+                 hub: qparams.hub,
+                 tag: qparams.tag,
+                 threadid: qparams.threadid,
+ 
+                 qwiketid: levelKey
+             } :
+                 route.indexOf('home') > 0 ? {
+                     channel, category: qparams.category,
+                     rootThreadid: levelKey,
+                     qwiketid: levelKey
+                 }
+                     : route.indexO('news') >= 0 ? {
+                         channel,
+                         rootThreadid: levelKey,
+                         qwiketid: levelKey
+                     }
+                         : {}
+         }*/
+        // console.log("QwiketItem", { levelKey, v10levelLink: JSON.stringify(v10levelLink, null, 4) })
+
         const flagLink = `${routePageLink}/qflag/${levelIsDisqus ? topic.get("author_username") : topic.get("username")}/${levelKey}`;
         //if (rootOpened)
         //	console.log("rootOpened:", { levelId })
@@ -682,7 +733,7 @@ export class QwiketItem extends Component {
         //if(typeOfQwiket=='full')
         //console.log("QGBG links:replyLink:",replyLink,"likeLink:",likeLink,levelIsDisqus)
         /**
-        Children:
+        Children:rout
         **/
         //if (typeOfQwiket == 'full')
         //	console.log("catedit level: ", { reshare, levelQwiket: levelQwiket.toJS(), rootThreadid })
@@ -746,6 +797,7 @@ export class QwiketItem extends Component {
                 cat: topic.get("cat") || topic.get("category"),
                 published_time: topic.get("published_time")
             }));
+            // console.log("DISQUS ITEM", { typeOfQwiket, parent_summary: parent_summary.toJS(), topic: topic.toJS() })
         }
         let topParent = levelQwiket;
         if (parent_summary && showParents) {
@@ -783,10 +835,14 @@ export class QwiketItem extends Component {
                     topParent = parentDatum;
                 return parentDatum;
             })
+            //  console.log("DISQUS ITEM", { parentQwikets: parentQwikets.toJS(), topic: topic.toJS() })
         }
         //console.log("QGBG BoundQwiket Render End parents:",parentQwikets?parentQwikets.toJS():'')
         //if(levelId=='north-korea-to-us-change-your-political-calculation-or-we-re-back-to-testing-nukes-and-missiles-1')
         //	console.log("qq replyLink2:",{replyLink,description:topic.get("description")});
+        /*  console.log("QwiketItem RENDERER", {
+              title: levelQwiket.get("title")
+          })*/
         return (
             <ErrorBoundary data-id="error-boundary">
                 <QwiketFamily
@@ -797,6 +853,7 @@ export class QwiketItem extends Component {
                     parents={parentQwikets}
                     topParent={topParent}
                     levelLink={levelLink}
+                    v10levelLink={v10levelLink}
                     replyLink={replyLink}
                     replyid={levelKey}
                     likeLink={likeLink}
@@ -827,21 +884,7 @@ export class QwiketItem extends Component {
         )
     }
 }
-QwiketItem.propTypes = {
-    topic: PropTypes.object.isRequired,
-    updateQwiketState: PropTypes.func.isRequired, //(xid,updatePOJSO)
-    globals: PropTypes.object.isRequired,
-    online: PropTypes.object.isRequired,
-    baseThreadid: PropTypes.string,
-    rootThreadid: PropTypes.string,
-    channel: PropTypes.string,
-    columnType: PropTypes.string, 				//feed,story-qwikets, disq-tids,sticky-qwikets,story-stickies,comments,newsline,context
-    showQwiket: PropTypes.object,
-    forceShow: PropTypes.bool,
-    qparams: PropTypes.object,
 
-    updateOnlineState: PropTypes.func.isRequired
-};
 function mapStateToProps(state) {
     return {
         context: state.context,

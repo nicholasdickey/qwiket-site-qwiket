@@ -1956,7 +1956,7 @@ export class QwiketComment extends Component {
             flatView: new Immutable.OrderedMap({})
 
         } : {};
-        //	console.log("construct")
+        console.log("QwiketComment construct")
         this.state.edit = false
         this.state.commentMenuOpen = false
         this.state.dirty = false;
@@ -2263,7 +2263,7 @@ export class QwiketComment extends Component {
             actions, /*bound actions*/
             ...rest /* styles */
         } = this.props;
-
+        console.log("QwiketComment RENDER")
         //  const muiTheme = useTheme();
         const width = u.width(globals);
         let loud = width > 900 ? (+session.get("loud")) : 1;
@@ -2569,6 +2569,7 @@ export class QwiketComment extends Component {
         //if (level == 0)
         // console.log("EDIT", edit);
         let borderColors = ['#81D4FA', '#CE93D8', '#FFAB91']
+        console.log("QwiketComment RENDER2")
         return <div>
 
             <div ref={this.myRef} data-id={`qwiket-comment-level-${level}`} className={level > 0 ? "qwiket-comment" : commentsOnly ? 'qwiket-comment-level0-comments-only' : 'qwiket-comment-level-zero'} style={{ borderRight: newFlag ? `${level < 12 ? 'thick' : 'thin'} ${green[500]} solid` : selected ? 'none' : 'none', borderLeft1: level > 0 ? `thin ${borderColors[stripeInd]} solid` : 'none', marginBottom: width > 750 ? 10 : 2, marginTop1: selected || parentSelected || parent ? width > 750 ? 4 : 2 : 0, marginLeft: offset, opacity: shaded ? 0.5 : 1.0 }} >

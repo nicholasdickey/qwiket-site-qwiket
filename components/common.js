@@ -25,6 +25,7 @@ function sleep(ms) {
 export class Common extends React.Component {
     constructor(props, context) {
         super(props, context);
+        console.log("Common constructor")
         this.queues = {
             newItemsNotifications: Immutable.fromJS({}),
             commentNotifications: null,
@@ -40,13 +41,13 @@ export class Common extends React.Component {
 
         let nextSession = nextProps.session;
         let session = props.session;
-
         let width = u.getLayoutWidth({ session });
-        let nextWidth = u.getLayoutWidth({ nextSession });
-
+        let nextWidth = u.getLayoutWidth({ session: nextSession });
+        const sessionChanged = nextSession != session;
+        //   console.log("WIDTH EVAL", { width, nextWidth, sWidth: session.get("width"), nsWidth: nextSession.get("width") })
         let widthChanged = width != nextWidth
-        console.log("Common shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged, widthChanged })
-        return widthChanged;
+        console.log("Common shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged })
+        return sessionChanged;
     }
     newItemsNotificationsAPI() {
         if (this.api)
@@ -98,7 +99,7 @@ export class Common extends React.Component {
     }
     componentDidMount() {
         //  console.log("componentDidMount")
-        window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 1000, { 'leading': true, 'trailing': false, 'maxWait': 1000 }));
+        window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
         window.goBack = false;
         this.updateDimensions();
         const props = this.props;
@@ -298,18 +299,18 @@ export class Common extends React.Component {
           nextProps.actions.fetchCatArticles(categoryXid);
         }*/
         if (nparams.rootThreadid != params.rootThreadid || nparams.qwiketid != params.qwiketid || nparams.threadid != params.threadid) {
-            // console.log('CommonPage componentWillReceiveProps fetchShowQwiket nparams:',nparams)
+            // console.log('CommonPage componentWillReceiveProps fetchShowQwiket nparams:', nparams)
             const rootThreadid = nparams.rootThreadid ? nparams.rootThreadid : nparams.threadid;
             const qwiketid = nparams.qwiketid ? nparams.qwiketid : nparams.threadid;
 
             // props.actions.fetchShowQwiket({ rootThreadid, qwiketid, qType: nextProps.qType });
         }
         if (nparams.qwiketid != params.qwiketid) {
-            // console.log('CommonPage componentWillReceiveProps fetchShowQwiket nparams:',nparams)
+            // console.log('fetchShowQwiket CommonPage componentWillReceiveProps fetchShowQwiket nparams:', nparams)
             const rootThreadid = nparams.rootThreadid ? nparams.rootThreadid : nparams.threadid;
             const qwiketid = nparams.qwiketid ? nparams.qwiketid : nparams.threadid;
-
-            props.actions.fetchShowQwiket({ rootThreadid, qwiketid, qType: nextProps.qType });
+            const channel = nparams.channel;
+            props.actions.fetchShowQwiket({ channel, rootThreadid, qwiketid, qType: nextProps.qType });
         }
 
     }

@@ -2,8 +2,8 @@
 require("regenerator-runtime");
 require("regenerator-runtime/runtime");
 require = require("esm")(module/*, options*/)
-var favicon = require('serve-favicon');
 
+var favicon = require('serve-favicon');
 const next = require('next')
 var proxy = require('http-proxy-middleware');
 const compression = require('compression')
@@ -11,7 +11,7 @@ const compression = require('compression')
 const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session')
 const { ssrParams, initSession } = require('./qwiket-lib/lib/ssrParams')
-
+const { qwiketRouter } = require('./qwiket-lib/lib/qwiketRouter')
 const chalk = require("chalk");
 const app = next({ dev: process.env.NODE_ENV !== 'production' })
 //const handler = routes.getRequestHandler(app)
@@ -172,6 +172,8 @@ app.prepare().then(() => {
 
     var apiProxy = proxy(optionsApi);
     server.use("/robots.txt", apiProxy);
+    qwiketRouter(server, app);
+    console.log("============================")
     server.use('/disqus-login', async (req, res) => {
         let { host, ip, ua, pxid, anon } = ssrParams(req);
 
@@ -239,48 +241,51 @@ app.prepare().then(() => {
 
 
     server.use('/upload', apiProxy)
-
-    server.get('/channel/:channel', async (req, res) => {
-        const actualPage = '/channel'
-        const queryParams = { route: 'channel', channel: req.params.channel, sel: 'newsline' }
-        let logout = req.query.logout;
-        if (logout) {
-            let { host, ip, ua, pxid, anon } = ssrParams(req);
-
-            let u = `${url}/qapi/user/disqus-logout?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
-            console.log(chalk.red.bold("LOGOUT API URL:"), u)
-            // console.log(chalk.red.bold("CHANNELL:"), req.params.channel, host)
-            let response = await fetch(u, {
-                credentials: 'same-origin'
-            })
-            let json = await response.json();
-
-            console.log("Return:", json)
-            if (json.cookie) {
-                const identity = json.cookie.identity;
-                const anon = json.cookie.anon;
-                const maxAge = 24 * 3600 * 30 * 1000 * 100;
-                res.cookie('_ga', 'GA1.2.' + identity, { maxAge, sameSite: 'Lax' });
-                res.cookie('qid', identity, { maxAge, sameSite: 'Lax' });
-                res.cookie('identity', identity, { maxAge, sameSite: 'Lax' });
-                res.cookie('anon', anon, { maxAge, sameSite: 'Lax' });
-                req.cookies['identity'] = identity;
-                req.cookies['anon'] = anon;
-
-                // return res.redirect(`${host}:/channel/${channel}`);
+    /*
+        server.get('/channel/:channel', async (req, res) => {
+            const actualPage = '/channel'
+            const queryParams = { route: 'channel', channel: req.params.channel, sel: 'newsline' }
+            let logout = req.query.logout;
+            if (logout) {
+                let { host, ip, ua, pxid, anon } = ssrParams(req);
+    
+                let u = `${url}/qapi/user/disqus-logout?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
+                console.log(chalk.red.bold("LOGOUT API URL:"), u)
+                // console.log(chalk.red.bold("CHANNELL:"), req.params.channel, host)
+                let response = await fetch(u, {
+                    credentials: 'same-origin'
+                })
+                let json = await response.json();
+    
+                console.log("Return:", json)
+                if (json.cookie) {
+                    const identity = json.cookie.identity;
+                    const anon = json.cookie.anon;
+                    const maxAge = 24 * 3600 * 30 * 1000 * 100;
+                    res.cookie('_ga', 'GA1.2.' + identity, { maxAge, sameSite: 'Lax' });
+                    res.cookie('qid', identity, { maxAge, sameSite: 'Lax' });
+                    res.cookie('identity', identity, { maxAge, sameSite: 'Lax' });
+                    res.cookie('anon', anon, { maxAge, sameSite: 'Lax' });
+                    req.cookies['identity'] = identity;
+                    req.cookies['anon'] = anon;
+    
+                    // return res.redirect(`${host}:/channel/${channel}`);
+                }
+                else {
+                    return res.status(500).json(json);
+    
+                }
             }
-            else {
-                return res.status(500).json(json);
-
-            }
-        }
-        app.render(req, res, actualPage, queryParams)
-    })
+            app.render(req, res, actualPage, queryParams)
+        })
+        */
+    /*
     server.get('/channel/:channel/find', (req, res) => {
         const actualPage = '/channel'
         const queryParams = { route: 'channel', channel: req.params.channel, find: 1, sel: 'newsline' }
         app.render(req, res, actualPage, queryParams)
-    })
+    })*/
+    /*
     server.get('/channel/:channel/qshow/:rootThreadid/:qwiketid', (req, res) => {
         const actualPage = '/channel'
         const queryParams = { route: 'qshow', channel: req.params.channel, rootThreadid: req.params.rootThreadid, qwiketid: req.params.qwiketid, sel: 'newsline' }
@@ -304,6 +309,7 @@ app.prepare().then(() => {
         const queryParams = { route: 'valid', sel: 'context' }
         app.render(req, res, actualPage, queryParams)
     })
+    */
     /*  server.get('/context/channel/:channel/topic/:threadid/?*', (req, res) => {
           const actualPage = '/channel'
           const queryParams = { route: 'context' }
@@ -316,12 +322,12 @@ app.prepare().then(() => {
           // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
           app.render(req, res, actualPage, queryParams)
       })*/
-    server.get('/context/?*', (req, res) => {
+    /*server.get('/context/?*', (req, res) => {
         const actualPage = '/channel'
         const queryParams = { route: 'context', sel: "context" }
         // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
         app.render(req, res, actualPage, queryParams)
-    })
+    })*/
     /*
     server.get('/context/channel/:channel/topic/:threadid/tag/:shortname', (req, res) => {
         const actualPage = '/channel'
@@ -349,34 +355,35 @@ app.prepare().then(() => {
         app.render(req, res, actualPage, queryParams)
     })
     */
-    server.get('/home/:shortname/?*', (req, res) => {
-        const actualPage = '/context'
-        const queryParams = { route: 'valid', sel: 'context' }
-        app.render(req, res, actualPage, queryParams)
-    })
-
-    server.get('/channel/:channel/home:shortname/?*', (req, res) => {
-        const actualPage = '/context'
-        const queryParams = { route: 'valid', sel: 'context' }
-        app.render(req, res, actualPage, queryParams)
-    })
-    server.get('/context/topic/:threadid/?*', (req, res) => {
-        const actualPage = '/context'
-        const queryParams = { route: 'valid', sel: 'context' }
-        app.render(req, res, actualPage, queryParams)
-    })
-    server.get('/context/topic/:shortname/url/:url/?*', (req, res) => {
-        const actualPage = '/context'
-        const queryParams = { route: 'valid', sel: 'context' }
-        app.render(req, res, actualPage, queryParams)
-    })
-    server.get('/context/channel/:channel/topic/:shortname/url/:url/?*', (req, res) => {
-        const actualPage = '/context'
-        const queryParams = { route: 'valid', sel: 'context' }
-        app.render(req, res, actualPage, queryParams)
-    })
-
-
+    /*
+     server.get('/home/:shortname/?*', (req, res) => {
+         const actualPage = '/context'
+         const queryParams = { route: 'valid', sel: 'context' }
+         app.render(req, res, actualPage, queryParams)
+     })
+ 
+     server.get('/channel/:channel/home:shortname/?*', (req, res) => {
+         const actualPage = '/context'
+         const queryParams = { route: 'valid', sel: 'context' }
+         app.render(req, res, actualPage, queryParams)
+     })
+     server.get('/context/topic/:threadid/?*', (req, res) => {
+         const actualPage = '/context'
+         const queryParams = { route: 'valid', sel: 'context' }
+         app.render(req, res, actualPage, queryParams)
+     })
+     server.get('/context/topic/:shortname/url/:url/?*', (req, res) => {
+         const actualPage = '/context'
+         const queryParams = { route: 'valid', sel: 'context' }
+         app.render(req, res, actualPage, queryParams)
+     })
+     server.get('/context/channel/:channel/topic/:shortname/url/:url/?*', (req, res) => {
+         const actualPage = '/context'
+         const queryParams = { route: 'valid', sel: 'context' }
+         app.render(req, res, actualPage, queryParams)
+     })
+ 
+ */
 
     //  .add('qview', '/qview/:rootThreadid/:qwiketid/(.*)?', 'dest')
     // .add('cc', '/cc/:cc/(.*)?', 'dest')

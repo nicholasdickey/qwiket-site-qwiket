@@ -36,7 +36,7 @@ class MyApp extends App {
             meta = meta.toJS();
         else
             meta = {};
-        console.log("RENDER APP:", { meta, store, Root })
+        // console.log("RENDER APP:", { meta, store, Root })
         if (Root.__CLIENT__)
             Root.store = store;
         return (
