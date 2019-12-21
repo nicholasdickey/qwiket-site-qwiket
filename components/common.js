@@ -55,7 +55,7 @@ export class Common extends React.Component {
         this.api = {
             registerQueue: (({ type, channel, homeChannel, shortname, solo, lastid, qwiketid }) => {
                 var queueId = Math.floor(Math.random() * 1000000);
-                // console.log("registerQueue", { queueId, type, channel, homeChannel, shortname, solo, lastid, qwiketid })
+                console.log("registerQueue", { queueId, type, channel, homeChannel, shortname, solo, lastid, qwiketid })
 
                 this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, { type, channel, homeChannel, shortname, solo, lastid, qwiketid, test: 0 });
                 return queueId;
@@ -218,7 +218,7 @@ export class Common extends React.Component {
          }, 10000);
          */
         this.intervalHandler = setInterval(() => {
-            // console.log("registerQueue notificationsHandler:", { newItemsNotifications: this.queues.newItemsNotifications.toJS() });
+            console.log("registerQueue notificationsHandler:", { newItemsNotifications: this.queues.newItemsNotifications.toJS() });
             this.queues.newItemsNotifications.forEach((p, i) => {
                 //$$$PROD*   console.log("notif,queue:", { i, p });
                 /*$$$PROD */ actions.fetchNotifications(p);
@@ -366,6 +366,8 @@ export class Common extends React.Component {
                             </QwiketViewWrap>*/
         /*
         <Typography variant="subtitile2" gutterBottom>CHANNEL: {app.get('channel').get('channelDetails').get('name')}</Typography>*/
+        qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
+
         const InnerWrapper = ({ layout }) => <div>
             <Topline layout={layout} width={width} />
             <InnerGrid layout={layout}>
