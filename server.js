@@ -417,6 +417,7 @@ app.prepare().then(() => {
         let r = {};
         r.session = req.session.options;
         r.success = true;
+        console.log("update-session-param DONE")
         res.end(JSON.stringify(r, null, 4));
 
     });

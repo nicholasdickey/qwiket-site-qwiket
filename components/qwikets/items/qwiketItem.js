@@ -76,7 +76,7 @@ export class QwiketItem extends Component {
 
     render() {
         let {
-		/*passed:*/		columnType, topic, channel, qparams, forceShow, firstRow, approver, test,
+		/*passed:*/		columnType, topic, channel, qparams, forceShow, firstRow, approver, test, wrapper,
 		/*bound: */		showQwiket, context, session, online,
             actions, /*bound actions*/
             ...rest /* styles */
@@ -844,9 +844,15 @@ export class QwiketItem extends Component {
         /*  console.log("QwiketItem RENDERER", {
               title: levelQwiket.get("title")
           })*/
+
         return (
             <ErrorBoundary data-id="error-boundary">
                 <QwiketFamily
+                    key={wrapper.key}
+                    rowIndex={wrapper.rowIndex}
+                    ref={wrapper.ref}
+                    lastRow={wrapper.lastRow}
+                    firstRow={wrapper.firstRow}
                     data-id="qwiket-family"
                     inShow={inShow}
                     level={levelQwiket}

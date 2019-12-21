@@ -317,9 +317,10 @@ export class Common extends React.Component {
     render() {
         console.log("RENDER COMMON");
         const { app, session, queues, qparams, context, user } = this.props;
-
+        let hot = +session.get("cover");
+        let loud = +session.get("loud");
         let width = u.getLayoutWidth({ session });
-
+        let theme = +session.get("dark") == 1 ? 0 : 1
         let pageType = qparams.sel ? qparams.sel : "newsline";
         //   console.log("COMMON RENDER", { pageType, qparams })
         // console.log({ user: user.toJS() })
@@ -370,7 +371,7 @@ export class Common extends React.Component {
             <InnerGrid layout={layout}>
                 <PageWrap>
                     <Header width={width} pageType={pageType} layout={layout} qparams={qparams} />
-                    <LayoutView width={width} pageType={pageType} layout={layout} qparams={Root.qparams ? {} : qparams} />
+                    <LayoutView width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} qparams={Root.qparams ? {} : qparams} />
                 </PageWrap>
             </InnerGrid>
         </div>;

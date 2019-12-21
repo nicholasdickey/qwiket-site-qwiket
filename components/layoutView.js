@@ -6,6 +6,25 @@ import Topic from './topic'
 import Tag from './tag'
 import u from '../qwiket-lib/lib/utils'
 import Root from 'window-or-global'
+import { Hotlist, HotItem } from './hotlist'
+
+//let Hotlist = () => <div />
+//let HotItem = () => <div />
+let HotlistRow = React.memo(({ layres, qparams, loud, theme }) => {
+    // return <div>HOTLIST {spaces}</div>
+    let spaces = layres.spaces;
+    let singleWidth = layres.singleWidth;
+    // console.log({ singleWidth })
+    const listRenderer = ({ rows }) => {
+        //   console.log("render listRenderer", { type, selector })
+        return <Hotlist spaces={spaces} qparams={qparams} loud={loud} rows={rows} />
+    }
+    const renderer = ({ item, channel, wrapper }) => {
+        // console.log('HotItem renderer')
+        return <HotItem wrapper={wrapper} width={singleWidth} item={item} loud={loud} theme={theme} qparams={qparams} />
+    }
+    return <Queue tag={'hot'} spaces={spaces} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
+})
 let Column = React.memo(({ column, qparams }) => {
     if (Root.qparams)
         qparams = Root.qparams;
@@ -28,28 +47,28 @@ let Column = React.memo(({ column, qparams }) => {
         case 'newsviews':
         case 'topics': {
             // console.log(`Column: ${selector}`)
-            const renderer = ({ item, channel }) => {
+            const renderer = ({ item, channel, wrapper }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", item)
 
 
-                return <QwiketItem qparams={qparams} columnType={selector} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
+                return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={selector} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
             }
             return <StyledColumn data-id="styled-column"><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} /></StyledColumn>
         }
         case 'feed': {
             // console.log("Column:feed")
-            const renderer = ({ item, channel }) => {
+            const renderer = ({ item, channel, wrapper }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", item)
 
 
-                return <QwiketItem columnType={'feed'} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
+                return <QwiketItem wrapper={wrapper} columnType={'feed'} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
             }
             return <Queue tag={tag} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
         }
         case "topic": {
-            console.log("dbb Column:topic ", { qwiketid: qparams.threadid, time: Date.now() })
+            // console.log("dbb Column:topic ", { qwiketid: qparams.threadid, time: Date.now() })
             let InnerTagWrap = styled.div`
                 width:100%;
                 display:flex;
@@ -64,13 +83,13 @@ let Column = React.memo(({ column, qparams }) => {
                 width:100% !important;
             `
             tag = tag;
-            console.log("Column:feed", { tag })
-            const renderer = ({ item, channel }) => {
+            // console.log("Column:feed", { tag })
+            const renderer = ({ item, channel, wrapper }) => {
                 //const [ref, setRef] = useState(false);
                 //  console.log("RENDERER:", tag)
 
 
-                return <QwiketItem qparams={qparams} columnType={'feed'} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
+                return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={'feed'} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
             }
             return <StyledColumn data-id="styled-column">
                 <Tag qparams={qparams} />
@@ -90,7 +109,7 @@ let Column = React.memo(({ column, qparams }) => {
     }
     return <StyledColumn>{JSON.stringify(column, null, 4)}</StyledColumn>
 });
-let LayoutRes = React.memo(({ layout, res, qparams }) => {
+let LayoutRes = React.memo(({ layout, res, qparams, hot, loud, theme }) => {
     // if (Root.qparams)
     //    qparams = Root.qparams;
     let layres = layout[res];
@@ -105,8 +124,15 @@ let LayoutRes = React.memo(({ layout, res, qparams }) => {
         width:100%;
         display:flex;     
     `
-    // <div>{JSON.stringify(layres, null, 4)}</div>
-    return <View>{cols}</View>
+    let OuterWrap = styled.div`
+        width:100%;
+
+    `
+    console.log({ layres })
+    return <OuterWrap>
+        {hot ? <HotlistRow layres={layres} loud={loud} theme={theme} /> : null}
+        <View>{cols}</View>
+    </OuterWrap>
 
 
 });
@@ -123,7 +149,7 @@ class LayoutView extends React.Component {
         return widthChanged || layoutChanged;
     }
     render() {
-        let { layout, width, qparams } = this.props;
+        let { layout, width, qparams, hot, loud, theme } = this.props;
         console.log("LAYOUT_VIEW:", { width, qparams });
         let layoutView = layout.layoutView;
         // let columns = layout.columns;
@@ -166,14 +192,15 @@ class LayoutView extends React.Component {
     `
         const OuterWrapper = styled.div`
         width:100%;
-    `;
+        `;
         // console.log("LAYOUTVIEW ", { width })
         return <OuterWrapper>
-            {width == 750 ? <W000><LayoutRes layout={layoutView} qparams={qparams} res="w900" /></W000> : null}
-            {width == 900 ? <W900><LayoutRes layout={layoutView} qparams={qparams} res="w900" /></W900> : null}
-            {width == 1200 ? <W1200><LayoutRes layout={layoutView} qparams={qparams} res="w1200" /></W1200> : null}
-            {width == 1800 ? <W1800><LayoutRes layout={layoutView} qparams={qparams} res="w1800" /></W1800> : null}
-            {width == 2100 ? <W2100><LayoutRes layout={layoutView} qparams={qparams} res="w2100" /></W2100> : null}
+
+            {width == 750 ? <W000><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w900" /></W000> : null}
+            {width == 900 ? <W900><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w900" /></W900> : null}
+            {width == 1200 ? <W1200><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w1200" /></W1200> : null}
+            {width == 1800 ? <W1800><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w1800" /></W1800> : null}
+            {width == 2100 ? <W2100><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w2100" /></W2100> : null}
 
         </OuterWrapper>
         // return <div>{JSON.stringify(layout, null, 4)}</div>

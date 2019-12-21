@@ -17,44 +17,9 @@ var Markdown = require('react-markdown');
 let { Link, Router } = ssRoutes;
 import { ClickWalledGarden } from '../qwiket-lib/components/walledGarden';
 import LinkPopup from '../qwiket-lib/components/linkPage';
-/**
- *
-          {shortname == 'nro' ? <div style={{ textTransform: 'none', width: '100%', marginLeft: 'auto', alignItems: 'center', marginRight: 'auto', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
-            <div style={{ fontSize: '1.0rem' }}><a href={website}><div>{full_description + (channel == 'qwiket') ? (
-              <div>
-                <div>Waiting for NRO's<span style={{ color: 'red' }}> honest </span>apology to Covington Students for spreading libelous lies.
-                      </div><div style={{ fontSize: '1.0rem' }}>And no, "Sorry for being too passionate", or "Everybody did it" is not it!</div></div>) : "Click here for more..."}</div></a>
-              {channel == 'qwiket' ? <Clock
-                date={Date(covingtonInterval)}
-                format={`[${days} days]  HH:mm:ss`}
-                style={{ fontSize: '1.2rem', color: 'red' }}
-                ticking={true}
-                interval={1000}
-
-              /> : null}
-            </div></div> : null}
- */
-const StyledCheckbox = styled(({ ...other }) => <div classes={{ checked: 'checked', disabled: 'disabled' }}{...other} />)`
-  color: #eee !important;
-  width:200px%;
-  & .label {
-    #color: ${props => props.color};
-    color: #ddd;
-    font-size: 14px; 
-    font-family: Asap Condensed;
-    font-weight:bold;
-  }
-   & .checked {
-    color: #eee !important;
-   
-  }
-  & .disabled {
-    color:  #aff; !important;
-  }
-`;
 
 let RenderTag = React.memo(({ channel, shortname, parentName, parentShortname, metaLink, name, description, image, included, dark, actions }) => {
-  console.log("RENDER RenderTag");
+  //console.log("RENDER RenderTag");
   const muiTheme = useTheme();
   const backgroundColor = muiTheme.palette.background.default;
   const color = muiTheme.palette.text.primary;
