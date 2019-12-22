@@ -398,29 +398,16 @@ export class QwiketItem extends Component {
             if (!hub)
                 hub = 0;
 
-            let tthreadid = topic.get('threadid') || topic.get('qwiketid');
-            // console.log("topic:", topic.toJS())
-            let thub = 0;
-
-            if (tthreadid) {
-                let chunks = tthreadid.split('-slug-');
-                thub = chunks[0];
-                tthreadid = chunks[1];
-                // console.log({ chunks })
-            }
-            let category = topic.get("cat") || topic.get("category") || topic.get("cat_shortname");
-            //  console.log({ category, topic: topic.toJS() })
-            if (!category && topic.get('tags'))
-                category = topic.get('tags').get(0);
+            let { qwiketid: tthreadid, hub: thub, tag: ttag } = u.parseQwiketid(topic);
             //  console.log("Calling route", { muzzled, category, topic: topic.toJS(), tag: topic.get('tags') ? topic.get('tags').get(0) : '' })
             let v10Link = route({
                 sel: muzzled ? qparams.sel : 'context',
                 qparams, nextParams:
-                    isDisqus ? { hub: [{ hub: thub }], tag: [{ tag: category }], comments: { disqus: [{ cc: `comment-${topic.get('id')}` }] }, topic: [{ threadid: tthreadid }], show: false }
+                    isDisqus ? { hub: [{ hub: thub }], tag: [{ tag: ttag }], comments: { disqus: [{ cc: `comment-${topic.get('id')}` }] }, topic: [{ threadid: tthreadid }], show: false }
                         : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ?
                             { comments: false, show: { qview: [{ qwiketid: topic.get("threadid") }] } }
-                            : { hub: [{ hub: thub }], tag: [{ tag: category }], comments: { native: [{ cqid: topic.get("threadid") }] }, topic: [{ threadid: tthreadid }], show: false }
-                            : { hub: [{ hub: thub }], tag: [{ tag: category }], topic: [{ threadid: tthreadid }], comments: false, show: false }
+                            : { hub: [{ hub: thub }], tag: [{ tag: ttag }], comments: { native: [{ cqid: topic.get("threadid") }] }, topic: [{ threadid: tthreadid }], show: false }
+                            : { hub: [{ hub: thub }], tag: [{ tag: ttag }], topic: [{ threadid: tthreadid }], comments: false, show: false }
             });
 
 

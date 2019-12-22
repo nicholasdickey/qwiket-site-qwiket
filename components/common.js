@@ -19,6 +19,8 @@ import QwiketView from '../components/qwikets/qwiketView'
 import Header from './header'
 import LayoutView from './layoutView'
 var debounce = require('lodash.debounce');
+import dynamic from "next/dynamic";
+const { Notif } = dynamic(import('../qwiket-lib/lib/notif'));
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -32,6 +34,7 @@ export class Common extends React.Component {
             alerts: []
         }
     }
+
     shouldComponentUpdate(nextProps) {
         let props = this.props;
         let contextChanged = props.context != nextProps.context;
@@ -53,11 +56,11 @@ export class Common extends React.Component {
         if (this.api)
             return this.api;
         this.api = {
-            registerQueue: (({ type, channel, homeChannel, shortname, solo, lastid, qwiketid }) => {
+            registerQueue: (({ tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid }) => {
                 var queueId = Math.floor(Math.random() * 1000000);
-                console.log("registerQueue", { queueId, type, channel, homeChannel, shortname, solo, lastid, qwiketid })
+                console.log("registerQueue", { queueId, tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid })
 
-                this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, { type, channel, homeChannel, shortname, solo, lastid, qwiketid, test: 0 });
+                this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, { tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid, test: 0 });
                 return queueId;
             }).bind(this),
             unregisterQueue: (({ queueId }) => {
@@ -98,7 +101,7 @@ export class Common extends React.Component {
         }
     }
     componentDidMount() {
-        //  console.log("componentDidMount")
+        console.log("COOMON componentDidMount")
         window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
         window.goBack = false;
         this.updateDimensions();
@@ -219,11 +222,13 @@ export class Common extends React.Component {
          */
         this.intervalHandler = setInterval(() => {
             console.log("registerQueue notificationsHandler:", { newItemsNotifications: this.queues.newItemsNotifications.toJS() });
-            this.queues.newItemsNotifications.forEach((p, i) => {
-                //$$$PROD*   console.log("notif,queue:", { i, p });
+            if (this.queues && this.queues.newItemsNotifications)
+                this.queues.newItemsNotifications.forEach((p, i) => {
+
+                    console.log("notif,queue:", { i, p });
                 /*$$$PROD */ actions.fetchNotifications(p);
-                /*$$$PROD*/   actions.onlineCount();
-            });
+                    /*$$$PROD*/  // actions.onlineCount();
+                });
             // console.log("registerComment CommentsNotifications action", this.commentNotifications)
             if (this.commentNotifications) {
                 // console.log("registerComment action")
@@ -322,6 +327,7 @@ export class Common extends React.Component {
         let width = u.getLayoutWidth({ session });
         let theme = +session.get("dark") == 1 ? 0 : 1
         let pageType = qparams.sel ? qparams.sel : "newsline";
+        let channel = app.get("channel").get("channel");
         //   console.log("COMMON RENDER", { pageType, qparams })
         // console.log({ user: user.toJS() })
         /* let qwiket = Immutable.fromJS({
@@ -373,7 +379,7 @@ export class Common extends React.Component {
             <InnerGrid layout={layout}>
                 <PageWrap>
                     <Header width={width} pageType={pageType} layout={layout} qparams={qparams} />
-                    <LayoutView width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} qparams={Root.qparams ? {} : qparams} />
+                    <LayoutView channel={channel} width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} qparams={Root.qparams ? Root.qparams : qparams} />
                 </PageWrap>
             </InnerGrid>
         </div>;

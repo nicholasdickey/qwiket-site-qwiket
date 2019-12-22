@@ -10,24 +10,26 @@ import { Hotlist, HotItem } from './hotlist'
 
 //let Hotlist = () => <div />
 //let HotItem = () => <div />
-let HotlistRow = React.memo(({ layres, qparams, loud, theme }) => {
+let HotlistRow = React.memo(({ layres, qparams, loud, theme, channel }) => {
     // return <div>HOTLIST {spaces}</div>
     let spaces = layres.spaces;
     let singleWidth = layres.singleWidth;
-    // console.log({ singleWidth })
+    console.log('HotlistRow', { singleWidth, channel, qparams })
     const listRenderer = ({ rows }) => {
         //   console.log("render listRenderer", { type, selector })
         return <Hotlist spaces={spaces} qparams={qparams} loud={loud} rows={rows} />
     }
     const renderer = ({ item, channel, wrapper }) => {
-        // console.log('HotItem renderer')
-        return <HotItem wrapper={wrapper} width={singleWidth} item={item} loud={loud} theme={theme} qparams={qparams} />
+        console.log('HotItem renderer', { channel })
+        return <HotItem wrapper={wrapper} width={singleWidth} item={item} loud={loud} theme={theme} qparams={qparams} channel={channel} />
     }
+    console.log("HotlistRow", { qparams })
     return <Queue tag={'hot'} spaces={spaces} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
 })
 let Column = React.memo(({ column, qparams }) => {
-    if (Root.qparams)
+    if (!qparams && Root.qparams)
         qparams = Root.qparams;
+    console.log("COLUMN:", { qparams })
     let tag = qparams.tag || qparams.shortname;
     let width = column.percentWidth;
     const StyledColumn = styled.div`
@@ -109,16 +111,17 @@ let Column = React.memo(({ column, qparams }) => {
     }
     return <StyledColumn>{JSON.stringify(column, null, 4)}</StyledColumn>
 });
-let LayoutRes = React.memo(({ layout, res, qparams, hot, loud, theme }) => {
+let LayoutRes = React.memo(({ layout, res, hot, ...other }) => {
     // if (Root.qparams)
     //    qparams = Root.qparams;
+
     let layres = layout[res];
-    //console.log("LAYRES", layres);
+    console.log("LAYRES", layres, { other });
     let columns = layres.columns;
     //console.log({ columns })
     let cols = columns.map(c => {
         // console.log("column", res, c)
-        return <Column column={c} qparams={qparams} />
+        return <Column column={c} {...other} />
     })
     let View = styled.div`
         width:100%;
@@ -130,7 +133,7 @@ let LayoutRes = React.memo(({ layout, res, qparams, hot, loud, theme }) => {
     `
     console.log({ layres })
     return <OuterWrap>
-        {hot ? <HotlistRow layres={layres} loud={loud} theme={theme} /> : null}
+        {hot ? <HotlistRow layres={layres}  {...other} /> : null}
         <View>{cols}</View>
     </OuterWrap>
 
@@ -149,8 +152,8 @@ class LayoutView extends React.Component {
         return widthChanged || layoutChanged;
     }
     render() {
-        let { layout, width, qparams, hot, loud, theme } = this.props;
-        console.log("LAYOUT_VIEW:", { width, qparams });
+        let { layout, width, ...other } = this.props;
+        console.log("LAYOUT_VIEW:", { width, other });
         let layoutView = layout.layoutView;
         // let columns = layout.columns;
         // let defaultWidth = session.get("defaultWidth");
@@ -196,11 +199,11 @@ class LayoutView extends React.Component {
         // console.log("LAYOUTVIEW ", { width })
         return <OuterWrapper>
 
-            {width == 750 ? <W000><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w900" /></W000> : null}
-            {width == 900 ? <W900><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w900" /></W900> : null}
-            {width == 1200 ? <W1200><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w1200" /></W1200> : null}
-            {width == 1800 ? <W1800><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w1800" /></W1800> : null}
-            {width == 2100 ? <W2100><LayoutRes layout={layoutView} qparams={qparams} hot={hot} loud={loud} theme={theme} res="w2100" /></W2100> : null}
+            {width == 750 ? <W000><LayoutRes layout={layoutView} {...other} res="w900" /></W000> : null}
+            {width == 900 ? <W900><LayoutRes layout={layoutView} {...other} res="w900" /></W900> : null}
+            {width == 1200 ? <W1200><LayoutRes layout={layoutView} {...other} res="w1200" /></W1200> : null}
+            {width == 1800 ? <W1800><LayoutRes layout={layoutView} {...other} res="w1800" /></W1800> : null}
+            {width == 2100 ? <W2100><LayoutRes layout={layoutView} {...other} res="w2100" /></W2100> : null}
 
         </OuterWrapper>
         // return <div>{JSON.stringify(layout, null, 4)}</div>

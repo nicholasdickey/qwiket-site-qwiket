@@ -205,7 +205,10 @@ class LinkRenderer extends Component {
         //  console.log("render Link", { props });
         let { href, index, dataId, theme, ...pr } = props;
         let url = href;
-        if (url.indexOf("youtube.com") >= 0 && url.indexOf('url=') < 0) {
+        if (typeof url !== 'string')
+            return <div />
+        console.log({ url })
+        if (url && url.indexOf("youtube.com") >= 0 && url.indexOf('url=') < 0) {
             //  console.log("youtu.be 21", { url });
             let w = url.split('v=');
             let r2 = w[1];
