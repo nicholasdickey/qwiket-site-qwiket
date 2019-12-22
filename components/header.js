@@ -366,9 +366,14 @@ const DesktopNavigation = ({ session, channelDetails, url }) => {
 const Lowline = ({ session }) => {
 
     let hasBand = +session.get("cover");
+    const OuterWrapper = styled.div`
+     margin-left:4px;
+     margin-right:4px;
+    `
     const LowlineWrapper = styled.div`
             display: flex;
             margin-top: 10px;
+          
             border-top: thin solid grey;
             height: 30px;
             border-bottom: ${ hasBand == 1 ? null : 'thin solid grey'};
@@ -424,7 +429,7 @@ const Lowline = ({ session }) => {
             margin-left: 10px;
             color: red;
             `
-    return <LowlineWrapper>
+    return <OuterWrapper><LowlineWrapper>
         <Stars>
             <Star />
             <Star />
@@ -439,7 +444,7 @@ const Lowline = ({ session }) => {
             <Star />
             <Star />
         </Stars>
-    </LowlineWrapper>
+    </LowlineWrapper></OuterWrapper>
 
 }
 
