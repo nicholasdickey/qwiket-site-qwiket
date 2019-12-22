@@ -373,7 +373,8 @@ export class Common extends React.Component {
         /*
         <Typography variant="subtitile2" gutterBottom>CHANNEL: {app.get('channel').get('channelDetails').get('name')}</Typography>*/
         qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
-
+        if (Root.qparams)
+            Root.qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
         const InnerWrapper = ({ layout }) => <div>
             <Topline layout={layout} width={width} />
             <InnerGrid layout={layout}>
