@@ -120,8 +120,12 @@ class Channel extends React.Component {
         req.res.cookie('anon', anon, { maxAge, sameSite: 'Lax' })
         console.log("SET COOKIE ", { identity, anon }) */
         console.log("dbb Channel:getInitialProps done", params, Date.now())
-        if (Root.__CLIENT__)
+        if (Root.__CLIENT__) {
+            let api = Root.qparams ? Root.qparams.newItemsNotificationsAPI : null
             Root.qparams = params;
+            if (api)
+                Root.qparams.newItemsNotificationsAPI = api;
+        }
         return {
             qparams: params
         }

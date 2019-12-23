@@ -821,7 +821,7 @@ export default function renderBlocks({ type, theme, isDraft, jsqwiket, includeIm
                 html = x('<div id="markdown-shell" class="q-qwiket-md-shell">' + html + '</div>', isZoom, image);
                 //console.log("catedit shtml-pos-x:", shtml);
                 if (isZoom) {
-                    html = `<div style = "display:flex;flex-direction:column;width:100%" class="${isZoom ? "html - zoom" : "html - body"}" > ${
+                    html = `<div style = "display:flex;flex-direction:column;width:100%" class="${isZoom ? "html-zoom" : "html-body"}" > ${
                         html.replace(/\t/g, ``).replace(/\n/g, ``).trim()
                             .replace(/float( *?):( *?)left;/g, `margin-left:auto;margin-right:auto;`)
                             .replace(/float( *?):( *?)right;/g, `margin-left:auto;margin-right:auto;`)
@@ -829,7 +829,7 @@ export default function renderBlocks({ type, theme, isDraft, jsqwiket, includeIm
 
                 }
                 else {
-                    html = `<div  style = "position:relative;display:flex;flex-direction:column;width:100%;height:100%;" class="${isZoom ? "html - zoom" : "html - body"}" > ${
+                    html = `<div  style = "position:relative;display:flex;flex-direction:column;width:100%;height:100%;" class="${isZoom ? "html - zoom" : "html-body"}" > ${
                         html.replace(/\t/g, ``).replace(/\n/g, ``).trim()
                             .replace(/width( *?):( *?)([A-Za-z0-9]*);?/g, `width:${isZoom ? "500px" : "100%"};`)
                             .replace(/height( *?):( *?)([A-Za-z0-9]*);/g, `height:100%;`)

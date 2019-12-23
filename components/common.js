@@ -56,11 +56,11 @@ export class Common extends React.Component {
         if (this.api)
             return this.api;
         this.api = {
-            registerQueue: (({ tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid }) => {
+            registerQueue: (({ tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid, tail }) => {
                 var queueId = Math.floor(Math.random() * 1000000);
-                console.log("registerQueue", { queueId, tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid })
+                console.log("registerQueue", { queueId, tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid, tail })
 
-                this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, { tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid, test: 0 });
+                this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, { tag, type, channel, homeChannel, shortname, solo, lastid, tail, qwiketid, test: 0 });
                 return queueId;
             }).bind(this),
             unregisterQueue: (({ queueId }) => {
@@ -80,7 +80,7 @@ export class Common extends React.Component {
                 let o = this.queues.newItemsNotifications.get(queueId);
                 if (!o)
                     return;
-                //console.log("COMMON updateLastId", { queueId, lastid, tail, o })
+                console.log("COMMON updateLastId", { queueId, lastid, tail, o })
                 o.lastid = lastid;
                 o.tail = tail;
                 this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, o);
@@ -372,9 +372,13 @@ export class Common extends React.Component {
                             </QwiketViewWrap>*/
         /*
         <Typography variant="subtitile2" gutterBottom>CHANNEL: {app.get('channel').get('channelDetails').get('name')}</Typography>*/
+
+        console.log("COMMON RENDER ======================================================================================>>>>>>>>>>>>>>>>>>>.")
         qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
-        if (Root.qparams)
+        if (__CLIENT__) {
+            Root.qparams = qparams;
             Root.qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
+        }
         const InnerWrapper = ({ layout }) => <div>
             <Topline layout={layout} width={width} />
             <InnerGrid layout={layout}>

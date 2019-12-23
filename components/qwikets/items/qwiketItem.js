@@ -82,7 +82,7 @@ export class QwiketItem extends Component {
             ...rest /* styles */
         } = this.props;
         if (Root.qparams) {//to avoid triggering layout render on the client
-            { Root.qparams }
+
             qparams = Root.qparams;
         }
         if (!qparams || !topic)

@@ -286,6 +286,7 @@ class LinkRenderer extends Component {
             );
             if (Root.__CLIENT__ && (typeof window.twttr !== 'undefined'))
                 setTimeout(() => {
+                    //  console.log("TWITTER1")
                     if (Root.__CLIENT__ && (typeof window.twttr !== 'undefined')) {
                         window.twttr.widgets.load()
                         window.twttr.widgets.load();
@@ -556,9 +557,23 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
 
                 }
                 .q-qwiket-markdown p{
-                    margin-block- end: 30px;
+                    margin-block-end: 12px;
                     margin-block-start: 12px;
                     width: 100%;
+                }
+                .q-embed-twitter{
+                    display:flex;
+                    justify-content:center;
+                    margin-block-end: 30px;
+                    margin-block-start: 30px;
+                    width: 100%;
+                }
+                .q-qwiket-rollup{
+                    display:flex;
+                    justify-content:flex-end;
+                    font-size:0.7rem;
+                    align-items:center;
+                    font-weight:500;
                 }
 
                 .q-qwiket-a{
@@ -604,7 +619,7 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
                 }
                 blockquote{
                     border-left: 5px solid ${ linkColor};
-                    margin-block-end: 30px;
+                    margin-block-end: 12px;
                     margin-block-start: 12px;
                     padding-left: 10px;
                     line-height: 1.4;
@@ -1029,18 +1044,26 @@ export default class QwiketRenderer extends Component {
                 case 'article':
                     return renderMarkdown({ blockType: p.blockType, md: renderToHtml({ topic, d, theme, globals, zoom, channel, approver }), dataId: 'markdown-block12', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'html': // scraped from external page or description block 
-                    // console.log("block:html")
+                    // console.log("first letter block:html", type)
                     if (!p.html)
                         return;
-                    html = p.html.replace(/<p><\/p>/g, '').replace(/<br>/g, '<br /><br />');
+                    html = p.html.replace(/<p >/g, "<p>").replace(/<\/p >/g, "</p>");
+                    html = html.replace(/<p><\/p>/g, '').replace(/<br>/g, '<br /><br />');
+
+                    // html = html.replace(/<\/div>/g, '')
+
+                    if (type == 'full')
+                        console.log("BLOCK2 replace p", html);
                     if (type == 'full') {
                         let lw = html.split("<p>");
+                        console.log("first letter split", { html, lw })
                         if (lw.length > 1) {
+                            console.log("first letter ppp")
                             let c = lw[1].trim().charAt(0);
 
                             if (c != '<' && c != '&') {
                                 let crest = lw[1].trim().slice(1);
-
+                                console.log("first letter", { crest, c })
                                 lw[1] = `<span class="q-drop"> ${c}</span > ${crest} `;
                                 html = lw.join('<p>');
                             }
@@ -1053,11 +1076,12 @@ export default class QwiketRenderer extends Component {
                     else {
                         html = html.replace(/class="drop"/g, `class="disabled-drop" `)
                     }
+
                     //console.log("catedit shtml:", shtml);
-                    html = x('<div id="markdown-shell" class="q-qwiket-md-shell">' + html + '</div>', isZoom, image);
+                    html = x(html, isZoom, image);
                     //console.log("catedit shtml-pos-x:", shtml);
                     if (isZoom) {
-                        html = `<div data-id="aaaa" style = "display:flex;flex-direction:column;width:100%" class="${isZoom ? "html - zoom" : "html - body"}" > ${
+                        html = `<div data-id="aaaa" style = "display:flex;flex-direction:column;width:100%" class="${isZoom ? "html-zoom" : "html-body"}" > ${
                             html.replace(/\t/g, ``).replace(/\n/g, ``).trim()
                                 .replace(/float( *?):( *?)left;/g, `margin-left:auto;margin-right:auto;`)
                                 .replace(/float( *?):( *?)right;/g, `margin-left:auto;margin-right:auto;`)
@@ -1065,21 +1089,20 @@ export default class QwiketRenderer extends Component {
 
                     }
                     else {
-                        html = `<div  style = "position:relative;display:flex;flex-direction:column;width:100%;height:100%;" class="${isZoom ? "html - zoom" : "html - body"}" > ${
-                            html.replace(/\t/g, ``).replace(/\n/g, ``).trim()
-                                .replace(/width( *?):( *?)([A-Za-z0-9]*);?/g, `width:${isZoom ? "500px" : "100%"};`)
-                                .replace(/height( *?):( *?)([A-Za-z0-9]*);/g, `height:100%;`)
-                                .replace(/width='([A-Za-z0-9 _%]*)'/g, `width='100%'`)
-                                .replace(/width="([A-Za-z0-9 _%]*)"/g, `width='100%'`)
-                                .replace(/width( *?)=( *)"([A-Za-z0-9 _]*)"/g, `width="100%"`)
-                                .replace(/height=[",']([A-Za-z0-9 _]*)[",']/g, `height="${isZoom ? "500px" : "100%"}"`)
-                                .replace(/height:[",']([A-Za-z0-9 _]*)[",']/g, `minHeight:350px;height:${isZoom ? "500px" : "100%"}`)
+                        let replHtml = html.replace(/\t/g, ``).replace(/\n/g, ``).trim()
+                            .replace(/width( *?):( *?)([A-Za-z0-9]*);?/g, `width:${isZoom ? "500px" : "100%"};`)
+                            .replace(/height( *?):( *?)([A-Za-z0-9]*);/g, `height:100%;`)
+                            .replace(/width='([A-Za-z0-9 _%]*)'/g, `width='100%'`)
+                            .replace(/width="([A-Za-z0-9 _%]*)"/g, `width='100%'`)
+                            .replace(/width( *?)=( *)"([A-Za-z0-9 _]*)"/g, `width="100%"`)
+                            .replace(/height=[",']([A-Za-z0-9 _]*)[",']/g, `height="${isZoom ? "500px" : "100%"}"`)
+                            .replace(/height:[",']([A-Za-z0-9 _]*)[",']/g, `minHeight:350px;height:${isZoom ? "500px" : "100%"}`);
 
-
-                            } `;
+                        html = `<div  style="position:relative;display:flex;flex-direction:column;width:100%;height:100%;" class="${isZoom ? "html-zoom" : "html-body"}">${replHtml}`;
                     }
-                    // if (full)
-                    //     console.log("BLOCK2:", { html })
+
+                    if (full)
+                        console.log("BLOCK2:", { html })
                     html = html.replace('&rsquo;', "'");
                     return renderMarkdown({ blockType: p.blockType, md: html, dataId: 'markdown-block11', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'image': {
@@ -1299,11 +1322,11 @@ export default class QwiketRenderer extends Component {
 
             <div>
                 {
-                    body && body.blocks && full && !readMore ? <div data-id="oolong-short" style={{ height: 60, width: '100%', paddingBottom: 20, marginTop: 20, cursor: 'pointer', display: 'flex', justifyContent: 'flex-end', paddingRight: 8, fontSize: '0.9rem', alignItems: 'flex-end' }} onClick={() => setLong(!readMore)}>
-                        Show More<ChevronDown style={{ height: 38, width: 38 }} /></div> : null
+                    body && body.blocks && full && !readMore ? <div data-id="oolong-short" className="q-qwiket-rollup" onClick={() => setLong(!readMore)}>
+                        Show More<ChevronDown style={{ height: 28, width: 28 }} /></div> : null
                 }
                 {full && readMore ? <div data-id="oolong-long" className="q-qwiket-rollup" onClick={() => setLong(!readMore)}>
-                    Roll Up<ChevronUp style={{ height: 38, width: 38 }} /> </div> : null
+                    Show Less<ChevronUp style={{ height: 28, width: 28 }} /> </div> : null
                 }
                 <div style={{ width: '100%' }}> {full && (reshare == 0 || reshare == 100) ? <div className=".q-qwiket-aaaa-wrap" style={{ display: 'flex', marginBottom: 20, width: '100%' }}><a className="q-qwiket-a" style={{
                     width: '100%',
