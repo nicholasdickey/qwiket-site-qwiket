@@ -6,6 +6,8 @@ import { withTheme } from '@material-ui/core/styles';
 import { QwiketComment } from './qwikets/qwiketComment'
 import Root from 'window-or-global'
 import Disqus from './disqus'
+import Tag from './tag'
+import Queue from '../qwiket-lib/components/queue'
 import { setPost } from '../qwiket-lib/actions/app'
 const StyledCheckbox = styled(({ ...other }) => <div classes={{ checked: 'checked', disabled: 'disabled' }}{...other} />)`
   color: #eee !important;
@@ -25,6 +27,46 @@ const StyledCheckbox = styled(({ ...other }) => <div classes={{ checked: 'checke
     color:  #aff; !important;
   }
 `;
+
+export let Context = ({ qparams, context, renderer, listRenderer }) => {
+
+  if (Root.qparams)
+    qparams = Root.qparams;
+
+  let tag = qparams.tag || qparams.shortname;
+  console.log("Context RENDER", { tag, qparams })
+  const StyledColumn = styled.div`
+        width:100%;
+    `
+  let InnerTagWrap = styled.div`
+                width:100%;
+                display:flex;
+            `
+  let TopicWrap = styled.div`
+                width:66.667%;
+            `
+  let FeedWrap = styled.div`
+                width:33.333%;
+            `
+  let InnerFeedWrap = styled.div`
+                width:100% !important;
+            `
+  return <StyledColumn data-id="styled-column">
+
+    <Tag qparams={qparams} />
+    <InnerTagWrap data-id="inner-tag-wrap">
+      <TopicWrap>
+        <Topic qparams={qparams} />
+      </TopicWrap>
+
+      <FeedWrap data-id="feed-wrap" >
+        <InnerFeedWrap data-id="inner-feed-wrap">
+          <Queue qparams={qparams} tag={tag} renderer={renderer} listRenderer={listRenderer} />
+        </InnerFeedWrap>
+      </FeedWrap>
+    </InnerTagWrap>
+  </StyledColumn>
+}
 let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a context main panel
   if (Root.qparams)
     qparams = Root.qparams;
@@ -145,7 +187,12 @@ function mapDispatchToProps(dispatch) {
     actions: bindActionCreators({ setPost }, dispatch)
   }
 }
-export default connect(
+Topic = connect(
   mapStateToProps,
   mapDispatchToProps
 )(withTheme(Topic))
+
+Context = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withTheme(Context))

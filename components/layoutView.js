@@ -2,8 +2,8 @@ import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import Queue from '../qwiket-lib/components/queue'
 import { QwiketItem } from './qwikets/items/qwiketItem'
-import Topic from './topic'
-import Tag from './tag'
+import { Context } from './topic'
+
 import u from '../qwiket-lib/lib/utils'
 import Root from 'window-or-global'
 import { Hotlist, HotItem } from './hotlist'
@@ -55,20 +55,6 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
         }
         case "topic": {
             // console.log("dbb Column:topic ", { qwiketid: qparams.threadid, time: Date.now() })
-            let InnerTagWrap = styled.div`
-                width:100%;
-                display:flex;
-            `
-            let TopicWrap = styled.div`
-                width:66.667%;
-            `
-            let FeedWrap = styled.div`
-                width:33.333%;
-            `
-            let InnerFeedWrap = styled.div`
-                width:100% !important;
-            `
-            tag = tag;
             // console.log("Column:feed", { tag })
             const renderer = ({ item, channel, wrapper }) => {
                 //const [ref, setRef] = useState(false);
@@ -78,19 +64,7 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
                 return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={'feed'} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
             }
             return <StyledColumn data-id="styled-column">
-
-                <Tag qparams={qparams} />
-                <InnerTagWrap data-id="inner-tag-wrap">
-                    <TopicWrap>
-                        <Topic qparams={qparams} />
-                    </TopicWrap>
-
-                    <FeedWrap data-id="feed-wrap" >
-                        <InnerFeedWrap data-id="inner-feed-wrap">
-                            <Queue qparams={qparams} tag={tag} renderer={renderer} listRenderer={listRenderer} />
-                        </InnerFeedWrap>
-                    </FeedWrap>
-                </InnerTagWrap>
+                <Context qparams={qparams} renderer={renderer} listRenderer={listRenderer} />
             </StyledColumn>
         }
         case 'newsviews':
@@ -129,7 +103,7 @@ let LayoutRes = React.memo(({ layoutNumber, layout, selectors, res, hot, density
     //    qparams = Root.qparams;
 
     let layres = layout[res];
-    //console.log("LAYRES", layres, { selectors, density, other });
+    console.log("LAYRES", layres, { selectors, density, other });
     let columns = layres.columns;
     //console.log({ columns })
     let cols = columns.map((c, i) => {
