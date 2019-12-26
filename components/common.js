@@ -15,6 +15,7 @@ import { fetchNotifications, fetchQueue } from '../qwiket-lib/actions/queue'
 import u from '../qwiket-lib/lib/utils'
 import Topline from './topline';
 import { Layout, InnerGrid } from '../qwiket-lib/components/layout';
+import { parseLayout } from '../qwiket-lib/lib/layout'
 import QwiketView from '../components/qwikets/qwiketView'
 import Header from './header'
 import LayoutView from './layoutView'
@@ -49,8 +50,10 @@ export class Common extends React.Component {
         const sessionChanged = nextSession != session;
         //   console.log("WIDTH EVAL", { width, nextWidth, sWidth: session.get("width"), nsWidth: nextSession.get("width") })
         let widthChanged = width != nextWidth
-        console.log("Common shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged })
-        return sessionChanged;
+        //Root.qparams = nextProps.qparams;
+
+        console.log("Common shouldComponentUpdate", { rparams: Root.qparams, contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged })
+        return sessionChanged // || qparamsChanged// || contextChanged;
     }
     newItemsNotificationsAPI() {
         if (this.api)
@@ -102,9 +105,9 @@ export class Common extends React.Component {
     }
     componentDidMount() {
         console.log("COOMON componentDidMount")
-        window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
+        // window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
         window.goBack = false;
-        this.updateDimensions();
+        // this.updateDimensions();
         const props = this.props;
         const { actions, path, app, user, qparams, queues, session, context, dispatch } = props;
 
@@ -320,12 +323,12 @@ export class Common extends React.Component {
 
     }
     render() {
-        console.log("RENDER COMMON");
+        console.log("RENDER COMMON layoutview");
         const { app, session, queues, qparams, context, user, actions } = this.props;
         let hot = +session.get("cover");
         let loud = +session.get("loud");
         let width = u.getLayoutWidth({ session });
-        let theme = +session.get("dark") == 1 ? 0 : 1
+        let theme = +session.get("theme") == 1 ? 1 : 0
         let pageType = qparams.sel ? qparams.sel : "newsline";
         let channel = app.get("channel").get("channel");
         let updateSession = actions.updateSession;
@@ -380,17 +383,58 @@ export class Common extends React.Component {
             Root.qparams = qparams;
             Root.qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
         }
+        let { layout, selectors, density } = parseLayout({ app, session, pageType });
+        let hpads = layout.hpads;
+        console.log("InnerGrid render layoutview")
+        const Grid = styled.div`
+        padding-left: ${hpads.w0};
+        padding-right: ${hpads.w0};
+        width: '100%'
+        @media(min-width:750px){
+            padding-left: ${hpads.w750};
+            padding-right: ${hpads.w750};
+        }
+        @media(min-width:900px){
+            padding-left: ${hpads.w900};
+            padding-right: ${hpads.w900};
+        }
+        @media(min-width:1200px){
+            padding-left: ${hpads.w1200};
+            padding-right: ${hpads.w1200};
+        }
+        @media(min-width:1600px){
+            padding-left: ${hpads.w1600};
+            padding-right: ${hpads.w1600};
+        }
+        @media(min-width:1800px){
+            padding-left: ${hpads.w1800};
+            padding-right: ${hpads.w1800};
+        }
+        @media(min-width:1950px){
+            padding-left: ${hpads.w1950};
+            padding-right: ${hpads.w1950};
+        }
+        @media(min-width:2100px){
+            padding-left: ${hpads.w2100};
+            padding-right: ${hpads.w2100};
+        }
+        @media(min-width:2400px){
+            padding-left: ${hpads.w2400};
+            padding-right: ${hpads.w2400};
+        }
+    
+    `
         const InnerWrapper = ({ layout, selectors, density }) => <div>
             <Topline layout={layout} width={width} />
-            <InnerGrid layout={layout} >
+            <Grid >
                 <PageWrap>
                     <Header width={width} pageType={pageType} layout={layout} qparams={qparams} />
-                    <LayoutView updateSession={updateSession} userLayout={session.get("userLayout")} channel={channel} width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} selectors={selectors} density={density} qparams={Root.qparams ? Root.qparams : qparams} />
+                    <LayoutView layout={layout} selectors={selectors} density={density} updateSession={updateSession} userLayout={session.get("userLayout")} channel={channel} width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} selectors={selectors} density={density} qparams={Root.qparams ? null : qparams} />
                 </PageWrap>
-            </InnerGrid>
+            </Grid>
         </div>;
-        return <div> <Layout pageType={pageType}>
-            <InnerWrapper /></Layout></div>
+        return <div>
+            <InnerWrapper layout={layout} selectors={selectors} density={density} /></div>
     }
 }
 function mapStateToProps(state) {

@@ -672,7 +672,7 @@ export class QwikieEditor extends Component {
         });
         const edit = qedit;
         // const muiTheme = globals.get("muiTheme");
-        const theme = +globals.get("dark") == 0 ? 1 : 0;
+        const theme = +globals.get("theme") == 0 ? 0 : 1;
         const lapsed = "10 sec";
         const color = muiTheme.palette.text.primary;
         const backgroundColor = muiTheme.palette.background.default;

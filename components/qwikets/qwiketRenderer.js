@@ -952,6 +952,7 @@ export default class QwiketRenderer extends Component {
         let { qparams, theme, type, subtype, topic, globals, state, setState, approver, channel, loud, keyprop, long, setLong, link, onClick, inShow, qwiketOpened, zoom } = this.props;
         const muiTheme = theme;
         theme = +globals.get("theme");
+        // console.log("Q RENDERERER", { theme })
         const palette = muiTheme.palette;
         //console.log("PALETTE", palette)
         const textColor = palette.text.primary;

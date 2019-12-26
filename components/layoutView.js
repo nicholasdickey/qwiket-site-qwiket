@@ -8,6 +8,7 @@ import u from '../qwiket-lib/lib/utils'
 import Root from 'window-or-global'
 import { Hotlist, HotItem } from './hotlist'
 import { ColHeader } from './colHeader'
+import Twitter from './twitter'
 
 //let Hotlist = () => <div />
 //let HotItem = () => <div />
@@ -30,7 +31,7 @@ let HotlistRow = React.memo(({ layres, qparams, loud, theme, channel }) => {
 let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelectors, colIndex, pageType, res, density, updateSession, userLayout }) => {
     if (!qparams && Root.qparams)
         qparams = Root.qparams;
-    //  console.log("COLUMN:", { qparams, column, colIndex, selectors, mscSelectors, density })
+    console.log("COLUMN:", { qparams, column, colIndex, selectors, mscSelectors, density })
     let tag = qparams.tag || qparams.shortname;
     let width = column.percentWidth;
     const StyledColumn = styled.div`
@@ -48,30 +49,9 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
         return <InnerStyledColumn data-id="inner-styled-column" className="q-column">{rows}</InnerStyledColumn>
     }
     switch (selector) {
-        case 'newsviews':
-        case 'topics':
-        case 'stickies':
-        case 'reacts': {
-            // console.log(`Column: ${selector}`)
-            const renderer = ({ item, channel, wrapper }) => {
-                //const [ref, setRef] = useState(false);
-                //  console.log("RENDERER:", item)
-
-
-                return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={selector} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
-            }
-            return <StyledColumn data-id="styled-column"><ColHeader qparams={qparams} colType={type} updateSession={updateSession} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} /></StyledColumn>
-        }
-        case 'feed': {
-            // console.log("Column:feed")
-            const renderer = ({ item, channel, wrapper }) => {
-                //const [ref, setRef] = useState(false);
-                //  console.log("RENDERER:", item)
-
-
-                return <QwiketItem wrapper={wrapper} columnType={'feed'} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
-            }
-            return <div><Queue tag={tag} renderer={renderer} qparams={qparams} listRenderer={listRenderer} /></div>
+        case 'twitter': {
+            return <StyledColumn data-id="styled-column"><ColHeader qparams={qparams} colType={type} updateSession={updateSession} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Twitter height={49600} />
+            </StyledColumn>
         }
         case "topic": {
             // console.log("dbb Column:topic ", { qwiketid: qparams.threadid, time: Date.now() })
@@ -113,6 +93,34 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
                 </InnerTagWrap>
             </StyledColumn>
         }
+        case 'newsviews':
+        case 'topics':
+        case 'stickies':
+        case 'reacts':
+        default:
+            {
+                // console.log(`Column: ${selector}`)
+                const renderer = ({ item, channel, wrapper }) => {
+                    //const [ref, setRef] = useState(false);
+                    //  console.log("RENDERER:", item)
+
+
+                    return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={selector} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
+                }
+                return <StyledColumn data-id="styled-column"><ColHeader qparams={qparams} colType={type} updateSession={updateSession} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} /></StyledColumn>
+            }
+        case 'feed': {
+            // console.log("Column:feed")
+            const renderer = ({ item, channel, wrapper }) => {
+                //const [ref, setRef] = useState(false);
+                //  console.log("RENDERER:", item)
+
+
+                return <QwiketItem wrapper={wrapper} columnType={'feed'} topic={item} channel={channel} qparams={qparams} forceShow={false} approver={false} test={false} />
+            }
+            return <div><Queue tag={tag} renderer={renderer} qparams={qparams} listRenderer={listRenderer} /></div>
+        }
+
     }
     return <StyledColumn>HEADER{JSON.stringify(column, null, 4)}</StyledColumn>
 });
@@ -158,12 +166,12 @@ class LayoutView extends React.Component {
         let props = this.props;
         let widthChanged = props.width != nextProps.width;
         let layoutChanged = props.layout != nextProps.layout;
-        //  console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged });
+        console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged });
         return widthChanged || layoutChanged;
     }
     render() {
         let { layout, width, ...other } = this.props;
-        //  console.log("LAYOUT_VIEW:", { width, other, layout });
+        console.log("LAYOUTVIEW:", { width, other, layout });
         let layoutView = layout.layoutView;
         let layoutNumber = layout.layoutNumber;
         // let columns = layout.columns;

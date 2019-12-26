@@ -19,7 +19,7 @@ import { ClickWalledGarden } from '../qwiket-lib/components/walledGarden';
 import LinkPopup from '../qwiket-lib/components/linkPage';
 
 let RenderTag = React.memo(({ channel, shortname, parentName, parentShortname, metaLink, name, description, image, included, dark, actions }) => {
-  //console.log("RENDER RenderTag");
+  console.log("RENDER RenderTag", shortname);
   const muiTheme = useTheme();
   const backgroundColor = muiTheme.palette.background.default;
   const color = muiTheme.palette.text.primary;
@@ -172,10 +172,10 @@ let Tag = ({ qparams, context, app, session, actions }) => {  // a.k.a context m
   //   qparams = Root.qparams;
   if (Root.qparams)
     qparams = Root.qparams;
-
+  console.log("RENDER TAG 1")
 
   let topic = context.get("topic");
-  let dark = +session.get('dark');
+  let dark = ! +session.get('theme');
   if (!topic) {
     // console.log("NO TOPIC");
     return <div />
@@ -202,7 +202,7 @@ let Tag = ({ qparams, context, app, session, actions }) => {  // a.k.a context m
   if (!parent) {
     // console.log("NO PARENT!!!")
   }
-  console.log("RENDER TAG");
+  console.log("RENDER TAG", { metaTag, shortname });
   let parentShortname = parent ? parent.get("shortname") : '';
   let parentName = parent ? parent.get("name") : '';
   //if (parent)

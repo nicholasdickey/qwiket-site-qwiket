@@ -407,6 +407,7 @@ export class QwiketItem extends Component {
                     sel: qparams.sel,
                     qparams,
                     nextParams: {
+                        comments: null,
                         show: { qview: [{ qwiketid: topic.get("threadid") }] }
                     }
                 })
@@ -529,7 +530,7 @@ export class QwiketItem extends Component {
                                  qwiketid: topic.get("threadid")
                              }
              }*/
-            console.log({ v10Link, tthreadid });
+            // console.log({ v10Link, tthreadid });
             //if (inShow && relation == 'level' && typeOfQwiket == 'commentStream' && Root.__CLIENT__)
             //if (relation == 'parent')
             //	console.log("Q1GBG 4: createDatum", { targetLink, levelLink, routePageLink, qparams, props: this.props })

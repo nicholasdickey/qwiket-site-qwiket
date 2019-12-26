@@ -102,7 +102,7 @@ const TitleBand = ({ title, leftLogo, rightLogo }) => {
     </StyledWrapper>
 }
 const DatelineBand = ({ session, channelDetails, user, actions }) => {
-    let dark = +session.get('dark');
+    let dark = !+session.get('theme');
     const muiTheme = useTheme();
     const backgroundColor = muiTheme.palette.background.default;
     const color = muiTheme.palette.text.primary;
@@ -219,7 +219,7 @@ const DatelineBand = ({ session, channelDetails, user, actions }) => {
 }
 
 const DesktopNavigation = ({ session, channelDetails, url }) => {
-    let dark = +session.get('dark');
+    let dark = ! +session.get('theme');
     const muiTheme = useTheme();
     const backgroundColor = muiTheme.palette.background.default;
     const color = muiTheme.palette.text.primary;

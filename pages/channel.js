@@ -44,6 +44,13 @@ class Channel extends React.Component {
         if (!sel)
             sel = "newsline"
         params.sel = sel;
+        if (Root.__CLIENT__) {
+            let api = Root.qparams ? Root.qparams.newItemsNotificationsAPI : qparams ? qparams.newItemsNotificationsAPI : null;
+            console.log("Updating Root.qparams", { params, api })
+            Root.qparams = params;
+            if (api)
+                Root.qparams.newItemsNotificationsAPI = api;
+        }
         // console.log({ props })
 
         //  console.log("fetchApp args", { channel, q, solo, code, appid, sel, utm_source, utm_medium })
@@ -120,12 +127,7 @@ class Channel extends React.Component {
         req.res.cookie('anon', anon, { maxAge, sameSite: 'Lax' })
         console.log("SET COOKIE ", { identity, anon }) */
         console.log("dbb Channel:getInitialProps done", params, Date.now())
-        if (Root.__CLIENT__) {
-            let api = Root.qparams ? Root.qparams.newItemsNotificationsAPI : null
-            Root.qparams = params;
-            if (api)
-                Root.qparams.newItemsNotificationsAPI = api;
-        }
+
         return {
             qparams: params
         }

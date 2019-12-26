@@ -37,7 +37,7 @@ let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a 
 
   let details = app.get("channel").get("channelDetails");
   let forum = details.get("forum");
-  let isDay = session.get("dark") ? 0 : 1;
+  let isDay = session.get("theme") ? 1 : 0;
   // if (Root.qparams)
   //   qparams = Root.qparams;
   let qwiketid = qparams.threadid;
