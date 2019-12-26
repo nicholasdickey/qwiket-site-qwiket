@@ -321,13 +321,14 @@ export class Common extends React.Component {
     }
     render() {
         console.log("RENDER COMMON");
-        const { app, session, queues, qparams, context, user } = this.props;
+        const { app, session, queues, qparams, context, user, actions } = this.props;
         let hot = +session.get("cover");
         let loud = +session.get("loud");
         let width = u.getLayoutWidth({ session });
         let theme = +session.get("dark") == 1 ? 0 : 1
         let pageType = qparams.sel ? qparams.sel : "newsline";
         let channel = app.get("channel").get("channel");
+        let updateSession = actions.updateSession;
         //   console.log("COMMON RENDER", { pageType, qparams })
         // console.log({ user: user.toJS() })
         /* let qwiket = Immutable.fromJS({
@@ -379,12 +380,12 @@ export class Common extends React.Component {
             Root.qparams = qparams;
             Root.qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
         }
-        const InnerWrapper = ({ layout }) => <div>
+        const InnerWrapper = ({ layout, selectors, density }) => <div>
             <Topline layout={layout} width={width} />
-            <InnerGrid layout={layout}>
+            <InnerGrid layout={layout} >
                 <PageWrap>
                     <Header width={width} pageType={pageType} layout={layout} qparams={qparams} />
-                    <LayoutView channel={channel} width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} qparams={Root.qparams ? Root.qparams : qparams} />
+                    <LayoutView updateSession={updateSession} userLayout={session.get("userLayout")} channel={channel} width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} selectors={selectors} density={density} qparams={Root.qparams ? Root.qparams : qparams} />
                 </PageWrap>
             </InnerGrid>
         </div>;

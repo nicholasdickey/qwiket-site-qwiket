@@ -408,13 +408,13 @@ const Lowline = ({ session }) => {
             @media(min-width: 1200px) {
                 display: flex;
             }
-            @media(min-width: 1799px) {
+            @media(min-width: 1850px) {
                 display: none;
             }
             `
     const LargeDesktop = styled.div`
             display: none;
-            @media(min-width: 1800px) {
+            @media(min-width: 1850px) {
                 display: flex;
             }
             `

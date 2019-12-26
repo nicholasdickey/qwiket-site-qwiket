@@ -62,7 +62,7 @@ class Channel extends React.Component {
             let state = store.getState()
             let app = state.app;
             let session = state.session;
-            let layout = parseLayout({ app, session, pageType: sel });
+            let { layout, selectors } = parseLayout({ app, session, pageType: sel });
             //  console.log("layout:", sel, layout)
             let width = u.getLayoutWidth({ session })
             let widthSelector = `w${width}`;
@@ -158,8 +158,9 @@ class Channel extends React.Component {
         let qparamsChanged = props.qparams != nextProps.qparams;
         let queuesChanged = props.queues != nextProps.queues;
         let sessionChanged = props.session != nextProps.session;
-        console.log("dbb CHANNEL shouldComponentUpdate", { contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged })
-        return qparamsChanged;
+        let userLayoutChanged = props.session.get('userLayout') != nextProps.session.get('userLayout');
+        console.log("dbb CHANNEL shouldComponentUpdate", { session: props.session.toJS(), nextSession: nextProps.session.toJS(), contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userLayoutChanged })
+        return qparamsChanged || userLayoutChanged;
     }
     render() {
         let { app, qparams, context, user } = this.props;
@@ -214,6 +215,7 @@ class Channel extends React.Component {
 function mapStateToProps(state) {
     return {
         app: state.app,
+        session: state.session
     };
 }
 

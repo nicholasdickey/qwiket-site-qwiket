@@ -106,7 +106,7 @@ const x = (html, isZoom, image) => {
         html = innerX({ html, token: '</blockquote>', insert: '</div>', order: 'post' });
         //console.log("catedit 12",html)
         let v = $('<div/>').html(html).contents();
-        //v.find(`style`).remove();
+        v.find(`style`).remove();
         v.find(`img[src*="${image}"]`).remove();
         //v.find('.twitter-tweet').remove();
         v.find(`img:not([src])`).each(function () {
@@ -126,18 +126,22 @@ const x = (html, isZoom, image) => {
                 $(this).remove();
             }
         });
-        v.find('blockquote').wrap(`<div class="${isZoom ? "zoom" : "normal"}-wrapper"></div>`);
-        v.find('img').wrap(`<div class="${isZoom ? "zoom" : "normal"}-wrapper"></div>`);
-        v.find('iframe').wrap(`<div class="${isZoom ? "zoom" : "normal"}-iframe-wrapper"></div>`);
+
+        // v.find('blockquote').wrap(`<div class="${isZoom ? "zoom" : "normal"}-wrapper"></div>`);
+        // v.find('img').wrap(`<div class="${isZoom ? "zoom" : "normal"}-wrapper"></div>`);
+        // v.find('iframe').wrap(`<div class="${isZoom ? "zoom" : "normal"}-iframe-wrapper"></div>`);
 
         var textnodes = getTextNodesIn(v.find('#markdown-shell')[0]);
+        //  console.log({ textnodes })
         for (var i = 0; i < textnodes.length; i++) {
+            // console.log('textnode', $(textnodes[i]).text())
             if ($(textnodes[i]).parent().is("'#markdown-shell")) {
                 $(textnodes[i]).wrap("<p>");
             }
         }
 
-        html = $("<div />").append(v.clone()).html();
+        html = $("<div/>").append(v.clone()).html();
+        // html = html.replace(/<p><\/div><\/p>/g, '').replace(/<p><\/div><\/div><\/p>/g, '');
         return html;
     }
     else
@@ -172,7 +176,13 @@ class ImageRenderer extends Component {
         const props = this.props;
         const state = this.state;
         console.log("render Image", { props });
-        let { src, alt, index } = props;
+        let { src, alt, index, coreImage } = props;
+        console.log("RENDER IMAGE", { src, coreImage })
+        if (src.indexOf(coreImage) >= 0) {
+            console.log("DUPLICATE IMAGE")
+            return <div>DUPLICATE IMAGE</div>
+        }
+
         const w = alt ? alt.split('x') : [];
         let width = 0;
         let height = 0;
@@ -181,14 +191,16 @@ class ImageRenderer extends Component {
             height = (+w[1]) ? w[1] : height;
 
             const open = state.lightbox;
+            return <div>IMAGE src={src} coreImage={coreImage}</div>
             //   console.log("r2", { state, src })
-            return <div>{
-                open ? <div><Lightbox
-                    mainSrc={src}
-
-                    onCloseRequest={() => { this.setState({ lightbox: false }) }}
-
-                /><div data-id="image-renderer" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={() => { this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div></div> : <div data-id="image-renderer-2" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div>}</div>
+            /* return <div>{
+                 open ? <div data-id={coreImage}><Lightbox
+                     mainSrc={src}
+ 
+                     onCloseRequest={() => { this.setState({ lightbox: false }) }}
+ 
+                 /><div data-id="image-renderer" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={() => { this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div></div> : <div data-id="image-renderer-2" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div>}</div>
+            */
             // setTimeout(() => $.getScript("/static/css/fslightbox.js"), 1000)
             // return <a data-fslightbox={alt} href={`/lightbox/${encodeURIComponent(src)}`}><img width={width} height={height} src={src} /></a>
         }
@@ -348,7 +360,7 @@ class LinkRenderer extends Component {
 /**
  * Process images, videos etc in markdown / html
  */
-const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state, setState, theme }) => {
+const processBlock = ({ coreImage, blockType, dataId, md, index, reshare, linkColor, state, setState, theme }) => {
     let html = null;
     let embeds = null;
     let changed = false;
@@ -403,11 +415,35 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
         }
 
     }
-    if (md.indexOf("That was no sweet") >= 0)
-        console.log("render processBlock7", md);
+    // if (md.indexOf("That was no sweet") >= 0)
+    //    console.log("render processBlock7", md);
+    //let w = md.split(coreImage);
+    // if (w > 1) {
+    //if (md.indexOf("Jack Rail")) {
+    // console.log("REPLACING IMAGE rail", { md, coreImage })
+    if (coreImage) {
+        let findCore = md.indexOf(coreImage);
+        if (findCore >= 0) {
+            let sw = md.split(coreImage);
+            if (sw.length > 1) {
+                let leftPart = sw[0];
+                let rightPart = sw[1];
+                // console.log("SPLIT:", { leftPart, rightPart, coreImage, sw })
+                let lastI = leftPart.lastIndexOf('<');
+                leftPart = leftPart.substring(0, lastI);
+                lastI = rightPart.indexOf('>');
+                rightPart = rightPart.substring(lastI + 1);
+                md = leftPart + rightPart;
+            }
+
+        }
+    }
+    // console.log("POST REPLACE", md);
+    // }
+    //}
     html = (
         <div data-id={blockType == 'text' ? 'textblock-' + dataId : 'htmlblock-' + dataId} key={`pre-render-blocks-key-${index}`} className={reshare > 50 && reshare < 60 ? "q-qwiket-markdown-draft" : "q-qwiket-markdown"} >
-            {blockType == 'text' || blockType == 'html' ? <Markdown options={{
+            {blockType == 'text' ? <Markdown options={{
                 forceBlock: true,
                 overrides: {
                     img: {
@@ -415,7 +451,8 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
                         props: {
                             setState,
                             index: `lightbox-${index}`,
-                            state
+                            state,
+                            coreImage
                         }
 
                     },
@@ -674,7 +711,7 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
                     color: ${ linkColor} !important;
                     margin-bottom: 10px;
                 }
-                .q-drop{
+                .m_first-letter, .q-drop{
                     float: left;
                     font-family: Gentium Basic, serif;
                     font-size: 72px;
@@ -690,7 +727,7 @@ const processBlock = ({ blockType, dataId, md, index, reshare, linkColor, state,
     return html;
 
 }
-export const renderMarkdown = ({ blockType, dataId, md, index, children, theme, reshare, linkColor, dropCap, state, setState }) => {
+export const renderMarkdown = ({ coreImage, blockType, dataId, md, index, children, theme, reshare, linkColor, dropCap, state, setState }) => {
     let html = null;
     let embeds = null;
     let changed = false;
@@ -737,7 +774,7 @@ export const renderMarkdown = ({ blockType, dataId, md, index, children, theme, 
     if (Root.__CLIENT__ && (md.indexOf('youtu') >= 0 || md.indexOf("/t.co") >= 0 || md.indexOf("twitter.com"))) {
         // console.log("!!!!!  childo renderMarkdown2", { blockType, md });
         let r = [];
-        let bl = processBlock({ blockType, dataId, md, index, children, state, setState, theme });
+        let bl = processBlock({ coreImage, blockType, dataId, md, index, children, state, setState, theme });
         //  console.log("childo processBlock", bl);
         r.push(bl)
         /* let v = $('<div/>').html(md).contents();
@@ -841,10 +878,10 @@ export const renderMarkdown = ({ blockType, dataId, md, index, children, theme, 
             ret = <div key={dataId + "render-block-" + index}>{r}</div>
         }
         else
-            ret = processBlock({ blockType, dataId, md, index, children, reshare, linkColor, theme });
+            ret = processBlock({ coreImage, blockType, dataId, md, index, children, reshare, linkColor, theme });
     }
     else {
-        ret = processBlock({ blockType, dataId, md, index, children, reshare, linkColor, theme });
+        ret = processBlock({ coreImage, blockType, dataId, md, index, children, reshare, linkColor, theme });
     }
 
     if (md.indexOf("That was no sweet") >= 0)
@@ -862,7 +899,13 @@ class RenderImage extends Component {
         const state = this.state;
         //   console.log("render Image", { props });
         let { src, alt, index } = props;
-        let { dataId, image, full, top, loud, opened, type, subtype } = props;
+        let { dataId, image, full, top, loud, opened, type, subtype, coreImage } = props;
+        /*  console.log("RENDER IMAGE", { image, coreImage })
+          if (image.indexOf(coreImage) >= 0) {
+              console.log("DUPLICATE IMAGE")
+              return <div>DUPLICATE IMAGE  src={image} coreImage={coreImage}</div>
+          }*/
+        //return <div>IMAGE src={image} coreImage={coreImage}</div>
         // if (type == 'reacts' && subtype == 'level')
         //   console.log("renderImage", { subtype, opened, type, image, lightbox: state.lightbox })
         let html = <div data-id="image-wrapper1" className="q-qwiket-image-wrapper">
@@ -1010,7 +1053,7 @@ export default class QwiketRenderer extends Component {
         //  else if (rs == 9 || rs == 109)
         //    blocks.push({ blockType: 'html', html: description });
         else if (!body) {
-            // if (full)
+            // if (full)f
             //     console.log('r1 3')
             blocks.push({ blockType: 'html', html: description });
         }
@@ -1032,6 +1075,7 @@ export default class QwiketRenderer extends Component {
         }
         //  if (full)
         //     console.log(">>>> BLOCKS MAP", {});
+        let coreImage = '';
         blocks = blocks.map((p, i) => {
             // if (full)
             //    console.log("BLOCK:", { p, type, reshare, description, body, article, blockType: p.blockType, cond: (type == 'full' && +article && d.html) ? 1 : 0 })
@@ -1040,23 +1084,25 @@ export default class QwiketRenderer extends Component {
                 case 'article1':
                     return renderArticle({ topic, d, theme, globals, zoom, channel, approver })
                 case 'text':
-                    return renderMarkdown({ blockType: p.blockType, dataId: 'text-block', md: p.text, index: i, theme, reshare, linkColor, dropCap: p.dropCap ? true : false, state: this.state, setState: (update) => this.setState(update) });
+                    return renderMarkdown({ coreImage, blockType: p.blockType, dataId: 'text-block', md: p.text, index: i, theme, reshare, linkColor, dropCap: p.dropCap ? true : false, state: this.state, setState: (update) => this.setState(update) });
                 case 'article':
                     return renderMarkdown({ blockType: p.blockType, md: renderToHtml({ topic, d, theme, globals, zoom, channel, approver }), dataId: 'markdown-block12', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'html': // scraped from external page or description block 
                     // console.log("first letter block:html", type)
                     if (!p.html)
                         return;
+                    // if (type == 'full')
+                    //    console.log("original htmll", p.html)
                     html = p.html.replace(/<p >/g, "<p>").replace(/<\/p >/g, "</p>");
-                    html = html.replace(/<p><\/p>/g, '').replace(/<br>/g, '<br /><br />');
+                    html = html.replace(/<p><\/p>/g, '').replace(/<br>/g, '<br /><br />').replace(/<p><\/div><\/p>/g, '')
 
                     // html = html.replace(/<\/div>/g, '')
 
-                    if (type == 'full')
-                        console.log("BLOCK2 replace p", html);
+                    // if (type == 'full')
+                    //    console.log("BLOCK2 replace p", html);
                     if (type == 'full') {
                         let lw = html.split("<p>");
-                        console.log("first letter split", { html, lw })
+                        //  console.log("first letter split", { html, lw })
                         if (lw.length > 1) {
                             console.log("first letter ppp")
                             let c = lw[1].trim().charAt(0);
@@ -1076,8 +1122,10 @@ export default class QwiketRenderer extends Component {
                     else {
                         html = html.replace(/class="drop"/g, `class="disabled-drop" `)
                     }
+                    html = `<div id="markdown-shell" class="q-qwiket-md-shell">${html}</div>`;
+                    // if (type == 'full')
+                    //    console.log("block2 html:", html);
 
-                    //console.log("catedit shtml:", shtml);
                     html = x(html, isZoom, image);
                     //console.log("catedit shtml-pos-x:", shtml);
                     if (isZoom) {
@@ -1085,7 +1133,7 @@ export default class QwiketRenderer extends Component {
                             html.replace(/\t/g, ``).replace(/\n/g, ``).trim()
                                 .replace(/float( *?):( *?)left;/g, `margin-left:auto;margin-right:auto;`)
                                 .replace(/float( *?):( *?)right;/g, `margin-left:auto;margin-right:auto;`)
-                            }</div > `;
+                            }</div> `;
 
                     }
                     else {
@@ -1098,17 +1146,22 @@ export default class QwiketRenderer extends Component {
                             .replace(/height=[",']([A-Za-z0-9 _]*)[",']/g, `height="${isZoom ? "500px" : "100%"}"`)
                             .replace(/height:[",']([A-Za-z0-9 _]*)[",']/g, `minHeight:350px;height:${isZoom ? "500px" : "100%"}`);
 
-                        html = `<div  style="position:relative;display:flex;flex-direction:column;width:100%;height:100%;" class="${isZoom ? "html-zoom" : "html-body"}">${replHtml}`;
+                        html = `<div  style="position:relative;display:flex;flex-direction:column;width:100%;height:100%;" class="${isZoom ? "html-zoom" : "html-body"}">${replHtml}</div>`;
                     }
 
-                    if (full)
-                        console.log("BLOCK2:", { html })
+                    //  if (full)
+                    //     console.log("BLOCK2:", { html })
                     html = html.replace('&rsquo;', "'");
-                    return renderMarkdown({ blockType: p.blockType, md: html, dataId: 'markdown-block11', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
+                    return renderMarkdown({ coreImage, blockType: p.blockType, md: html, dataId: 'markdown-block11', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'image': {
                     if (description.indexOf("That was no sweet") >= 0)
                         console.log("image block", image)
-                    return <RenderImage dataId={`image - dds - ${i} `} image={image} top={top} loud={loud} full={full} opened={opened} type={type} subtype={subtype} />
+                    let coreImageW = image.split('.');
+                    coreImage = coreImageW[coreImageW.length > 1 ? coreImageW.length - 2 : 0];
+                    coreImageW = coreImage.split('/');
+                    coreImage = coreImageW[coreImageW.length > 1 ? coreImageW.length - 2 : 0];
+
+                    return <RenderImage dataId={`image-dds - ${i} `} image={image} top={top} loud={loud} full={full} opened={opened} type={type} subtype={subtype} />
                 }
                 case 'rich-link': {
                     const m = p.meta;

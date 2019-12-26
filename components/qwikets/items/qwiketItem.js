@@ -399,22 +399,97 @@ export class QwiketItem extends Component {
                 hub = 0;
 
             let { qwiketid: tthreadid, hub: thub, tag: ttag } = u.parseQwiketid(topic);
-            //  console.log("Calling route", { muzzled, category, topic: topic.toJS(), tag: topic.get('tags') ? topic.get('tags').get(0) : '' })
-            let v10Link = route({
-                sel: muzzled ? qparams.sel : 'context',
-                qparams, nextParams:
-                    isDisqus ? { hub: [{ hub: thub }], tag: [{ tag: ttag }], comments: { disqus: [{ cc: `comment-${topic.get('id')}` }] }, topic: [{ threadid: tthreadid }], show: false }
-                        : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ?
-                            { comments: false, show: { qview: [{ qwiketid: topic.get("threadid") }] } }
-                            : { hub: [{ hub: thub }], tag: [{ tag: ttag }], comments: { native: [{ cqid: topic.get("threadid") }] }, topic: [{ threadid: tthreadid }], show: false }
-                            : { hub: [{ hub: thub }], tag: [{ tag: ttag }], topic: [{ threadid: tthreadid }], comments: false, show: false }
-            });
+
+            // console.log("Calling route", { qparams, hub: thub, muzzled, topic: topic.toJS(), tag: topic.get('tags') ? topic.get('tags').get(0) : '' })
+            let v10Link;
+            if (muzzled) {
+                v10Link = route({
+                    sel: qparams.sel,
+                    qparams,
+                    nextParams: {
+                        show: { qview: [{ qwiketid: topic.get("threadid") }] }
+                    }
+                })
+            }
+            else if (isDisqus && thub) {
+                v10Link = route({
+                    nextRoute: 'context-channel-hub-tag-topic-comments-disqus',
+                    routeParams: {
+                        channel,
+                        hub: thub,
+                        threadid: tthreadid,
+                        tag: ttag,
+                        cc: `comment-${topic.get('id')}`
+                    }
+                })
+            }
+            else if (isDisqus) {
+                v10Link = route({
+                    nextRoute: 'context-channel-tag-topic-comments-disqus',
+                    routeParams: {
+                        channel,
+                        threadid: tthreadid,
+                        tag: ttag,
+                        cc: `comment-${topic.get('id')}`
+                    }
+                })
+            }
+            else if ([6, 7, 106, 107].indexOf(+reshare) >= 0) {
+                if (thub)
+                    v10Link = route({
+                        nextRoute: 'context-channel-hub-tag-topic-comments-native',
+                        routeParams: {
+                            channel,
+                            threadid: tthreadid,
+                            hub: thub,
+                            tag: ttag,
+                            cqid: topic.get("threadid")
+                        }
+                    })
+                else
+                    v10Link = route({
+                        nextRoute: 'context-channel-tag-topic-comments-native',
+                        routeParams: {
+                            channel,
+                            threadid: tthreadid,
+                            tag: ttag,
+                            cqid: topic.get("threadid")
+                        }
+                    })
+            }
+            else {
+                if (thub) {
+                    v10Link = route({
+                        nextRoute: 'context-channel-hub-tag-topic',
+                        routeParams: {
+                            channel,
+                            threadid: tthreadid,
+
+                            hub: thub,
+                            tag: ttag
+                        }
+                    })
+                }
+                else {
+                    v10Link = route({
+                        nextRoute: 'context-channel-tag-topic',
+                        routeParams: {
+                            channel,
+                            threadid: tthreadid,
+
+
+                            tag: ttag
+                        }
+                    })
+                }
+            }
+
 
 
             /* let v10Link = {
                  route: isDisqus ? "taghub-disqus-context" : [6, 7, 106, 107].indexOf(+reshare) >= 0 ? muzzled ? qroute == "context" ? "taghub-view-context" : "taghub-view-context-home" : "taghub-native-context" : (loud || opened) ? "taghub-context" : "taghub-show-context",
                  pathname: '/channel',
- 
+     
                  params: isDisqus ? {
                      channel,
                      hub: thub,
@@ -426,21 +501,21 @@ export class QwiketItem extends Component {
                      hub,
                      tag: category,
                      threadid: qthreadid,
- 
+     
                      qwiketid: topic.get("threadid")
- 
+     
                  } : {
                          channel,
                          shortname: qparams.shortname,
                          qwiketid: topic.get("threadid")
- 
+     
                      } : {
                          channel,
                          hub: shub,
                          tag: category,
                          threadid: sthreadid,
                          cqid: topic.get("threadid")
- 
+     
                      } : (loud || opened) ? {
                          channel,
                          hub: thub,
@@ -454,7 +529,7 @@ export class QwiketItem extends Component {
                                  qwiketid: topic.get("threadid")
                              }
              }*/
-            //  console.log({ v10Link, tthreadid });
+            console.log({ v10Link, tthreadid });
             //if (inShow && relation == 'level' && typeOfQwiket == 'commentStream' && Root.__CLIENT__)
             //if (relation == 'parent')
             //	console.log("Q1GBG 4: createDatum", { targetLink, levelLink, routePageLink, qparams, props: this.props })
@@ -685,13 +760,13 @@ export class QwiketItem extends Component {
         /* let v10levelLink = {
              route: levelRoute,
              pathname: '/channel',
- 
+         
              params: route.indexOf('context') > 0 ? {
                  channel,
                  hub: qparams.hub,
                  tag: qparams.tag,
                  threadid: qparams.threadid,
- 
+         
                  qwiketid: levelKey
              } :
                  route.indexOf('home') > 0 ? {
