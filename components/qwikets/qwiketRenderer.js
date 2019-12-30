@@ -178,9 +178,9 @@ class ImageRenderer extends Component {
         console.log("render Image", { props });
         let { src, alt, index, coreImage } = props;
         console.log("RENDER IMAGE", { src, coreImage })
-        if (src.indexOf(coreImage) >= 0) {
+        if (coreImage && coreImage.trim() && src.indexOf(coreImage) >= 0) {
             console.log("DUPLICATE IMAGE")
-            return <div>DUPLICATE IMAGE</div>
+            return <div>{`II src:${src} cI:${coreImage}`}</div>
         }
 
         const w = alt ? alt.split('x') : [];
@@ -191,16 +191,16 @@ class ImageRenderer extends Component {
             height = (+w[1]) ? w[1] : height;
 
             const open = state.lightbox;
-            return <div>IMAGE src={src} coreImage={coreImage}</div>
+            // return <div>IMAGE src={src} coreImage={coreImage}</div>
             //   console.log("r2", { state, src })
-            /* return <div>{
-                 open ? <div data-id={coreImage}><Lightbox
-                     mainSrc={src}
- 
-                     onCloseRequest={() => { this.setState({ lightbox: false }) }}
- 
-                 /><div data-id="image-renderer" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={() => { this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div></div> : <div data-id="image-renderer-2" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div>}</div>
-            */
+            return <div>{
+                open ? <div data-id={coreImage}><Lightbox
+                    mainSrc={src}
+
+                    onCloseRequest={() => { this.setState({ lightbox: false }) }}
+
+                /><div data-id="image-renderer" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={() => { this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div></div> : <div data-id="image-renderer-2" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}><img style={{ height: '100%', width: '100%' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); this.setState({ lightbox: true }) }} width={width ? width : null} height={height ? height : null} src={src} /></div>}</div>
+
             // setTimeout(() => $.getScript("/static/css/fslightbox.js"), 1000)
             // return <a data-fslightbox={alt} href={`/lightbox/${encodeURIComponent(src)}`}><img width={width} height={height} src={src} /></a>
         }
@@ -945,7 +945,7 @@ export default class QwiketRenderer extends Component {
         let changedTopic = props.topic != nextProps.topic;
         let changedSession = props.session != nextProps.session;
         let longChanged = props.long != nextProps.long;
-        console.log("QwiketRenderer shouldComponentsUpdate", { threadid: nextProps.topic.get("threadid") || nextProps.topic.get("qwiketid"), changedTopic, changedSession, longChanged })
+        // console.log("QwiketRenderer shouldComponentsUpdate", { threadid: nextProps.topic.get("threadid") || nextProps.topic.get("qwiketid"), changedTopic, changedSession, longChanged })
         return changedTopic || changedSession || longChanged;
     }
     render() {
@@ -1144,6 +1144,7 @@ export default class QwiketRenderer extends Component {
                             .replace(/width='([A-Za-z0-9 _%]*)'/g, `width='100%'`)
                             .replace(/width="([A-Za-z0-9 _%]*)"/g, `width='100%'`)
                             .replace(/width( *?)=( *)"([A-Za-z0-9 _]*)"/g, `width="100%"`)
+                            .replace(/alt="width=([A-Za-z0-9 _]*)"/g, `width="100%"`) //pjmedia
                             .replace(/height=[",']([A-Za-z0-9 _]*)[",']/g, `height="${isZoom ? "500px" : "100%"}"`)
                             .replace(/height:[",']([A-Za-z0-9 _]*)[",']/g, `minHeight:350px;height:${isZoom ? "500px" : "100%"}`);
 

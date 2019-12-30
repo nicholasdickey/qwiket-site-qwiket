@@ -54,8 +54,22 @@ class Channel extends React.Component {
         // console.log({ props })
 
         //  console.log("fetchApp args", { channel, q, solo, code, appid, sel, utm_source, utm_medium })
+        let force = false;
         if (Root.__SERVER__)
             await fetchApp({ req, store, channel, q, solo, code, appid, utm_source, utm_medium });
+        else {
+
+            let state = store.getState()
+            let app = state.app;
+            let channelDetails = app.get("channel").get("channelDetails");
+            let channel = channelDetails.get("channel");
+
+            if (params.channel != channel) {
+                console.log("CHANNEL CHANGED!");
+                force = true;
+                await fetchApp({ req, store, channel: params.channel, q, solo, code, appid, utm_source, utm_medium });
+            }
+        }
         let columns = null;
         if (req) {
             await dispatchSession({ req, store });
@@ -69,13 +83,15 @@ class Channel extends React.Component {
             let state = store.getState()
             let app = state.app;
             let session = state.session;
-            let { layout, selectors } = parseLayout({ app, session, pageType: sel });
+            let user = state.user;
+            let { layout, selectors } = parseLayout({ qparams: params, app, session, pageType: sel, user });
             //  console.log("layout:", sel, layout)
             let width = u.getLayoutWidth({ session })
             let widthSelector = `w${width}`;
             //  console.log("## ## ## ", { width, widthSelector })
-            columns = layout.layoutView[widthSelector].columns;
 
+            if (layout.layoutView[widthSelector])
+                columns = layout.layoutView[widthSelector].columns;
             if (!req) {
                 //let props = this.props;
                 params.url = window.location;
@@ -83,13 +99,13 @@ class Channel extends React.Component {
             }
             //  console.log("after fetchApp", columns, params)
             if (Root.__SERVER__)
-                await fetchColumns({ columns, store, query: params, app, req });
+                await fetchColumns({ columns, store, query: params, app, req, force });
             else
-                fetchColumns({ columns, store, query: params, app, req });
+                fetchColumns({ columns, store, query: params, app, req, force });
             console.log("dbb DONE WITH FETCH", Date.now())
         }
         else if (req) {
-            //  console.log("LANDING");
+            console.log("LANDING");
             let state = store.getState()
             let session = state.session;
             if (req.session.options[`loginRedirect`]) {
@@ -145,7 +161,7 @@ class Channel extends React.Component {
         const { app, qparams, context, user } = this.props;
         let channelName = app.get("channel").get("channel");
         // console.log("+++CLIENT")
-        if (qparams.url && qparams.url.indexOf('logout') >= 0) {
+        if (qparams && qparams.url && qparams.url.indexOf('logout') >= 0) {
             //  console.log("+++LOGOUT !!!!");
             const as = `/channel/${channelName}`
             const href = `/channel?channel=${channelName}`
@@ -154,6 +170,7 @@ class Channel extends React.Component {
 
     }
     shouldComponentUpdate(nextProps) {
+        console.log("channel shouldComponentUpdate", nextProps.qparams)
         let props = this.props;
         let contextChanged = props.context != nextProps.context;
         let appChanged = props.app != nextProps.app;
@@ -161,8 +178,10 @@ class Channel extends React.Component {
         let queuesChanged = props.queues != nextProps.queues;
         let sessionChanged = props.session != nextProps.session;
         let userLayoutChanged = props.session.get('userLayout') != nextProps.session.get('userLayout');
-        console.log("dbb CHANNEL shouldComponentUpdate", { session: props.session.toJS(), nextSession: nextProps.session.toJS(), contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userLayoutChanged })
-        return qparamsChanged || userLayoutChanged;
+        let selChanged = props.qparams.sel != nextProps.qparams.sel || props.qparams.channel != nextProps.qparams.channel
+
+        console.log("dbb CHANNEL shouldComponentUpdate", { session: props.session.toJS(), nextSession: nextProps.session.toJS(), contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userLayoutChanged, selChanged })
+        return qparamsChanged || userLayoutChanged || selChanged;
     }
     render() {
         let { app, qparams, context, user } = this.props;
@@ -170,7 +189,7 @@ class Channel extends React.Component {
             qparams = Root.qparams;
         let channelName = app.get("channel").get("channel");
         console.log("dbb RENDER CHANNEL", qparams, Date.now())
-        //  console.log("channel+++", { qparams, channelName, RootC: Root.__CLIENT__ })
+        console.log("channel+++", { qparams, channelName, RootC: Root.__CLIENT__ })
         if (channelName && channelName == 'landing') {
 
             return <Landing />

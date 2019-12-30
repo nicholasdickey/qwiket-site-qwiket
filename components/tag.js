@@ -36,7 +36,7 @@ let RenderTag = React.memo(({ channel, shortname, parentName, parentShortname, m
 
   let OW = styled.div`
     width:100%;
-    padding-right:8px;
+    padding-right:4px;
   `
   let OuterWrap = styled.div`
       width:100%;
@@ -190,8 +190,8 @@ let Tag = ({ qparams, context, app, session, actions }) => {  // a.k.a context m
   }
   // console.log({app})
   let tags = app.get("tags");
-  // console.log("app tags", {tags: tags.toJS(), shortname })
-  let metaTag = tags.get(shortname)
+  console.log("app tags", { tags: tags ? tags.toJS() : '', shortname })
+  let metaTag = tags ? tags.get(shortname) : ''
   //console.log({metaTag});
   if (metaTag) {
     // console.log({ raw_metaTag: metaTag, metaTag: metaTag.toJS() });

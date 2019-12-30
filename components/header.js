@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux';
 import styled from 'styled-components';
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+//import { useRouter } from 'next/router'
 import Root from 'window-or-global';
 
 import { Image } from 'react-bootstrap'
@@ -26,6 +26,9 @@ import blueGrey from '@material-ui/core/colors/blueGrey';
 import teal from '@material-ui/core/colors/teal';
 import cyan from '@material-ui/core/colors/cyan';
 import FilledStar from 'mdi-material-ui/Star';
+import { route } from '../qwiket-lib/lib/qwiketRouter'
+
+import { LayoutSwitch } from './widgets/layoutSwitch'
 const TitleBand = ({ title, leftLogo, rightLogo }) => {
     const StyledWrapper = styled.div`
     display:flex;
@@ -101,7 +104,7 @@ const TitleBand = ({ title, leftLogo, rightLogo }) => {
         <Logo src={leftLogo} /><Title>{title.toUpperCase()}</Title>{rightLogo ? <Logo src={rightLogo} /> : null}
     </StyledWrapper>
 }
-const DatelineBand = ({ session, channelDetails, user, actions }) => {
+const DatelineBand = ({ layout, pageType, qparams, session, channelDetails, user, actions, ...other }) => {
     let dark = !+session.get('theme');
     const muiTheme = useTheme();
     const backgroundColor = muiTheme.palette.background.default;
@@ -155,7 +158,7 @@ const DatelineBand = ({ session, channelDetails, user, actions }) => {
 
     const HorizWrap = styled.div`
         display:flex;
-        justify-content:flex-begin;
+        justify-content:center;
         margin-left:40px;
         margin-right:40px;
     `
@@ -186,39 +189,48 @@ const DatelineBand = ({ session, channelDetails, user, actions }) => {
      `
     let hometown = channelDetails.get('hometown');
     let channel = channelDetails.get('shortname');
+    let channelConfig = channelDetails.get("config");
     // console.log("CHANNEL:", channel)
     let date = new Date();
     let dateStrging = date.toDateString();
     let name = user.get("user_name");
     let approver = user.get("approver");
     let avatar = user.get("avatar");
+    let userLayout = user.get("user_layout");
+    console.log("user userLayout", { user: user.toJS() })
 
     let isLoggedIn = user.get("isLoggedIn");
     // console.log({ isLoggedIn })
-    return <StyledWrapper>
+    return <div><StyledWrapper>
         <HorizWrap><SubTitle>{`${dateStrging}  ${hometown}`}</SubTitle></HorizWrap>
         {isLoggedIn ? <HorizWrap><AvatarGroup><Image src={avatar} width={32} height={32} />{subscr_status > 0 ? <SubscriberStar /> : null}</AvatarGroup></HorizWrap> : null}
 
         {
             !isLoggedIn ? <ClickWalledGarden placeHolder={<SubTitle><a>Sign In</a>&nbsp; Subscribe</SubTitle>} /> :
-                <HorizWrap>
-                    <SubTitle>
-                        <a onClick={() => { console.log("sign out:", `/disqus-logout?channel=${channel}`); window.location = `/channel/${channel}?logout=1` }}>
-                            Sign Out
+                <div>
+                    <HorizWrap>
+                        <SubTitle>
+                            <a onClick={() => { console.log("sign out:", `/disqus-logout?channel=${channel}`); window.location = `/channel/${channel}?logout=1` }}>
+                                Sign Out
                     </a>
-                    </SubTitle>
-                    {!approver ? <SubTitle>
-                        |
+                        </SubTitle>
+                        {!approver ? <SubTitle>
+                            |
                 </SubTitle> : null}
-                    <SubTitle> {`${isLoggedIn ? approver ? '[' + name + ']' : name : 'Subscribe'}`}</SubTitle>
+                        <SubTitle> {`${isLoggedIn ? approver ? '[' + name + ']' : name : 'Subscribe'}`}</SubTitle>
 
 
-                </HorizWrap>
+                    </HorizWrap>
+
+                </div>
         }
-    </StyledWrapper >
+
+    </StyledWrapper >  <HorizWrap> <LayoutSwitch layout={layout} pageType={pageType} qparams={qparams} userLayout={userLayout} channelConfig={channelConfig} {...other} /></HorizWrap></div>
 }
 
-const DesktopNavigation = ({ session, channelDetails, url }) => {
+const DesktopNavigation = ({ session, channelDetails, qparams }) => {
+    if (Root.qparams)
+        qparams = Root.qparams;
     let dark = ! +session.get('theme');
     const muiTheme = useTheme();
     const backgroundColor = muiTheme.palette.background.default;
@@ -246,7 +258,7 @@ const DesktopNavigation = ({ session, channelDetails, url }) => {
            `
 
 
-    const MenuEntry = ({ link, name, as, gap, subMenu }) => {
+    const MenuEntry = ({ name, v10Link, gap, subMenu }) => {
         let [anchorEl, setAnchorEl] = useState(0);
 
         const StyledItem = styled.div`
@@ -273,15 +285,21 @@ const DesktopNavigation = ({ session, channelDetails, url }) => {
 
         `
         if (!subMenu)
-            return <StyledItem><Link href={link} as={as}><a data-id="menu-anchor">{name}</a></Link></StyledItem>
+            return <StyledItem><Link href={v10Link.href} as={v10Link.as}><a data-id="menu-anchor">{name}</a></Link></StyledItem>
         //  console.log({ subMenu, anchorEl })
         const handleClose = (target) => {
             setAnchorEl(null);
         };
         let keys = Object.keys(subMenu);
         let rows = keys.map(key => {
-            let link = `/channel?channel=${key}`;
-            let as = `/channel/${key}`;
+            v10Link = route({
+                nextRoute: 'newsline-channel',
+                routeParams: {
+                    channel: key
+                }
+            })
+            // let link = `/channel?channel=${key}`;
+            // let as = `/channel/${key}`;
             let StyledLink = styled.a` 
             text-decoration:none;
             color:${color};
@@ -289,7 +307,7 @@ const DesktopNavigation = ({ session, channelDetails, url }) => {
                 //text-decoration:underline;
                 color:${linkColor};
            }`
-            return <MenuItem key={`navmenu-${key}`} onClick={() => handleClose(key)}><Link href={link} as={as}><StyledLink>{subMenu[key]}</StyledLink></Link></MenuItem>
+            return <MenuItem key={`navmenu-${key}`} onClick={() => handleClose(key)}><Link href={v10Link.href} as={v10Link.as}><a><StyledLink>{subMenu[key]}</StyledLink></a></Link></MenuItem>
         })
         const Item = () => <StyledItem ><a >{name}</a></StyledItem >
         return <div onClick={(event) => {
@@ -322,40 +340,58 @@ const DesktopNavigation = ({ session, channelDetails, url }) => {
     menu['channels'] = 'Channels';
     menu['lacantina'] = 'La Cantina';
     let keys = Object.keys(menu);
-    const router = useRouter();
+    //const router = useRouter();
     //console.log({ router, Root })
     let channel = channelDetails.get("shortname");
-    let asPath = router.asPath;
+    //let asPath = router.asPath;
 
     let items = keys.map((key, i) => {
         let subMenu = navMenu({ config: channelDetails.get("config"), toplevel: key });
 
-        let link = '';
-        let as = '';
+        // let link = '';
+        // let as = '';
+        let v10Link;
         let gap = false;
         if (key == 'home') {
-            link = `/channel?channel=${channelDetails.get("shortname")}`;
-            as = `/channel/${channel}`;
+            v10Link = route({
+                nextRoute: 'newsline-channel',
+                routeParams: {
+                    channel: channelDetails.get("shortname")
+                }
+            })
+            // link = `/channel?channel=${channelDetails.get("shortname")}`;
+            // as = `/channel/${channel}`;
         }
         else if (key == 'find') {
-            link = `${asPath}&find=1`;
-            as = `${url}/find`
+            v10Link = route({ sel: qparams.sel, qparams, nextParams: {} });
+            v10Link.href.query.find = '1';
+            v10Link.as += '?find=1';
             gap = true;
         }
         else if (key == 'lacantina') {
-            link = `/context?channel=${channel}&qwiketid=${'la-cantina'}`;
-            as = `/context/channel/${channel}/topic/0/la-cantina`;
+            v10Link = route({
+                nextRoute: 'context-channel-tag-topic',
+                routeParams: {
+                    channel,
+                    threadid: channelDetails.get("cb_threadid"),
+                    tag: channelDetails.get("cb_cat")
+                }
+            })
         }
         else if (subMenu) {
-            link = '';
-            as = ''
+
         }
         else {
-            link = `/channel?channel=${key}`;
-            as = `/channel/${key}`;
+            v10Link = route({
+                nextRoute: 'newsline-channel',
+                routeParams: {
+                    channel: key
+                }
+            })
+
         }
         // console.log("Menu:", { name: menu[key], link, as })
-        return <MenuEntry key={`NavmenuItems - ${i} `} name={menu[key]} link={link} as={as} gap={gap} subMenu={subMenu} />
+        return <MenuEntry key={`NavmenuItems - ${i} `} name={menu[key]} v10Link={v10Link} gap={gap} subMenu={subMenu} />
     })
     //  console.log({ menu })
 
@@ -387,15 +423,6 @@ const Lowline = ({ session }) => {
             } `
     const VerticalTablet = styled.div`
             display: none;
-            @media(min-width: 750px) {
-                display: flex;
-            }
-            @media(min-width: 900px) {
-                display: none;
-            }
-            `
-    const HorizontalTablet = styled.div`
-            display: none;
             @media(min-width: 900px) {
                 display: flex;
             }
@@ -403,18 +430,27 @@ const Lowline = ({ session }) => {
                 display: none;
             }
             `
-    const SmallDesktop = styled.div`
+    const HorizontalTablet = styled.div`
             display: none;
             @media(min-width: 1200px) {
                 display: flex;
             }
-            @media(min-width: 1850px) {
+            @media(min-width: 1799px) {
+                display: none;
+            }
+            `
+    const SmallDesktop = styled.div`
+            display: none;
+            @media(min-width: 1800px) {
+                display: flex;
+            }
+            @media(min-width: 2100px) {
                 display: none;
             }
             `
     const LargeDesktop = styled.div`
             display: none;
-            @media(min-width: 1850px) {
+            @media(min-width: 2100px) {
                 display: flex;
             }
             `
@@ -448,17 +484,21 @@ const Lowline = ({ session }) => {
 
 }
 
-let Header = ({ app, session, pageType, layout, user, qparams, actions }) => {
+let Header = ({ app, session, pageType, layout, user, qparams, actions, ...other }) => {
+    if (Root.qparams)
+        qparams = Root.qparams;
     let channel = app.get("channel").get("channelDetails");
     let newsline = app.get("channel").get("newsline");
     //  console.log({ newsline: newsline.toJS(), session: session.toJS() })
     const StyledHeader = styled.div`
         width:100%;
     `
+    if (Root.qparams)
+        qparams = Root.qparams;
     return <StyledHeader>
         <TitleBand title={`${newsline.get("shortname") != newsline.get("channel") ? `${channel.get("nickname")}:` : ''}${newsline.get("name")}`} leftLogo={channel.get("logo")} rightLogo={newsline.get("logo") ? newsline.get("logo") : newsline.get("logo_src")} />
-        <DatelineBand session={session} user={user} channelDetails={channel} actions={actions} />
-        <DesktopNavigation session={session} channelDetails={channel} url={qparams.url} />
+        <DatelineBand layout={layout} pageType={pageType} qparams={qparams} session={session} user={user} channelDetails={channel} actions={actions} {...other} />
+        <DesktopNavigation session={session} channelDetails={channel} url={qparams.url} qparams={qparams} />
         <Lowline session={session} />
     </StyledHeader>
 };

@@ -9,6 +9,8 @@ import Root from 'window-or-global'
 
 import Typography from '@material-ui/core/Typography';
 import { updateSession, checkAlerts, onlineCount, fetchTag } from '../qwiket-lib/actions/app'
+import { updateUserLayout } from '../qwiket-lib/actions/user'
+
 import { fetchShowQwiket, fetchQwiket } from '../qwiket-lib/actions/context'
 import { fetchComments } from '../qwiket-lib/actions/comments'
 import { fetchNotifications, fetchQueue } from '../qwiket-lib/actions/queue'
@@ -51,9 +53,11 @@ export class Common extends React.Component {
         //   console.log("WIDTH EVAL", { width, nextWidth, sWidth: session.get("width"), nsWidth: nextSession.get("width") })
         let widthChanged = width != nextWidth
         //Root.qparams = nextProps.qparams;
-
-        console.log("Common shouldComponentUpdate", { rparams: Root.qparams, contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged })
-        return sessionChanged // || qparamsChanged// || contextChanged;
+        let userChanged = props.user != nextProps.user
+        let selChanged = props.qparams.sel != nextProps.qparams.sel || props.qparams.channel != nextProps.qparams.channel
+        let layoutChanged = props.qparams.layout != nextProps.qparams.layout;
+        console.log("Common shouldComponentUpdate", { selChanged, rparams: Root.qparams, contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userChanged })
+        return sessionChanged || userChanged || layoutChanged || selChanged// || qparamsChanged// || contextChanged;
     }
     newItemsNotificationsAPI() {
         if (this.api)
@@ -105,9 +109,9 @@ export class Common extends React.Component {
     }
     componentDidMount() {
         console.log("COOMON componentDidMount")
-        // window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
+        window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
         window.goBack = false;
-        // this.updateDimensions();
+        this.updateDimensions();
         const props = this.props;
         const { actions, path, app, user, qparams, queues, session, context, dispatch } = props;
 
@@ -224,11 +228,11 @@ export class Common extends React.Component {
          }, 10000);
          */
         this.intervalHandler = setInterval(() => {
-            console.log("registerQueue notificationsHandler:", { newItemsNotifications: this.queues.newItemsNotifications.toJS() });
+            //  console.log("registerQueue notificationsHandler:", { newItemsNotifications: this.queues.newItemsNotifications.toJS() });
             if (this.queues && this.queues.newItemsNotifications)
                 this.queues.newItemsNotifications.forEach((p, i) => {
 
-                    console.log("notif,queue:", { i, p });
+                   // console.log("notif,queue:", { i, p });
                 /*$$$PROD */ actions.fetchNotifications(p);
                     /*$$$PROD*/  // actions.onlineCount();
                 });
@@ -331,6 +335,7 @@ export class Common extends React.Component {
         let theme = +session.get("theme") == 1 ? 1 : 0
         let pageType = qparams.sel ? qparams.sel : "newsline";
         let channel = app.get("channel").get("channel");
+        let chanConfig = app.get("channel").get("channelDetails").get("config");
         let updateSession = actions.updateSession;
         //   console.log("COMMON RENDER", { pageType, qparams })
         // console.log({ user: user.toJS() })
@@ -377,15 +382,17 @@ export class Common extends React.Component {
         /*
         <Typography variant="subtitile2" gutterBottom>CHANNEL: {app.get('channel').get('channelDetails').get('name')}</Typography>*/
 
-        console.log("COMMON RENDER ======================================================================================>>>>>>>>>>>>>>>>>>>.")
+        //  console.log("COMMON RENDER ======================================================================================>>>>>>>>>>>>>>>>>>>.")
         qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
         if (__CLIENT__) {
-            Root.qparams = qparams;
+            if (!Root.qparams)
+                Root.qparams = qparams;
             Root.qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
         }
-        let { layout, selectors, density } = parseLayout({ app, session, pageType });
+        console.log("calling parseLayout", { qparams })
+        let { layout, selectors, density } = parseLayout({ qparams, app, session, pageType, user });
         let hpads = layout.hpads;
-        console.log("InnerGrid render layoutview")
+        //  console.log("InnerGrid render layoutview")
         const Grid = styled.div`
         padding-left: ${hpads.w0};
         padding-right: ${hpads.w0};
@@ -423,13 +430,17 @@ export class Common extends React.Component {
             padding-right: ${hpads.w2400};
         }
     
-    `
+    
+        `
+        if (typeof chanConfig === 'string')
+            chanConfig = Immutable.fromJS(JSON.parse(chanConfig));
+        console.log({ chanConfig: chanConfig.toJS() })
         const InnerWrapper = ({ layout, selectors, density }) => <div>
             <Topline layout={layout} width={width} />
             <Grid >
                 <PageWrap>
-                    <Header width={width} pageType={pageType} layout={layout} qparams={qparams} />
-                    <LayoutView layout={layout} selectors={selectors} density={density} updateSession={updateSession} userLayout={session.get("userLayout")} channel={channel} width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} selectors={selectors} density={density} qparams={Root.qparams ? null : qparams} />
+                    <Header width={width} pageType={pageType} layout={layout} qparams={Root.qparams ? null : qparams} density={density} />
+                    <LayoutView chanConfig={chanConfig} layout={layout} selectors={selectors} density={density} updateUserLayout={actions.updateUserLayout} userLayout={user.get("user_layout")} channel={channel} width={width} hot={hot} loud={loud} theme={theme} pageType={pageType} layout={layout} selectors={selectors} density={density} qparams={Root.qparams ? null : qparams} />
                 </PageWrap>
             </Grid>
         </div>;
@@ -452,7 +463,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         actions: bindActionCreators({
-            updateSession, fetchShowQwiket, checkAlerts, fetchComments, fetchNotifications, onlineCount, fetchQwiket, fetchTag, fetchQueue
+            updateSession, updateUserLayout, fetchShowQwiket, checkAlerts, fetchComments, fetchNotifications, onlineCount, fetchQwiket, fetchTag, fetchQueue
         }, dispatch)
     }
 }

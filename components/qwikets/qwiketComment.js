@@ -1958,7 +1958,7 @@ export class QwiketComment extends Component {
             flatView: new Immutable.OrderedMap({})
 
         } : {};
-        console.log("QwiketComment construct")
+        //  console.log("QwiketComment construct")
         this.state.edit = false
         this.state.commentMenuOpen = false
         this.state.dirty = false;
@@ -1987,7 +1987,7 @@ export class QwiketComment extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         //console.log({props:this.props,nprops:nextProps})
         //return nextProps!=this.props||(this.props.level==0&&this.state!=nextState);
-        console.log("qq comment shouldComponentUpdate0");
+        // console.log("qq comment shouldComponentUpdate0");
         const props = this.props;
         const topic = props.topic;
         const nextTopic = nextProps.topic;
@@ -2036,7 +2036,7 @@ export class QwiketComment extends Component {
               return true;
           }*/
         if (this.state != nextState) {
-            console.log("000555")
+            // console.log("000555")
             if (this.state.dirty != nextState.dirty) {
                 console.log("dirty changed")
                 return true;
@@ -2254,7 +2254,7 @@ export class QwiketComment extends Component {
             channel: test ? 'test' : channel
         };
         //	console.log("fetchComments", { test, request })
-        console.log("target fetch", request)
+        // console.log("target fetch", request)
         this.fc(request);
     }
 
@@ -2265,7 +2265,7 @@ export class QwiketComment extends Component {
             actions, /*bound actions*/
             ...rest /* styles */
         } = this.props;
-        console.log("QwiketComment RENDER")
+        // console.log("QwiketComment RENDER")
         //  const muiTheme = useTheme();
         const width = u.width(globals);
         let loud = width > 900 ? (+session.get("loud")) : 1;

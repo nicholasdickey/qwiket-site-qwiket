@@ -34,7 +34,11 @@ export let Context = ({ qparams, context, renderer, listRenderer }) => {
     qparams = Root.qparams;
 
   let tag = qparams.tag || qparams.shortname;
-  console.log("Context RENDER", { tag, qparams })
+  if (!tag) {
+    let topic = context.get("topic");
+    tag = topic.get("cat") || topic.get("category");
+  }
+  // console.log("Context RENDER", { tag, qparams })
   const StyledColumn = styled.div`
         width:100%;
     `
@@ -75,7 +79,7 @@ let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a 
     console.log("NO TOPIC");
     return <div />
   }
-  console.log("RENDER TOPIC", qparams);
+  // console.log("RENDER TOPIC", qparams);
 
   let details = app.get("channel").get("channelDetails");
   let forum = details.get("forum");
@@ -124,7 +128,7 @@ let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a 
     topicOnly={true}
 
   />
-    <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
+    <div style={{ paddingLeft: 8, display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <div data-id='w01' style={{ width: '100%' }}>
 
         {true ? <div style={{ width: '100%', height: '100%' }}>
@@ -172,7 +176,7 @@ let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a 
 
 
 
-  </OuterTopic>
+  </OuterTopic >
 }
 function mapStateToProps(state) {
   return {

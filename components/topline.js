@@ -7,6 +7,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Tooltip from '@material-ui/core/Tooltip';
 import { updateSession } from '../qwiket-lib/actions/app'
 import AlertWidget from './widgets/alert'
+import { refresh } from '../qwiket-lib/lib/qwiketRouter';
+
 const StyledCheckbox = styled(({ ...other }) => <Checkbox classes={{ checked: 'checked', disabled: 'disabled' }}{...other} />)`
   color: #eee !important;
   width:200px%;
@@ -68,6 +70,7 @@ let Topline = ({ session, layout, actions }) => {
         return <Check label='Loud' checked={session.get('loud') == 1 ? true : false} onChange={(e, v) => {
             console.log("Changed Loud")
             upd({ loud: v ? 1 : 0 });
+            refresh({ qparams });
         }} />
     }
     const Thick = () => {
@@ -82,6 +85,7 @@ let Topline = ({ session, layout, actions }) => {
         return <StyledCheck><Check label='Thick' checked={session.get('thick') == 1 ? true : false} onChange={(e, v) => {
             console.log("Changed And The Band")
             upd({ thick: v ? 1 : 0 });
+            refresh({ qparams });
         }} /></StyledCheck>
     }
     const Dense = () => {
@@ -95,12 +99,14 @@ let Topline = ({ session, layout, actions }) => {
         return <StyledCheck><Check label='Dense' checked={session.get('dense') == 1 ? true : false} onChange={(e, v) => {
             console.log("Changed And The Band")
             upd({ dense: v ? 1 : 0 });
+            refresh({ qparams });
         }} /></StyledCheck>
     }
     const Dark = () => {
         return <Check label='Dark' checked={session.get('theme') == 0 ? true : false} onChange={(e, v) => {
             console.log("Changed Loud")
             upd({ theme: v ? 0 : 1 });
+            refresh({ qparams });
             //setTimeout(() => location.reload(true), 200)
         }} />
     }
@@ -114,6 +120,7 @@ let Topline = ({ session, layout, actions }) => {
         return <StyledCheck><Check label='And The Band' checked={session.get('cover') == 1 ? true : false} onChange={(e, v) => {
             console.log("Changed And The Band")
             upd({ cover: v ? 1 : 0 });
+            refresh({ qparams });
         }} /></StyledCheck>
     }
 

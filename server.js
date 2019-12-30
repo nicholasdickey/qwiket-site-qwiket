@@ -228,7 +228,28 @@ app.prepare().then(() => {
 
         }
     });
+    server.post('/update-user-layout', async (req, res) => {
+        let { host, ip, ua, pxid, anon } = ssrParams(req);
+        let body = req.body;
+        let userLayout = body.userLayout;
+        console.log(chalk.red.bold("update-user-layout:"));
+        let u = `${url}/qapi/user/update-user-layout?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
+        // let u = `http://dev.qwiket.com:8088/api?task=updateUserLayout&pxid=${pxid}&host=${host}&ip=${ip}&XDEBUG_SESSION_START=vscode`;
+        //  console.log(chalk.red.bold("LOGOUT API URL:"), u)
+        // console.log(chalk.red.bold("CHANNELL:"), channel, host)
+        let response = await fetch(u, {
+            // credentials: 'same-origin',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `userLayout=${encodeURIComponent(userLayout)}`
+        })
+        sres = await response.text();
+        console.log({ sres })
+        res.end(sres);
 
+    });
     server.use("/jsapi/?*", apiProxy);
     server.use("/api/?*", apiProxy);
     server.use("/qapi/?*", apiProxy);
@@ -248,15 +269,15 @@ app.prepare().then(() => {
             let logout = req.query.logout;
             if (logout) {
                 let { host, ip, ua, pxid, anon } = ssrParams(req);
-    
-                let u = `${url}/qapi/user/disqus-logout?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
+     
+                let u = `${ url } / qapi / user / disqus - logout ? ua = ${ ua } & pxid=${ pxid } & anon=${ anon } & host=${ host } & xip=${ ip }`;
                 console.log(chalk.red.bold("LOGOUT API URL:"), u)
                 // console.log(chalk.red.bold("CHANNELL:"), req.params.channel, host)
                 let response = await fetch(u, {
                     credentials: 'same-origin'
                 })
                 let json = await response.json();
-    
+     
                 console.log("Return:", json)
                 if (json.cookie) {
                     const identity = json.cookie.identity;
@@ -268,12 +289,12 @@ app.prepare().then(() => {
                     res.cookie('anon', anon, { maxAge, sameSite: 'Lax' });
                     req.cookies['identity'] = identity;
                     req.cookies['anon'] = anon;
-    
-                    // return res.redirect(`${host}:/channel/${channel}`);
+     
+                    // return res.redirect(`${ host }: /channel/${ channel }`);
                 }
                 else {
                     return res.status(500).json(json);
-    
+     
                 }
             }
             app.render(req, res, actualPage, queryParams)
@@ -292,13 +313,13 @@ app.prepare().then(() => {
         console.log("QSHOW ======== --------------   >>>>>>>>>", queryParams)
         app.render(req, res, actualPage, queryParams)
     })
-
+    
     server.get('/context/channel/:channel/rediro/topic/:threadid/?*', (req, res) => {
         const actualPage = '/context'
         const queryParams = { route: 'valid', sel: 'context' }
         app.render(req, res, actualPage, queryParams)
     })
-
+    
     server.get('/context/rediro/topic/:threadid/?*', (req, res) => {
         const actualPage = '/context'
         const queryParams = { route: 'valid', sel: 'context' }
@@ -347,7 +368,7 @@ app.prepare().then(() => {
         // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
         app.render(req, res, actualPage, queryParams)
     })
-
+    
     server.get('/context/channel/:channel/topic/:threadid', (req, res) => {
         const actualPage = '/channel'
         const queryParams = { route: 'context', qwiketid: req.params.threadid, channel: req.params.channel, sel: 'context' }
@@ -361,7 +382,7 @@ app.prepare().then(() => {
          const queryParams = { route: 'valid', sel: 'context' }
          app.render(req, res, actualPage, queryParams)
      })
- 
+     
      server.get('/channel/:channel/home:shortname/?*', (req, res) => {
          const actualPage = '/context'
          const queryParams = { route: 'valid', sel: 'context' }
@@ -382,8 +403,8 @@ app.prepare().then(() => {
          const queryParams = { route: 'valid', sel: 'context' }
          app.render(req, res, actualPage, queryParams)
      })
- 
- */
+     
+    */
 
     //  .add('qview', '/qview/:rootThreadid/:qwiketid/(.*)?', 'dest')
     // .add('cc', '/cc/:cc/(.*)?', 'dest')
@@ -407,8 +428,11 @@ app.prepare().then(() => {
         let { name, value } = req.query;
         try {
             if (!req.session || !req.session.options) {
+                console.log('init session')
                 req.session.options = initSession(req);
+
             }
+            console.log("update-session-param value:", name, value.length)
             req.session.options[name] = value;
         }
         catch (x) {

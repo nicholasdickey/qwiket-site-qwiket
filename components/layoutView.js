@@ -16,22 +16,22 @@ let HotlistRow = React.memo(({ layres, qparams, loud, theme, channel }) => {
     // return <div>HOTLIST {spaces}</div>
     let spaces = layres.spaces;
     let singleWidth = layres.singleWidth;
-    console.log('HotlistRow', { singleWidth, channel, qparams })
+    console.log('HotlistRow', { singleWidth, spaces, layres, channel, qparams })
     const listRenderer = ({ rows }) => {
         //   console.log("render listRenderer", { type, selector })
         return <Hotlist spaces={spaces} qparams={qparams} loud={loud} rows={rows} />
     }
     const renderer = ({ item, channel, wrapper }) => {
-        console.log('HotItem renderer', { channel })
+        // console.log('HotItem renderer', { channel })
         return <HotItem wrapper={wrapper} width={singleWidth} item={item} loud={loud} theme={theme} qparams={qparams} channel={channel} />
     }
-    console.log("HotlistRow", { qparams })
+    //console.log("HotlistRow", { qparams })
     return <Queue tag={'hot'} spaces={spaces} renderer={renderer} qparams={qparams} listRenderer={listRenderer} />
 })
-let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelectors, colIndex, pageType, res, density, updateSession, userLayout }) => {
+let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelectors, colIndex, pageType, res, density, updateUserLayout, userLayout, chanConfig }) => {
     if (!qparams && Root.qparams)
         qparams = Root.qparams;
-    console.log("COLUMN:", { qparams, column, colIndex, selectors, mscSelectors, density })
+    console.log("COLUMN:", { qparams, column, colIndex, selectors, mscSelectors, density, res })
     let tag = qparams.tag || qparams.shortname;
     let width = column.percentWidth;
     const StyledColumn = styled.div`
@@ -42,7 +42,7 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
     `
     let type = column.type;
     let selector = column.selector;
-    let msc = column.msc;
+    let msc = column.msc ? column.msc : pageType == 'newsline' ? 'navigator' : 'feed';
     // console.log("COLUMN LAYOUT NUMBER", layoutNumber)
     const listRenderer = ({ rows }) => {
         //   console.log("render listRenderer", { type, selector })
@@ -50,7 +50,7 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
     }
     switch (selector) {
         case 'twitter': {
-            return <StyledColumn data-id="styled-column"><ColHeader qparams={qparams} colType={type} updateSession={updateSession} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Twitter height={49600} />
+            return <StyledColumn data-id="styled-column"><ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Twitter height={49600} />
             </StyledColumn>
         }
         case "topic": {
@@ -58,7 +58,7 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
             // console.log("Column:feed", { tag })
             const renderer = ({ item, channel, wrapper }) => {
                 //const [ref, setRef] = useState(false);
-                //  console.log("RENDERER:", tag)
+                console.log("ITEM RENDERER:", tag)
 
 
                 return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={'feed'} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
@@ -76,12 +76,12 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
                 // console.log(`Column: ${selector}`)
                 const renderer = ({ item, channel, wrapper }) => {
                     //const [ref, setRef] = useState(false);
-                    //  console.log("RENDERER:", item)
+                    console.log("ITEM RENDERER:", { channel, item })
 
 
                     return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={selector} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
                 }
-                return <StyledColumn data-id="styled-column"><ColHeader qparams={qparams} colType={type} updateSession={updateSession} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} /></StyledColumn>
+                return <StyledColumn data-id="styled-column"><ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} /></StyledColumn>
             }
         case 'feed': {
             // console.log("Column:feed")
@@ -134,18 +134,19 @@ let LayoutRes = React.memo(({ layoutNumber, layout, selectors, res, hot, density
 class LayoutView extends React.Component {
     constructor(props, context) {
         super(props, context);
-        console.log("LayoutView constructor")
+        //  console.log("LayoutView constructor")
     }
     shouldComponentUpdate(nextProps) {
         let props = this.props;
         let widthChanged = props.width != nextProps.width;
         let layoutChanged = props.layout != nextProps.layout;
-        console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged });
-        return widthChanged || layoutChanged;
+        let selChanged = !props.qparams || !nextProps.qparams || props.qparams.sel != nextProps.qparams.sel || props.qparams.channel != nextProps.qparams.channel
+        //  console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged });
+        return widthChanged || layoutChanged || selChanged;
     }
     render() {
         let { layout, width, ...other } = this.props;
-        console.log("LAYOUTVIEW:", { width, other, layout });
+        console.log(" RENDER LAYOUTVIEW:", { width, other, layout });
         let layoutView = layout.layoutView;
         let layoutNumber = layout.layoutNumber;
         // let columns = layout.columns;
