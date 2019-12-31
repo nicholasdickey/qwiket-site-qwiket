@@ -428,7 +428,8 @@ const processBlock = ({ coreImage, blockType, dataId, md, index, reshare, linkCo
             if (sw.length > 1) {
                 let leftPart = sw[0];
                 let rightPart = sw[1];
-                // console.log("SPLIT:", { leftPart, rightPart, coreImage, sw })
+
+                console.log("SPLIT:", { leftPart, rightPart, coreImage, sw })
                 let lastI = leftPart.lastIndexOf('<');
                 leftPart = leftPart.substring(0, lastI);
                 lastI = rightPart.indexOf('>');
@@ -462,7 +463,7 @@ const processBlock = ({ coreImage, blockType, dataId, md, index, reshare, linkCo
                         theme
                     }
                 },
-            }}>{md.indexOf('<p') < 0 ? `<div data-id="inner-wrap">${md}</div>` : md}</Markdown> : <OldMarkdown data-id={`${dataId}-md`} escapeHtml={false} source={md} renderers={{
+            }}>{md.indexOf('<p') < 0 ? `<div data-id="inner-wrap">${md}</div>` : md}</Markdown> : <div data-id={`${dataId}-md`}><OldMarkdown escapeHtml={false} source={md} renderers={{
                 link: (props) => {
                     // console.log("renderLink", { props })
                     /* const embedVideo = renderIFrame({ href });
@@ -476,7 +477,7 @@ const processBlock = ({ coreImage, blockType, dataId, md, index, reshare, linkCo
                     return <a data-id="link" href={href} className="q-qwiket-link">{children}</a>
                 },
 
-            }} />}
+            }} /></div>}
             {false ? <Markdown data-id={`${dataId}-md`} escapeHtml={false} source={md} renderers={{
                 link: (props) => {
                     // console.log("renderLink", { props })
@@ -1152,17 +1153,22 @@ export default class QwiketRenderer extends Component {
                     }
 
                     //  if (full)
-                    //     console.log("BLOCK2:", { html })
+                    // console.log("BLOCK2:", { html, coreImage })
                     html = html.replace('&rsquo;', "'");
                     return renderMarkdown({ coreImage, blockType: p.blockType, md: html, dataId: 'markdown-block11', index: i, theme, linkColor, state: this.state, setState: (update) => this.setState(update) });
                 case 'image': {
                     if (description.indexOf("That was no sweet") >= 0)
                         console.log("image block", image)
                     let coreImageW = image.split('.');
-                    coreImage = coreImageW[coreImageW.length > 1 ? coreImageW.length - 2 : 0];
+                    if (coreImageW.length > 1) {
+                        for (var i = 0; i < coreImageW.length - 1; i++)
+                            coreImage += coreImageW[i];
+                    }
+                    //coreImage = coreImageW[coreImageW.length > 1 ? coreImageW.length - 2 : 0];
                     coreImageW = coreImage.split('/');
-                    coreImage = coreImageW[coreImageW.length > 1 ? coreImageW.length - 2 : 0];
-
+                    coreImage = coreImageW[coreImageW.length - 1];
+                    //coreImage = coreImageW[coreImageW.length > 1 ? coreImageW.length - 2 : 0];
+                    // console.log({ coreImage, image })
                     return <RenderImage dataId={`image-dds - ${i} `} image={image} top={top} loud={loud} full={full} opened={opened} type={type} subtype={subtype} />
                 }
                 case 'rich-link': {

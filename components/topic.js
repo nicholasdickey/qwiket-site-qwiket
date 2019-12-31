@@ -38,7 +38,7 @@ export let Context = ({ qparams, context, renderer, listRenderer }) => {
     let topic = context.get("topic");
     tag = topic.get("cat") || topic.get("category");
   }
-  // console.log("Context RENDER", { tag, qparams })
+  console.log("Context RENDER", { tag, qparams })
   const StyledColumn = styled.div`
         width:100%;
     `
@@ -71,7 +71,7 @@ export let Context = ({ qparams, context, renderer, listRenderer }) => {
     </InnerTagWrap>
   </StyledColumn>
 }
-let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a context main panel
+let Topic = ({ theme, qparams, channel, context, session, actions }) => {  // a.k.a context main panel
   if (Root.qparams)
     qparams = Root.qparams;
   let topic = context.get("topic");
@@ -79,9 +79,9 @@ let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a 
     console.log("NO TOPIC");
     return <div />
   }
-  // console.log("RENDER TOPIC", qparams);
+  console.log("RENDER TOPIC", qparams);
 
-  let details = app.get("channel").get("channelDetails");
+  let details = channel.get("channelDetails");
   let forum = details.get("forum");
   let isDay = session.get("theme") ? 1 : 0;
   // if (Root.qparams)
@@ -98,8 +98,8 @@ let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a 
   const muiTheme = theme;
   const backgroundColor = muiTheme.palette.background;
   const color = muiTheme.palette.text.primary;
-  let channel = app.get("channel").get("channel");
-  let homeChannel = app.get("channel").get("homeChannel")
+  //let channel = app.get("channel").get("channel");
+  let homeChannel = channel.get("homeChannel")
   var ch = (channel && channel != 'usconservative' && channel != 'qwiket') ? ('/channel/' + channel) : '';
   const disqusContextUrl = '/context' + ch
   let OuterTopic = styled.div`
@@ -180,7 +180,7 @@ let Topic = ({ theme, qparams, app, context, session, actions }) => {  // a.k.a 
 }
 function mapStateToProps(state) {
   return {
-    app: state.app,
+    channel: state.app.get("channel"),
     session: state.session,
     context: state.context,
     user: state.user

@@ -3,7 +3,7 @@ import React from 'react';
 import Document, { Head, Main, NextScript } from 'next/document';
 import { ServerStyleSheet } from 'styled-components'
 import { ServerStyleSheets } from '@material-ui/styles';
-import theme from '../views/theme';
+import { withTheme } from '@material-ui/core/styles';
 
 class MyDocument extends Document {
     static async getInitialProps(ctx) {
@@ -32,7 +32,11 @@ class MyDocument extends Document {
     }
 
     render() {
-
+        const muiTheme = this.props.theme;
+        const palette = muiTheme.palette;
+        const backgroundColor = palette.background.default;
+        const color = palette.text.primary;
+        //  console.log("MUITHEME:", { muiTheme, backgroundColor, color, type: palette.type })
         return (
 
             <html>
@@ -58,7 +62,7 @@ class MyDocument extends Document {
                     {/* PWA primary color */}
                     <meta
                         name="theme-color"
-                        content={theme.palette.primary.main}
+                        content={muiTheme.palette.primary.main}
                     />
 
                     <link href="https://fonts.googleapis.com/css?family=Asap+Condensed|Domine|Playfair+Display|Stint+Ultra+Condensed" rel="stylesheet" />
@@ -88,5 +92,5 @@ class MyDocument extends Document {
         );
     }
 }
-
+MyDocument = withTheme(MyDocument)
 export default MyDocument;

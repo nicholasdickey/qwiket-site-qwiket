@@ -274,6 +274,8 @@ export class QwikieEditor extends Component {
         let prevTopic = prevProps.topic;
         let prevQedit = prevProps.qedit;
         let prevItem = prevQedit ? prevTopic : prevProps.replyTopic;
+        if (!prevItem)
+            return;
         console.log("prevItem", prevItem.toJS())
         let prevUid = prevState.uid;
         let prevQwiketid = (!prevQedit && !prevItem) ? `__new:${prevUid}` : prevItem.get("qwiketid");
@@ -640,12 +642,12 @@ export class QwikieEditor extends Component {
                 site_name = `${user.get("user_name")} on Qwiket`,
                 stickie = true;
         }
-        console.log("QwiketEditor render", { item: item ? item.toJS() : {}, topic: topic ? topic.toJS() : {}, qedit, replyTopic, qwiketid })
+        //  console.log("QwiketEditor render", { item: item ? item.toJS() : {}, topic: topic ? topic.toJS() : {}, qedit, replyTopic, qwiketid })
         let reshare = item ? item.get("reshare") : 0;
         let open = ((qwiketid == context.get("openEditor"))) && (level > 0 && selected || level == 0) ? true : false;
         let width = u.width(session);
-        if (context.get("openEditor"))
-            console.log("RENDER ", { selected, level, reshare, openEditor: context.get("openEditor"), qwiketid, open, allowOpen, qedit })
+        //  if (context.get("openEditor"))
+        //     console.log("RENDER ", { selected, level, reshare, openEditor: context.get("openEditor"), qwiketid, open, allowOpen, qedit })
         //qedit = route.indexOf("qedit") >= 0 ? true : false;
         //let open = route.indexOf("qedit") >= 0 || route.indexOf("qreply") >= 0 ? true : false;
         let newTabUrl = qwiketid != rootThreadid ? `/context/channel/${channel}/topic/${qwiketid}` : null;

@@ -44,10 +44,7 @@ import Box8Outline from 'mdi-material-ui/Numeric8BoxOutline';
 import Box9Outline from 'mdi-material-ui/Numeric9BoxOutline';
 import Box10Outline from 'mdi-material-ui/Numeric10BoxOutline';
 
-
-
-
-
+import Users from 'mdi-material-ui/AccountMultiple';
 
 import SmallDesktop from 'mdi-material-ui/Laptop';
 import LargeDesktop from 'mdi-material-ui/DesktopMac';
@@ -123,11 +120,12 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
     let open = openSpec.open;
     if (typeof channelConfig === 'string')
         channelConfig = Immutable.fromJS(JSON.parse(channelConfig));
-    console.log('RENDER', { layoutNumber, channelConfig: channelConfig.toJS() })
+    // console.log('RENDER', { layoutNumber, channelConfig: channelConfig.toJS() })
 
 
     const muiTheme = useTheme();
     const fullScreen = useMediaQuery(muiTheme.breakpoints.down('sm'));
+
     let densityOptions = ["Normal", "Thick", "Dense"];
     let densityValues = ["normal", "thick", "dense"];
 
@@ -367,7 +365,7 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
     let usedWidth = 0;
     let hasMP = false;
     let totalColumns = 0;
-    console.log({ densityLayout })
+    // console.log({ densityLayout })
     let editorColumns = densityLayout ? densityLayout.map((column, index) => {
         let type = column.type;
         if (type == 'mp')
@@ -673,12 +671,17 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
 
     );
 }
-export let LayoutSwitch = ({ layout, qparams, userLayout, actions, width, ...other }) => {
+export let LayoutSwitch = ({ layout, qparams, userLayout, actions, width, countData, ...other }) => {
     if (Root.qparams)
         qparams = Root.qparams;
 
     const [open, setOpen] = React.useState({ open: false, newPage: false });
+    const matches = useMediaQuery('(min-width:900px)');
 
+    console.log({ matches })
+    if (!matches)
+        return <div />
+        
     let layoutNumber = qparams.layout;
     if (!layoutNumber)
         layoutNumber = 1;
@@ -746,16 +749,24 @@ export let LayoutSwitch = ({ layout, qparams, userLayout, actions, width, ...oth
     width:120px;
     color:grey;
     `
+    // console.log({ countData: countData ? countData.toJS() : '' })
+    let CountText = styled.div`
+    display:flex;
+    align-itemd:flex-begin;
+    `
+    let Count = () => <span className="q-count-text">{countData ? <CountText><Users className="q-count" />{`${countData.get("count")}/${countData.get("daycount")}`}</CountText> : null}</span>
+
     return <StyledDiv>
         <LayoutEditor qparams={qparams} userLayout={userLayout} openSpec={open} setOpen={setOpen} layoutNumber={layoutNumber} numPages={numPages} width={width}{...other} />
 
-        <Grid container spacing={0}><Grid item sm> <ResIcon>QWIKET 20/20</ResIcon> </Grid><Grid item sm> <ResIcon>{resIcon}</ResIcon> </Grid>
+        <Grid container spacing={0}><Grid item sm> <ResIcon><Count /></ResIcon> </Grid><Grid item sm> <ResIcon>QWIKET 20/20</ResIcon> </Grid><Grid item sm> <ResIcon>{resIcon}</ResIcon> </Grid>
             {items}<Grid item sm><Filler /></Grid>{add}{edit}
         </Grid></StyledDiv>
 
 }
 function mapStateToProps(state) {
     return {
+        countData: state.app.get("countData")
     };
 }
 function mapDispatchToProps(dispatch) {
@@ -765,7 +776,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 LayoutEditor = connect(
-    mapStateToProps,
+    null,
     mapDispatchToProps
 )(LayoutEditor)
 LayoutSwitch = connect(

@@ -9,7 +9,7 @@ import { ThemeProvider } from '@material-ui/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import withRedux from 'next-redux-wrapper'
 import { initStore } from '../qwiket-lib/store'
-import theme from '../views/theme';
+import theme from '../theme';
 import Root from 'window-or-global'
 class MyApp extends App {
     static async getInitialProps({ Component, ctx }) {
@@ -36,9 +36,14 @@ class MyApp extends App {
             meta = meta.toJS();
         else
             meta = {};
-        // console.log("RENDER APP:", { meta, store, Root })
+        // let session = store && store.getState() && store.getState().session && store.getState().session ? store && store.getState() && store.getState().session && store.getState().session.toJS() : {};
+        let colorTheme = +store && store.getState() && store.getState().session && store.getState().session.get ? store.getState().session.get("theme") : 0;
+
+        //   console.log("RENDER APP:", { session, theme: colorTheme, meta, Root })
         if (Root.__CLIENT__)
             Root.store = store;
+        let muiTheme = theme({ mode: colorTheme });
+        //  console.log('APP post creted muitheme:', muiTheme)
         return (
             <div>
                 <Head>
@@ -71,7 +76,7 @@ class MyApp extends App {
 
 
                 </Head>
-                <ThemeProvider theme={theme}>
+                <ThemeProvider theme={muiTheme}>
                     {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                     <CssBaseline />
                     <Provider store={store}>

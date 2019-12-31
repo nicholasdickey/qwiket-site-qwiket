@@ -36,6 +36,7 @@ export class Common extends React.Component {
             commentNotifications: null,
             alerts: []
         }
+
     }
 
     shouldComponentUpdate(nextProps) {
@@ -109,6 +110,7 @@ export class Common extends React.Component {
     }
     componentDidMount() {
         console.log("COOMON componentDidMount")
+
         window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
         window.goBack = false;
         this.updateDimensions();
@@ -234,7 +236,7 @@ export class Common extends React.Component {
 
                    // console.log("notif,queue:", { i, p });
                 /*$$$PROD */ actions.fetchNotifications(p);
-                    /*$$$PROD*/  // actions.onlineCount();
+                    /*$$$PROD*/  actions.onlineCount();
                 });
             // console.log("registerComment CommentsNotifications action", this.commentNotifications)
             if (this.commentNotifications) {
@@ -327,7 +329,7 @@ export class Common extends React.Component {
 
     }
     render() {
-        console.log("RENDER COMMON layoutview");
+        // console.log("RENDER COMMON layoutview");
         const { app, session, queues, qparams, context, user, actions } = this.props;
         let hot = +session.get("cover");
         let loud = +session.get("loud");
@@ -385,11 +387,13 @@ export class Common extends React.Component {
         //  console.log("COMMON RENDER ======================================================================================>>>>>>>>>>>>>>>>>>>.")
         qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
         if (__CLIENT__) {
+            if (Root.__CLIENT__)
+                setTimeout(() => actions.onlineCount(), 500);
             if (!Root.qparams)
                 Root.qparams = qparams;
             Root.qparams.newItemsNotificationsAPI = this.newItemsNotificationsAPI();
         }
-        console.log("calling parseLayout", { qparams })
+        // console.log("calling parseLayout", { qparams })
         let { layout, selectors, density } = parseLayout({ qparams, app, session, pageType, user });
         let hpads = layout.hpads;
         //  console.log("InnerGrid render layoutview")

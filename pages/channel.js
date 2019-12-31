@@ -26,7 +26,7 @@ class Channel extends React.Component {
 
         }
         else {
-            console.log("dbb CLIENT INIT", store.getState().queues.toJS(), Date.now())
+            // console.log("dbb CLIENT INIT", store.getState().queues.toJS(), Date.now())
             Root.__WEB__ = true;
             Root.__CLIENT__ = true;
 
@@ -37,7 +37,7 @@ class Channel extends React.Component {
         //console.log({ store, isServer, query })
         // let props = path ? parseCommonRoute(path) : { qparams: Object.assign(query, { route: {}, path: req ? req.url : location.href }), nothing: true, path: req ? req.url : location.href };
         let params = query;//props.qparams;
-        console.log("QUERY:", { params })
+        // console.log("QUERY:", { params })
         let sel = query.sel;
         //  console.log("sel", sel)
         let { channel, q, solo } = params;
@@ -46,7 +46,7 @@ class Channel extends React.Component {
         params.sel = sel;
         if (Root.__CLIENT__) {
             let api = Root.qparams ? Root.qparams.newItemsNotificationsAPI : qparams ? qparams.newItemsNotificationsAPI : null;
-            console.log("Updating Root.qparams", { params, api })
+            // console.log("Updating Root.qparams", { params, api })
             Root.qparams = params;
             if (api)
                 Root.qparams.newItemsNotificationsAPI = api;
@@ -61,11 +61,10 @@ class Channel extends React.Component {
 
             let state = store.getState()
             let app = state.app;
-            let channelDetails = app.get("channel").get("channelDetails");
-            let channel = channelDetails.get("channel");
+            let app_channel = app.get("channel").get("channel");
 
-            if (params.channel != channel) {
-                console.log("CHANNEL CHANGED!");
+            if (params.channel != app_channel) {
+                console.log("CHANNEL CHANGED!", params.channel, app_channel, app.toJS());
                 force = true;
                 await fetchApp({ req, store, channel: params.channel, q, solo, code, appid, utm_source, utm_medium });
             }
@@ -161,16 +160,16 @@ class Channel extends React.Component {
         const { app, qparams, context, user } = this.props;
         let channelName = app.get("channel").get("channel");
         // console.log("+++CLIENT")
-        if (qparams && qparams.url && qparams.url.indexOf('logout') >= 0) {
-            //  console.log("+++LOGOUT !!!!");
-            const as = `/channel/${channelName}`
-            const href = `/channel?channel=${channelName}`
-            Router.replace(href, as);
-        }
+        /*  if (qparams && qparams.url && qparams.url.indexOf('logout') >= 0) {
+              //  console.log("+++LOGOUT !!!!");
+              const as = `/channel/${channelName}`
+              const href = `/channel?channel=${channelName}`
+              Router.replace(href, as);
+          } */
 
     }
     shouldComponentUpdate(nextProps) {
-        console.log("channel shouldComponentUpdate", nextProps.qparams)
+        //  console.log("channel shouldComponentUpdate", nextProps.qparams)
         let props = this.props;
         let contextChanged = props.context != nextProps.context;
         let appChanged = props.app != nextProps.app;
@@ -180,7 +179,7 @@ class Channel extends React.Component {
         let userLayoutChanged = props.session.get('userLayout') != nextProps.session.get('userLayout');
         let selChanged = props.qparams.sel != nextProps.qparams.sel || props.qparams.channel != nextProps.qparams.channel
 
-        console.log("dbb CHANNEL shouldComponentUpdate", { session: props.session.toJS(), nextSession: nextProps.session.toJS(), contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userLayoutChanged, selChanged })
+        //  console.log("dbb CHANNEL shouldComponentUpdate", { session: props.session.toJS(), nextSession: nextProps.session.toJS(), contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userLayoutChanged, selChanged })
         return qparamsChanged || userLayoutChanged || selChanged;
     }
     render() {
@@ -188,8 +187,8 @@ class Channel extends React.Component {
         if (Root.__CLIENT__ && Root.qparams)
             qparams = Root.qparams;
         let channelName = app.get("channel").get("channel");
-        console.log("dbb RENDER CHANNEL", qparams, Date.now())
-        console.log("channel+++", { qparams, channelName, RootC: Root.__CLIENT__ })
+        // console.log("dbb RENDER CHANNEL", qparams, Date.now())
+        //  console.log("channel+++", { qparams, channelName, RootC: Root.__CLIENT__ })
         if (channelName && channelName == 'landing') {
 
             return <Landing />

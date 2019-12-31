@@ -16,7 +16,7 @@ let HotlistRow = React.memo(({ layres, qparams, loud, theme, channel }) => {
     // return <div>HOTLIST {spaces}</div>
     let spaces = layres.spaces;
     let singleWidth = layres.singleWidth;
-    console.log('HotlistRow', { singleWidth, spaces, layres, channel, qparams })
+    //console.log('HotlistRow', { singleWidth, spaces, layres, channel, qparams })
     const listRenderer = ({ rows }) => {
         //   console.log("render listRenderer", { type, selector })
         return <Hotlist spaces={spaces} qparams={qparams} loud={loud} rows={rows} />
@@ -31,7 +31,7 @@ let HotlistRow = React.memo(({ layres, qparams, loud, theme, channel }) => {
 let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelectors, colIndex, pageType, res, density, updateUserLayout, userLayout, chanConfig }) => {
     if (!qparams && Root.qparams)
         qparams = Root.qparams;
-    console.log("COLUMN:", { qparams, column, colIndex, selectors, mscSelectors, density, res })
+    // console.log(`COLUMN:${column.selector}`, { qparams, column, colIndex, selectors, mscSelectors, density, res })
     let tag = qparams.tag || qparams.shortname;
     let width = column.percentWidth;
     const StyledColumn = styled.div`
@@ -58,7 +58,7 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
             // console.log("Column:feed", { tag })
             const renderer = ({ item, channel, wrapper }) => {
                 //const [ref, setRef] = useState(false);
-                console.log("ITEM RENDERER:", tag)
+                // console.log("ITEM RENDERER:", tag)
 
 
                 return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={'feed'} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
@@ -76,7 +76,7 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
                 // console.log(`Column: ${selector}`)
                 const renderer = ({ item, channel, wrapper }) => {
                     //const [ref, setRef] = useState(false);
-                    console.log("ITEM RENDERER:", { channel, item })
+                    //console.log("ITEM RENDERER:", { channel, item })
 
 
                     return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={selector} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
@@ -103,7 +103,7 @@ let LayoutRes = React.memo(({ layoutNumber, layout, selectors, res, hot, density
     //    qparams = Root.qparams;
 
     let layres = layout[res];
-    console.log("LAYRES", layres, { selectors, density, other });
+    //console.log("LAYRES", layres, { selectors, density, other });
     let columns = layres.columns;
     //console.log({ columns })
     let cols = columns.map((c, i) => {
@@ -134,19 +134,19 @@ let LayoutRes = React.memo(({ layoutNumber, layout, selectors, res, hot, density
 class LayoutView extends React.Component {
     constructor(props, context) {
         super(props, context);
-        //  console.log("LayoutView constructor")
+        console.log("LayoutView constructor")
     }
     shouldComponentUpdate(nextProps) {
         let props = this.props;
         let widthChanged = props.width != nextProps.width;
         let layoutChanged = props.layout != nextProps.layout;
         let selChanged = !props.qparams || !nextProps.qparams || props.qparams.sel != nextProps.qparams.sel || props.qparams.channel != nextProps.qparams.channel
-        //  console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged });
+        console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged, selChanged });
         return widthChanged || layoutChanged || selChanged;
     }
     render() {
         let { layout, width, ...other } = this.props;
-        console.log(" RENDER LAYOUTVIEW:", { width, other, layout });
+        // console.log(" RENDER LAYOUTVIEW:", { width, other, layout });
         let layoutView = layout.layoutView;
         let layoutNumber = layout.layoutNumber;
         // let columns = layout.columns;

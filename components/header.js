@@ -28,6 +28,7 @@ import cyan from '@material-ui/core/colors/cyan';
 import FilledStar from 'mdi-material-ui/Star';
 import { route } from '../qwiket-lib/lib/qwiketRouter'
 
+
 import { LayoutSwitch } from './widgets/layoutSwitch'
 const TitleBand = ({ title, leftLogo, rightLogo }) => {
     const StyledWrapper = styled.div`
@@ -104,12 +105,14 @@ const TitleBand = ({ title, leftLogo, rightLogo }) => {
         <Logo src={leftLogo} /><Title>{title.toUpperCase()}</Title>{rightLogo ? <Logo src={rightLogo} /> : null}
     </StyledWrapper>
 }
+
 const DatelineBand = ({ layout, pageType, qparams, session, channelDetails, user, actions, ...other }) => {
     let dark = !+session.get('theme');
     const muiTheme = useTheme();
     const backgroundColor = muiTheme.palette.background.default;
     const color = muiTheme.palette.text.primary;
-    const linkColor = dark ? muiTheme.palette.linkColor.dark : muiTheme.palette.linkColor.light;
+    console.log("HEADER", { palete: muiTheme.palette })
+    const linkColor = muiTheme.palette.linkColor;
     let subscr_status = +user.get('subscr_status');
     if (!subscr_status)
         subscr_status = 0;
@@ -197,10 +200,17 @@ const DatelineBand = ({ layout, pageType, qparams, session, channelDetails, user
     let approver = user.get("approver");
     let avatar = user.get("avatar");
     let userLayout = user.get("user_layout");
-    console.log("user userLayout", { user: user.toJS() })
+    //console.log("user userLayout", { user: user.toJS() })
 
     let isLoggedIn = user.get("isLoggedIn");
     // console.log({ isLoggedIn })
+    let LayoutSwitchWrap = styled.div`
+        display:none;
+        & @media(min-width:900px){
+            display:flex;
+        }
+
+    `
     return <div><StyledWrapper>
         <HorizWrap><SubTitle>{`${dateStrging}  ${hometown}`}</SubTitle></HorizWrap>
         {isLoggedIn ? <HorizWrap><AvatarGroup><Image src={avatar} width={32} height={32} />{subscr_status > 0 ? <SubscriberStar /> : null}</AvatarGroup></HorizWrap> : null}
@@ -484,11 +494,11 @@ const Lowline = ({ session }) => {
 
 }
 
-let Header = ({ app, session, pageType, layout, user, qparams, actions, ...other }) => {
+let Header = ({ channel: channelObject, session, pageType, layout, user, qparams, actions, ...other }) => {
     if (Root.qparams)
         qparams = Root.qparams;
-    let channel = app.get("channel").get("channelDetails");
-    let newsline = app.get("channel").get("newsline");
+    let channelDetails = channelObject.get("channelDetails");
+    let newsline = channelObject.get("newsline");
     //  console.log({ newsline: newsline.toJS(), session: session.toJS() })
     const StyledHeader = styled.div`
         width:100%;
@@ -496,9 +506,9 @@ let Header = ({ app, session, pageType, layout, user, qparams, actions, ...other
     if (Root.qparams)
         qparams = Root.qparams;
     return <StyledHeader>
-        <TitleBand title={`${newsline.get("shortname") != newsline.get("channel") ? `${channel.get("nickname")}:` : ''}${newsline.get("name")}`} leftLogo={channel.get("logo")} rightLogo={newsline.get("logo") ? newsline.get("logo") : newsline.get("logo_src")} />
-        <DatelineBand layout={layout} pageType={pageType} qparams={qparams} session={session} user={user} channelDetails={channel} actions={actions} {...other} />
-        <DesktopNavigation session={session} channelDetails={channel} url={qparams.url} qparams={qparams} />
+        <TitleBand title={`${newsline.get("shortname") != newsline.get("channel") ? `${channelDetails.get("nickname")}:` : ''}${newsline.get("name")}`} leftLogo={channelDetails.get("logo")} rightLogo={newsline.get("logo") ? newsline.get("logo") : newsline.get("logo_src")} />
+        <DatelineBand layout={layout} pageType={pageType} qparams={qparams} session={session} user={user} channelDetails={channelDetails} actions={actions}  {...other} />
+        <DesktopNavigation session={session} channelDetails={channelDetails} url={qparams.url} qparams={qparams} />
         <Lowline session={session} />
     </StyledHeader>
 };
@@ -509,7 +519,7 @@ function mapDispatchToProps(dispatch) {
 }
 function mapStateToProps(state) {
     return {
-        app: state.app,
+        channel: state.app.get("channel"),
         session: state.session,
         user: state.user
     };
