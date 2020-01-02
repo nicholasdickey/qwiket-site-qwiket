@@ -175,7 +175,9 @@ let Tag = ({ qparams, context, app, session, actions }) => {  // a.k.a context m
   console.log("RENDER TAG 1")
 
   let topic = context.get("topic");
-  let dark = ! +session.get('theme');
+  let dark = +session.get('theme') ? 0 : 1;
+
+  console.log("Tag", { dark })
   if (!topic) {
     // console.log("NO TOPIC");
     return <div />

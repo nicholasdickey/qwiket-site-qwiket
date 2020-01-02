@@ -662,7 +662,7 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
                     <Button onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={() => { console.log("saving", { userLayout, string: JSON.stringify(userLayout) }); actions.updateUserLayout({ userLayout: JSON.stringify(userLayout) }); refresh({ qparams }) }} color="primary" autoFocus>
+                    <Button onClick={() => { console.log("saving", { userLayout, string: JSON.stringify(userLayout) }); actions.updateUserLayout({ userLayout: JSON.stringify(userLayout) }); /*refresh({ qparams })*/ }} color="primary" autoFocus>
                         Save
                     </Button>
                 </DialogActions>
@@ -681,7 +681,7 @@ export let LayoutSwitch = ({ layout, qparams, userLayout, actions, width, countD
     console.log({ matches })
     if (!matches)
         return <div />
-        
+
     let layoutNumber = qparams.layout;
     if (!layoutNumber)
         layoutNumber = 1;
