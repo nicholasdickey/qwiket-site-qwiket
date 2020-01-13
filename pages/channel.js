@@ -107,7 +107,7 @@ class Channel extends React.Component {
             console.log("LANDING");
             let state = store.getState()
             let session = state.session;
-            if (req.session.options[`loginRedirect`]) {
+            if (req.session && req.session.options && req.session.options[`loginRedirect`]) {
                 let redirect = req.session.options[`loginRedirect`];
                 req.session.options[`loginRedirect`] = '';
                 let state = store.getState()

@@ -30,7 +30,10 @@ import { route } from '../qwiket-lib/lib/qwiketRouter'
 
 
 import { LayoutSwitch } from './widgets/layoutSwitch'
-const TitleBand = ({ title, leftLogo, rightLogo }) => {
+const TitleBand = ({ title, leftLogo, rightLogo, link }) => {
+    const muiTheme = useTheme();
+    const backgroundColor = muiTheme.palette.background.default;
+    const color = muiTheme.palette.text.primary;
     const StyledWrapper = styled.div`
     display:flex;
     width:100%;
@@ -41,6 +44,13 @@ const TitleBand = ({ title, leftLogo, rightLogo }) => {
     @media(max-width:749px){
         display:none;
     }
+    & a{
+    cursor:pointer;
+    text-decoration:none;
+    color:${color};
+    }
+   
+
    
 `
     const Logo = styled((props) => {
@@ -102,7 +112,7 @@ const TitleBand = ({ title, leftLogo, rightLogo }) => {
     `
 
     return <StyledWrapper>
-        <Logo src={leftLogo} /><Title>{title.toUpperCase()}</Title>{rightLogo ? <Logo src={rightLogo} /> : null}
+        <Logo src={leftLogo} /> <Title><Link href={link.href} as={link.as}><a>{title.toUpperCase()}</a></Link></Title>{rightLogo ? <Logo src={rightLogo} /> : null}
     </StyledWrapper>
 }
 
@@ -505,8 +515,14 @@ let Header = ({ channel: channelObject, session, pageType, layout, user, qparams
     `
     if (Root.qparams)
         qparams = Root.qparams;
+    let v10Link = route({
+        nextRoute: 'newsline-channel',
+        routeParams: {
+            channel: channelObject.get("channel")
+        }
+    })
     return <StyledHeader>
-        <TitleBand title={`${newsline.get("shortname") != newsline.get("channel") ? `${channelDetails.get("nickname")}:` : ''}${newsline.get("name")}`} leftLogo={channelDetails.get("logo")} rightLogo={newsline.get("logo") ? newsline.get("logo") : newsline.get("logo_src")} />
+        <TitleBand link={v10Link} title={`${newsline.get("shortname") != newsline.get("channel") ? `${channelDetails.get("nickname")}:` : ''}${newsline.get("name")}`} leftLogo={channelDetails.get("logo")} rightLogo={newsline.get("logo") ? newsline.get("logo") : newsline.get("logo_src")} />
         <DatelineBand layout={layout} pageType={pageType} qparams={qparams} session={session} user={user} channelDetails={channelDetails} actions={actions}  {...other} />
         <DesktopNavigation session={session} channelDetails={channelDetails} url={qparams.url} qparams={qparams} />
         <Lowline session={session} />

@@ -16,6 +16,7 @@
                 "displayName": true,
                 "preprocess": false
             }
-        ]
+        ],
+        "@babel/plugin-proposal-object-rest-spread"
     ]
 }

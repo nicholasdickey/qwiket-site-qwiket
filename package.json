@@ -5,7 +5,18 @@
   "scripts": {
     "dev": "NODE_ENV=dev node --max-old-space-size=4096 server.js",
     "build": "next build",
-    "start": "NODE_ENV=production node --max-old-space-size=2048 server.js"
+    "start": "NODE_ENV=production node --max-old-space-size=2048 server.js",
+    "analyze": "BUNDLE_ANALYZE=both next build",
+    "analyze:server": "BUNDLE_ANALYZE=server next build",
+    "analyze:browser": "BUNDLE_ANALYZE=browser next build",
+    "slint": "eslint server/queue.js server/comments.js",
+    "stest": "jest server/comments --silent --detectOpenHandles ",
+    "queue-test": "jest server/jtest/queue/ --detectOpenHandles ",
+    "comments-test": "jest server/jtest/comments/ --silent --detectOpenHandles ",
+    "qwikets-test": "jest server/jtest/qwikets/ --silent --detectOpenHandles ",
+    "api-test": "jest server/jtest/api/  --detectOpenHandles ",
+    "test": "jest server/jtest --silent --detectOpenHandles ",
+    "scoverage": "jest --silent --collectCoverageFrom=server/queue.js --collectCoverageFrom=server/comments.js --collectCoverageFrom=server/jsapi.js    --coverage"
   },
   "dependencies": {
     "@material-ui/core": "^4.5.1",
@@ -92,6 +103,19 @@
     "window-or-global": "^1.0.1"
   },
   "devDependencies": {
-    "babel-plugin-styled-components": "^1.10.6"
+    "babel-plugin-styled-components": "^1.10.6",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "24.1.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-jest": "^22.6.4",
+    "eslint-plugin-react": "^7.12.4",
+    "jest": "^24.8.0",
+    "enzyme": "3.4.3",
+    "enzyme-adapter-react-16": "1.2.0",
+    "react-addons-test-utils": "15.6.2",
+    "react-test-renderer": "16.4.2"
   }
 }

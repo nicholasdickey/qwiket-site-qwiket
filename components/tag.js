@@ -227,8 +227,8 @@ let Tag = ({ qparams, context, app, session, actions }) => {  // a.k.a context m
   let description = metaTag.get("description");
   let myfeeds = app.get("channel").get('myfeeds');
   let isIncluded = shortname => {
-    return myfeeds.find(feed => (feed.shortname == shortname) && feed.included
-    )
+    return myfeeds ? (myfeeds.find(feed => (feed.shortname == shortname) && feed.included)) : false;
+
   }
 
   let included = isIncluded(shortname);

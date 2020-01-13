@@ -67,6 +67,38 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
                 <Context qparams={qparams} renderer={renderer} listRenderer={listRenderer} />
             </StyledColumn>
         }
+        case "newsline": {
+            {
+                // console.log(`Column: ${selector}`)
+                const renderer = ({ item, channel, wrapper }) => {
+                    //const [ref, setRef] = useState(false);
+                    //console.log("ITEM RENDERER:", { channel, item })
+
+
+                    return <QwiketItem wrapper={wrapper} qparams={qparams} columnType={selector} topic={item} channel={channel} forceShow={false} approver={false} test={false} />
+                }
+                let GoldenRatioContainer = styled.div`
+                display:flex;
+                width:${width};
+                position:relative;
+                `
+                let GoldenRatioLeft = styled.div`
+                width:61.8%;
+                `
+                let GoldenRatioRight = styled.div`
+                width:38.2%;
+                `
+                return <GoldenRatioContainer data-id="newsline-container">
+                    <GoldenRatioLeft>
+                        <ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} />
+                    </GoldenRatioLeft>
+                    <GoldenRatioRight>
+                        <ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={msc} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={msc} renderer={renderer} listRenderer={listRenderer} />
+
+                    </GoldenRatioRight>
+                </GoldenRatioContainer>
+            }
+        }
         case 'newsviews':
         case 'topics':
         case 'stickies':
