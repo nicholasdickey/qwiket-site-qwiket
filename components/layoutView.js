@@ -8,6 +8,7 @@ import u from '../qwiket-lib/lib/utils'
 import Root from 'window-or-global'
 import { Hotlist, HotItem } from './hotlist'
 import { ColHeader } from './colHeader'
+import { NavigatorPanel } from './widgets/navigatorPanel'
 import Twitter from './twitter'
 
 //let Hotlist = () => <div />
@@ -90,10 +91,11 @@ let Column = React.memo(({ layoutNumber, column, qparams, selectors, mscSelector
                 `
                 return <GoldenRatioContainer data-id="newsline-container">
                     <GoldenRatioLeft>
-                        <ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} />
+                        <ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={selector} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={selector} renderer={renderer} listRenderer={listRenderer} solo={qparams.soloShortname} />
                     </GoldenRatioLeft>
                     <GoldenRatioRight>
-                        <ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={msc} selectors={selectors} colIndex={colIndex} pageType={pageType} res={res} density={density} /><Queue qparams={qparams} tag={msc} renderer={renderer} listRenderer={listRenderer} />
+                        <ColHeader chanConfig={chanConfig} qparams={qparams} colType={type} updateUserLayout={updateUserLayout} userLayout={userLayout} layoutNumber={layoutNumber} selector={msc} selectors={mscSelectors} colIndex={colIndex} pageType={pageType} res={res} density={density} />
+                        {msc == 'navigator' ? <NavigatorPanel qparams={qparams} /> : <Queue qparams={qparams} tag={msc} renderer={renderer} listRenderer={listRenderer} />}
 
                     </GoldenRatioRight>
                 </GoldenRatioContainer>
@@ -166,14 +168,14 @@ let LayoutRes = React.memo(({ layoutNumber, layout, selectors, res, hot, density
 class LayoutView extends React.Component {
     constructor(props, context) {
         super(props, context);
-        console.log("LayoutView constructor")
+        //  console.log("LayoutView constructor")
     }
     shouldComponentUpdate(nextProps) {
         let props = this.props;
         let widthChanged = props.width != nextProps.width;
         let layoutChanged = props.layout != nextProps.layout;
         let selChanged = !props.qparams || !nextProps.qparams || props.qparams.sel != nextProps.qparams.sel || props.qparams.channel != nextProps.qparams.channel
-        console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged, selChanged });
+        //  console.log("shouldComponentUpdate LayoutView ", { widthChanged, layoutChanged, selChanged });
         return widthChanged || layoutChanged || selChanged;
     }
     render() {

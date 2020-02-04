@@ -243,7 +243,7 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
 
     `
     let layout = userLayout.layout;
-    console.log({ userLayout })
+    //  console.log({ userLayout })
     if (!layout) {
         userLayout.layout = {};
         setTimeout(() => setUserLayout(userLayout), 1);
@@ -253,7 +253,7 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
     if (!pageTypeLayout) {
         //first try to get the default from channel
         pageTypeLayout = channelConfig.get("layout").get(pageType).toJS();
-        console.log({ pageTypeLayout })
+        //   console.log({ pageTypeLayout })
         if (!pageTypeLayout)
             pageTypeLayout = {};
         userLayout.layout[pageType] = pageTypeLayout;
@@ -262,10 +262,10 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
     let pageLayout = pageTypeLayout[`l${layoutNumber}`];
     if (!pageLayout) {
         let chanTypeLayout = channelConfig.get("layout").get(pageType);
-        console.log({ chanTypeLayout: chanTypeLayout.toJS() })
+        //  console.log({ chanTypeLayout: chanTypeLayout.toJS() })
         if (chanTypeLayout) {
             let chanPageLayout = chanTypeLayout.get(`l${layoutNumber}`);
-            console.log({ page: `l${layoutNumber}`, chanPageLayout: chanPageLayout ? chanPageLayout.toJS() : '' })
+            // console.log({ page: `l${layoutNumber}`, chanPageLayout: chanPageLayout ? chanPageLayout.toJS() : '' })
 
             if (chanPageLayout) {
                 pageLayout = chanPageLayout.toJS();
@@ -281,13 +281,13 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
     let resLayout = pageLayout[res];
     if (!resLayout) {
         let chanTypeLayout = channelConfig.get("layout").get(pageType);
-        console.log({ chanTypeLayout: chanTypeLayout.toJS() })
+        //   console.log({ chanTypeLayout: chanTypeLayout.toJS() })
         if (chanTypeLayout) {
 
             let chanPageLayout = chanTypeLayout.get(`l${layoutNumber}`);
             if (chanPageLayout) {
                 let chanResLayout = chanPageLayout.get(res);
-                console.log({ res, chanResLayout: chanResLayout ? chanResLayout.toJS() : '' })
+                // console.log({ res, chanResLayout: chanResLayout ? chanResLayout.toJS() : '' })
                 if (chanResLayout) {
                     resLayout = chanResLayout.toJS();
                 }
@@ -304,17 +304,17 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
     let densityLayout = resLayout[density];
     if (!densityLayout) {
         let chanTypeLayout = channelConfig.get("layout").get(pageType);
-        console.log({ layoutNumber, chanTypeLayout: chanTypeLayout.toJS() })
+        //   console.log({ layoutNumber, chanTypeLayout: chanTypeLayout.toJS() })
         if (chanTypeLayout) {
             let chanPageLayout = chanTypeLayout.get(`l${layoutNumber}`);
-            console.log({ chanPageLayout: chanPageLayout ? chanPageLayout.toJS() : null })
+            //   console.log({ chanPageLayout: chanPageLayout ? chanPageLayout.toJS() : null })
             if (chanPageLayout) {
 
                 let chanResLayout = chanPageLayout.get(res);
-                console.log({ chanResLayout: chanResLayout.toJS() })
+                //  console.log({ chanResLayout: chanResLayout.toJS() })
                 if (chanResLayout) {
                     let chanDensityLayout = chanResLayout.get(density);
-                    console.log({ density, chanDensityLayout: chanDensityLayout ? chanDensityLayout.toJS() : '' })
+                    //   console.log({ density, chanDensityLayout: chanDensityLayout ? chanDensityLayout.toJS() : '' })
                     if (chanDensityLayout) {
                         densityLayout = chanDensityLayout.toJS();
                     }
@@ -494,7 +494,7 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
             return;
         let newKey = +numKeys.length + 1;
         userLayout.layout[pageType][`l${newKey}`] = defaultPage;
-        console.log("1234 ", { numKeys, newKey, userLayout, pageTypeLayout })
+        //  console.log("1234 ", { numKeys, newKey, userLayout, pageTypeLayout })
         setNumPages(newKey);
         setLayoutNumber(newKey);
     }
@@ -507,17 +507,17 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
     const changeColumn = ({ action, type }) => {
         console.log("userLayout changeColumn", { action, type })
         const ul = Immutable.fromJS(userLayout.layout[pageType][`l${layoutNumber}`][res][density]).toJS();
-        console.log('userLayout before:', ul)
+        //  console.log('userLayout before:', ul)
 
         if (action == 'delete-layout') {
             let chanTypeLayout = channelConfig.get("layout").get(pageType);
-            console.log({ chanTypeLayout: chanTypeLayout.toJS() })
+            //  console.log({ chanTypeLayout: chanTypeLayout.toJS() })
             if (chanTypeLayout) {
                 let chanPageLayout = chanTypeLayout.get(`l${layoutNumber}`);
                 if (chanPageLayout) {
-                    console.log({ chanPageLayout })
+                    //  console.log({ chanPageLayout })
                     let chanResLayout = chanPageLayout.get(res);
-                    console.log({ chanResLayout: chanResLayout.toJS() })
+                    // console.log({ chanResLayout: chanResLayout.toJS() })
                     if (chanResLayout) {
                         let chanDensityLayout = chanResLayout.get(density);
                         console.log({ chanPageLayout, chanResLayout, density, chanDensityLayout: chanDensityLayout ? chanDensityLayout.toJS() : '' })
@@ -533,7 +533,7 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
         }
         else if (action == 'delete') {
             densityLayout.splice(selectedColumn, 1);
-            console.log("userLayout splice", { densityLayout, selectedColumn })
+            // console.log("userLayout splice", { densityLayout, selectedColumn })
 
 
         }
@@ -554,13 +554,13 @@ let LayoutEditor = ({ width, density: defaultDensity, pageType: defaultPageType,
 
         }
         userLayout.layout[pageType][`l${layoutNumber}`][res][density] = Immutable.fromJS(densityLayout).toJS();
-        console.log('userLayout after:', { userLayout }, userLayout.layout[pageType][`l${layoutNumber}`][res][density])
+        //  console.log('userLayout after:', { userLayout }, userLayout.layout[pageType][`l${layoutNumber}`][res][density])
         const newLayout = Immutable.fromJS(userLayout);
-        console.log("setting ", { newLayout: newLayout.toJS(), userLayout })
+        //  console.log("setting ", { newLayout: newLayout.toJS(), userLayout })
         setUserLayout(userLayout);
         setUpdate(Math.random(1000));
     }
-    console.log('userLayout render:', userLayout.layout[pageType][`l${layoutNumber}`][res][density])
+    //  console.log('userLayout render:', userLayout.layout[pageType][`l${layoutNumber}`][res][density])
 
     return (
 
@@ -678,7 +678,7 @@ export let LayoutSwitch = ({ layout, qparams, userLayout, actions, width, countD
     const [open, setOpen] = React.useState({ open: false, newPage: false });
     const matches = useMediaQuery('(min-width:900px)');
 
-    console.log({ matches })
+    //  console.log({ matches })
     if (!matches)
         return <div />
 
@@ -728,7 +728,7 @@ export let LayoutSwitch = ({ layout, qparams, userLayout, actions, width, countD
                             comments: false
                         }
                     });
-                console.log({ link })
+                // console.log({ link })
                 Router.push(link.href, link.as);
 
 

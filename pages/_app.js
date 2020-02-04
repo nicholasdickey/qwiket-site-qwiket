@@ -39,7 +39,7 @@ class MyApp extends App {
         let session = store && store.getState() && store.getState().session && store.getState().session ? store && store.getState() && store.getState().session && store.getState().session.toJS() : {};
         let colorTheme = +(store && store.getState() && store.getState().session && store.getState().session.get ? store.getState().session.get("theme") : 0);
 
-        console.log("RENDER APP:", { session, theme: colorTheme, meta, Root })
+        //   console.log("RENDER APP:", { session, theme: colorTheme, meta, Root })
         if (Root.__CLIENT__)
             Root.store = store;
         let muiTheme = theme({ mode: colorTheme });

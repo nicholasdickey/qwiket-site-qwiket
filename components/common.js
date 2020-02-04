@@ -30,7 +30,7 @@ function sleep(ms) {
 export class Common extends React.Component {
     constructor(props, context) {
         super(props, context);
-        console.log("Common constructor")
+        //  console.log("Common constructor")
         this.queues = {
             newItemsNotifications: Immutable.fromJS({}),
             commentNotifications: null,
@@ -57,7 +57,7 @@ export class Common extends React.Component {
         let userChanged = props.user != nextProps.user
         let selChanged = props.qparams.sel != nextProps.qparams.sel || props.qparams.channel != nextProps.qparams.channel
         let layoutChanged = props.qparams.layout != nextProps.qparams.layout;
-        console.log("Common shouldComponentUpdate", { selChanged, rparams: Root.qparams, contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userChanged })
+        //  console.log("Common shouldComponentUpdate", { selChanged, rparams: Root.qparams, contextChanged, appChanged, qparamsChanged, queuesChanged, sessionChanged, userChanged })
         return sessionChanged || userChanged || layoutChanged || selChanged// || qparamsChanged// || contextChanged;
     }
     newItemsNotificationsAPI() {
@@ -66,7 +66,7 @@ export class Common extends React.Component {
         this.api = {
             registerQueue: (({ tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid, tail }) => {
                 var queueId = Math.floor(Math.random() * 1000000);
-                console.log("registerQueue", { queueId, tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid, tail })
+                //  console.log("registerQueue", { queueId, tag, type, channel, homeChannel, shortname, solo, lastid, qwiketid, tail })
 
                 this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, { tag, type, channel, homeChannel, shortname, solo, lastid, tail, qwiketid, test: 0 });
                 return queueId;
@@ -88,7 +88,7 @@ export class Common extends React.Component {
                 let o = this.queues.newItemsNotifications.get(queueId);
                 if (!o)
                     return;
-                console.log("COMMON updateLastId", { queueId, lastid, tail, o })
+                //  console.log("COMMON updateLastId", { queueId, lastid, tail, o })
                 o.lastid = lastid;
                 o.tail = tail;
                 this.queues.newItemsNotifications = this.queues.newItemsNotifications.set(queueId, o);
@@ -109,7 +109,7 @@ export class Common extends React.Component {
         }
     }
     componentDidMount() {
-        console.log("COOMON componentDidMount")
+        //  console.log("COOMON componentDidMount")
 
         window.addEventListener("resize", debounce(this.updateDimensions.bind(this), 500, { 'leading': false, 'trailing': true, 'maxWait': 3000 }));
         window.goBack = false;
@@ -438,7 +438,7 @@ export class Common extends React.Component {
         `
         if (typeof chanConfig === 'string')
             chanConfig = Immutable.fromJS(JSON.parse(chanConfig));
-        console.log({ chanConfig: chanConfig.toJS() })
+        //   console.log({ chanConfig: chanConfig.toJS() })
         const InnerWrapper = ({ layout, selectors, density }) => <div>
             <Topline layout={layout} width={width} />
             <Grid >

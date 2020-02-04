@@ -121,7 +121,7 @@ const DatelineBand = ({ layout, pageType, qparams, session, channelDetails, user
     const muiTheme = useTheme();
     const backgroundColor = muiTheme.palette.background.default;
     const color = muiTheme.palette.text.primary;
-    console.log("HEADER", { palete: muiTheme.palette })
+    // console.log("HEADER", { palete: muiTheme.palette })
     const linkColor = muiTheme.palette.linkColor;
     let subscr_status = +user.get('subscr_status');
     if (!subscr_status)
