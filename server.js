@@ -232,7 +232,7 @@ app.prepare().then(() => {
         let { host, ip, ua, pxid, anon } = ssrParams(req);
         let body = req.body;
         let userLayout = body.userLayout;
-        console.log(chalk.red.bold("update-user-layout:"));
+        console.log(chalk.red.bold("update-user-layout:", JSON.stringify(body, null, 4)));
         let u = `${url}/qapi/user/update-user-layout?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
         // let u = `http://dev.qwiket.com:8088/api?task=updateUserLayout&pxid=${pxid}&host=${host}&ip=${ip}&XDEBUG_SESSION_START=vscode`;
         //  console.log(chalk.red.bold("LOGOUT API URL:"), u)
@@ -246,7 +246,31 @@ app.prepare().then(() => {
             body: `userLayout=${encodeURIComponent(userLayout)}`
         })
         sres = await response.text();
-        console.log({ sres })
+        // console.log({ sres })
+        res.end(sres);
+
+    });
+    server.post('/save-newsline-definition', async (req, res) => {
+        let { host, ip, ua, pxid, anon } = ssrParams(req);
+        let body = req.body;
+        let { type, channel, definition } = req.body;
+
+        //   let userLayout = body.userLayout;
+        console.log(chalk.red.bold("save-newsline-definition:"));
+        let u = `${url}/qapi/app/save-newsline-definition?ua=${ua}&pxid=${pxid}&anon=${anon}&host=${host}&xip=${ip}`;
+        // let u = `http://dev.qwiket.com:8088/api?task=updateUserLayout&pxid=${pxid}&host=${host}&ip=${ip}&XDEBUG_SESSION_START=vscode`;
+        //  console.log(chalk.red.bold("LOGOUT API URL:"), u)
+        // console.log(chalk.red.bold("CHANNELL:"), channel, host)
+        let response = await fetch(u, {
+            // credentials: 'same-origin',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `type=${type}&channel=${channel}&definition=${encodeURIComponent(definition)}`
+        })
+        sres = await response.text();
+        // console.log({ sres })
         res.end(sres);
 
     });
@@ -313,13 +337,13 @@ app.prepare().then(() => {
         console.log("QSHOW ======== --------------   >>>>>>>>>", queryParams)
         app.render(req, res, actualPage, queryParams)
     })
-    
+     
     server.get('/context/channel/:channel/rediro/topic/:threadid/?*', (req, res) => {
         const actualPage = '/context'
         const queryParams = { route: 'valid', sel: 'context' }
         app.render(req, res, actualPage, queryParams)
     })
-    
+     
     server.get('/context/rediro/topic/:threadid/?*', (req, res) => {
         const actualPage = '/context'
         const queryParams = { route: 'valid', sel: 'context' }
@@ -368,7 +392,7 @@ app.prepare().then(() => {
         // console.log("CONTEXT ======== --------------   >>>>>>>>>", queryParams)
         app.render(req, res, actualPage, queryParams)
     })
-    
+     
     server.get('/context/channel/:channel/topic/:threadid', (req, res) => {
         const actualPage = '/channel'
         const queryParams = { route: 'context', qwiketid: req.params.threadid, channel: req.params.channel, sel: 'context' }

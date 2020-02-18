@@ -36,7 +36,8 @@ export let Context = ({ qparams, context, renderer, listRenderer }) => {
   let tag = qparams.tag || qparams.shortname;
   if (!tag) {
     let topic = context.get("topic");
-    tag = topic.get("cat") || topic.get("category");
+    if (topic)
+      tag = topic.get("cat") || topic.get("category");
   }
   console.log("Context RENDER", { tag, qparams })
   const StyledColumn = styled.div`

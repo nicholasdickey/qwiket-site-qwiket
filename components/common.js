@@ -50,7 +50,13 @@ export class Common extends React.Component {
         let session = props.session;
         let width = u.getLayoutWidth({ session });
         let nextWidth = u.getLayoutWidth({ session: nextSession });
-        const sessionChanged = nextSession != session;
+        //   const sessionChanged = nextSession != session;
+        const thickChanged = nextSession.get("thick") != session.get("thick");
+        const loudChanged = nextSession.get("loud") != session.get("loud");
+        const darkChanged = nextSession.get("theme") != session.get("theme");
+        const bandChanged = nextSession.get("cover") != session.get("cover");
+        const sessionChanged = thickChanged || loudChanged || darkChanged || bandChanged;
+
         //   console.log("WIDTH EVAL", { width, nextWidth, sWidth: session.get("width"), nsWidth: nextSession.get("width") })
         let widthChanged = width != nextWidth
         //Root.qparams = nextProps.qparams;
@@ -272,6 +278,7 @@ export class Common extends React.Component {
 
     }
     componentDidUpdate() {
+        console.log("COMMON componentDidUpdate")
         if (this.lazyLoadInstance) {
             this.lazyLoadInstance.update()
         }
