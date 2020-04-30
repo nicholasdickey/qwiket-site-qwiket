@@ -62,7 +62,7 @@
     "he": "^1.2.0",
     "http-proxy-middleware": "^0.20.0",
     "immutable": "^4.0.0-rc.12",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "linkifyjs": "^2.1.8",
     "lodash.debounce": "^4.0.8",
     "markdown-to-jsx": "^6.10.3",
